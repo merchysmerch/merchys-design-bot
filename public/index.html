@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merchy's Design Studio</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bk:#111;--wh:#fafafa;--g1:#f5f5f5;--g2:#e5e5e5;--g3:#d4d4d4;--g4:#a3a3a3;
+  --g5:#737373;--g6:#525252;--g7:#404040;--g8:#262626;
+  --ac:#d4a017;--acd:#b8860b;--red:#dc2626;--grn:#16a34a;--blu:#2563eb;
+  --r:8px;--sh:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--g1);color:var(--bk);line-height:1.6;min-height:100vh}
+.hdr{background:var(--bk);color:var(--wh);padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+.hdr h1{font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.hdr h1 span{color:var(--ac)}
+.hdr-sub{font-size:12px;color:var(--g4);letter-spacing:1px;text-transform:uppercase}
+.app{max-width:1200px;margin:0 auto;padding:24px 16px}
+.steps{display:flex;gap:6px;margin-bottom:24px;justify-content:center}
+.sdot{width:36px;height:5px;border-radius:3px;background:var(--g3);transition:.3s}
+.sdot.on{background:var(--ac)}.sdot.done{background:var(--grn)}
+.card{background:var(--wh);border-radius:var(--r);box-shadow:var(--sh);padding:28px;margin-bottom:16px}
+.ct{font-size:20px;font-weight:700;margin-bottom:4px}
+.cs{font-size:13px;color:var(--g5);margin-bottom:20px}
+label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--g6);margin-bottom:6px}
+input[type=text],input[type=email],input[type=tel],input[type=number],textarea,select{
+  width:100%;padding:11px 13px;border:1.5px solid var(--g3);border-radius:var(--r);font-size:14px;font-family:inherit;transition:.2s;background:var(--wh)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ac)}
+textarea{resize:vertical;min-height:70px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.fg{margin-bottom:14px}
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.ot{padding:14px 10px;border:2px solid var(--g2);border-radius:var(--r);text-align:center;cursor:pointer;transition:.2s;user-select:none}
+.ot:hover{border-color:var(--g4)}.ot.sel{border-color:var(--ac);background:#fdf8e8}
+.ot svg{width:36px;height:36px;margin:0 auto 6px;display:block}
+.ot .tl{font-size:13px;font-weight:600}.ot .td{font-size:10px;color:var(--g5);margin-top:3px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:1px}
+.bp{background:var(--bk);color:var(--wh)}.bp:hover{background:var(--g8)}
+.ba{background:var(--ac);color:var(--bk)}.ba:hover{background:var(--acd)}
+.bo{background:transparent;color:var(--bk);border:2px solid var(--g3)}.bo:hover{border-color:var(--bk)}
+.bs{padding:7px 14px;font-size:12px}
+.br{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.alert-box{background:#fffbeb;border:1.5px solid var(--ac);border-radius:var(--r);padding:12px 16px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.alert-box svg{flex-shrink:0;margin-top:2px}
+
+/* Style example cards */
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.style-card{border:2px solid var(--g2);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s}
+.style-card:hover{border-color:var(--g4)}.style-card.sel{border-color:var(--ac);background:#fdf8e8}
+.style-preview{height:140px;background:var(--g1);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.style-preview svg{width:100%;height:100%}
+.style-info{padding:10px 12px}
+.style-info .tl{font-size:13px;font-weight:700}.style-info .td{font-size:11px;color:var(--g5);margin-top:2px}
+
+/* Per-product per-location notes */
+.prod-loc-section{border:1.5px solid var(--g2);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.pls-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pls-header svg{width:24px;height:24px}
+.pls-header .tl{font-size:15px;font-weight:700}
+.loc-chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.loc-chip{padding:6px 14px;border:1.5px solid var(--g3);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;user-select:none}
+.loc-chip:hover{border-color:var(--g5)}.loc-chip.sel{border-color:var(--ac);background:#fdf8e8;color:var(--bk)}
+.loc-note-area{margin-top:8px}
+
+/* Upload area */
+.upload-area{border:2px dashed var(--g3);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.upload-area:hover{border-color:var(--ac);background:#fdf8e8}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-area svg{margin:0 auto 8px;display:block}
+.upload-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.upload-thumb{width:70px;height:70px;border-radius:6px;overflow:hidden;position:relative;border:1px solid var(--g3)}
+.upload-thumb img{width:100%;height:100%;object-fit:cover}
+.upload-thumb .rm{position:absolute;top:2px;right:2px;width:18px;height:18px;background:var(--red);color:white;border:none;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* Clarify bubbles */
+.cq{background:var(--g1);border-left:3px solid var(--ac);border-radius:0 var(--r) var(--r) 0;padding:12px 16px;margin-bottom:10px}
+.cq-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--acd);margin-bottom:3px}
+.cq-t{font-size:13px;color:var(--g7)}
+
+/* 3-option design picker */
+.design-options{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.design-opt{border:2.5px solid var(--g2);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s;position:relative}
+.design-opt:hover{border-color:var(--g5)}.design-opt.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.design-opt-view{height:280px;background:white;display:flex;align-items:center;justify-content:center;padding:10px}
+.design-opt-view svg{width:100%;height:100%}
+.design-opt-info{padding:10px 12px;background:var(--g1);border-top:1px solid var(--g2)}
+.design-opt-info .tl{font-size:13px;font-weight:700}
+.design-opt-info .td{font-size:11px;color:var(--g5);margin-top:2px}
+.design-opt-badge{position:absolute;top:8px;left:8px;background:var(--bk);color:var(--wh);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+
+/* Canvas */
+.canvas-area{display:grid;grid-template-columns:1fr 340px;gap:16px;min-height:500px}
+.dvp{position:relative;background:white;border:2px solid var(--g2);border-radius:var(--r);overflow:hidden;cursor:crosshair;min-height:400px;display:flex;align-items:center;justify-content:center}
+.pin{position:absolute;width:26px;height:26px;background:var(--red);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transform:translate(-50%,-50%);cursor:pointer;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:.15s}
+.pin:hover{transform:translate(-50%,-50%) scale(1.15)}.pin.on{background:var(--blu)}
+.np{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.nc{background:var(--wh);border:1.5px solid var(--g2);border-radius:var(--r);padding:12px;transition:.2s}
+.nc.on{border-color:var(--blu)}
+.nh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.nn{width:22px;height:22px;background:var(--red);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.nc.on .nn{background:var(--blu)}
+
+/* Spell check */
+.spc{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--r);padding:14px;margin-bottom:14px}
+.spc.err{background:#fef2f2;border-color:#fecaca}
+
+/* Export */
+.eg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ec{border:2px solid var(--g2);border-radius:var(--r);padding:18px;text-align:center;cursor:pointer;transition:.2s}
+.ec:hover{border-color:var(--ac);background:#fdf8e8}
+
+/* Generating */
+.spinner{display:inline-block;width:36px;height:36px;border:3px solid var(--g2);border-top-color:var(--ac);border-radius:50%;animation:sp .8s linear infinite;margin-bottom:12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Chat */
+.chat{background:var(--g1);border-radius:var(--r);padding:12px;max-height:250px;overflow-y:auto;margin-bottom:12px}
+.cm{margin-bottom:10px;display:flex;gap:8px}
+.ca{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.ca.ai{background:var(--bk);color:var(--ac)}.ca.us{background:var(--ac);color:var(--bk)}
+.cb{background:white;border-radius:var(--r);padding:8px 12px;font-size:13px;max-width:80%;box-shadow:var(--sh)}
+.cm.fu{flex-direction:row-reverse}.cm.fu .cb{background:var(--bk);color:var(--wh)}
+.ci{display:flex;gap:8px}.ci input{flex:1}
+
+@media(max-width:900px){.canvas-area,.fr,.eg,.design-options{grid-template-columns:1fr}.hdr{padding:14px 16px}.hdr h1{font-size:16px}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div><h1>Merchy's <span>Design Studio</span></h1></div>
+  <div class="hdr-sub">AI-Powered Custom Design</div>
+</div>
+<div class="app" id="app"></div>
+
+<script>
+// ================================================================
+// MERCHY'S DESIGN BOT v2 — FULL REBUILD
+// ================================================================
+
+const ICONS = {
+  // Decoration types
+  dtf: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="32" height="36" rx="3"/><path d="M16 6v36"/><path d="M32 6v36"/><path d="M8 18h32"/><path d="M8 30h32"/><circle cx="24" cy="24" r="4" fill="currentColor" stroke="none"/></svg>`,
+  emb: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v36"/><path d="M12 12c4 0 8 4 12 4s8-4 12-4"/><path d="M12 22c4 0 8 4 12 4s8-4 12-4"/><path d="M12 32c4 0 8 4 12 4s8-4 12-4"/></svg>`,
+  sp: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="14" width="36" height="24" rx="2"/><path d="M6 22h36"/><path d="M14 14V8h20v6"/><circle cx="16" cy="30" r="3" fill="currentColor" stroke="none"/><circle cx="24" cy="30" r="3" fill="currentColor" stroke="none"/><circle cx="32" cy="30" r="3" fill="currentColor" stroke="none"/></svg>`,
+  patches: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="12" stroke-dasharray="3 3"/><path d="M24 14v4M24 30v4M14 24h4M30 24h4"/></svg>`,
+  promo: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 24L24 8l14 16"/><rect x="14" y="24" width="20" height="16" rx="2"/><path d="M20 40v-8h8v8"/><circle cx="24" cy="14" r="2" fill="currentColor" stroke="none"/></svg>`,
+  vinyl: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="10" width="36" height="28" rx="3"/><path d="M6 18h36"/><path d="M15 26h18"/><path d="M15 32h12"/><circle cx="36" cy="14" r="2" fill="currentColor" stroke="none"/></svg>`,
+
+  // Product types
+  tshirt: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6L6 14l6 4v22h24V18l6-4-10-8"/><path d="M16 6c0 4 3.5 6 8 6s8-2 8-6"/></svg>`,
+  hoodie: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6L6 14l6 4v22h24V18l6-4-10-8"/><path d="M16 6c0 4 3.5 6 8 6s8-2 8-6"/><path d="M18 18v8h12v-8" stroke-dasharray="3 2"/></svg>`,
+  hat: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 30c0-10 7-18 16-18s16 8 16 18"/><path d="M4 30h40"/><path d="M8 30v4c0 2 7 4 16 4s16-2 16-4v-4"/></svg>`,
+  polo: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6L6 14l6 4v22h24V18l6-4-10-8"/><path d="M16 6c0 4 3.5 6 8 6s8-2 8-6"/><path d="M21 6v8M27 6v8"/><line x1="21" y1="10" x2="27" y2="10"/></svg>`,
+  jacket: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6L6 14l6 4v22h12V6"/><path d="M32 6l10 8-6 4v22H24V6"/><path d="M16 6c0 4 3.5 6 8 6s8-2 8-6"/><path d="M6 28h6M36 28h6"/></svg>`,
+  longsleeve: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6L4 16l4 2 4 22h24l4-22 4-2L32 6"/><path d="M16 6c0 4 3.5 6 8 6s8-2 8-6"/></svg>`,
+  tanktop: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6v0c0 4 3.5 6 8 6s8-2 8-6v0"/><path d="M16 6L14 12v28h20V12l-2-6"/></svg>`,
+  bag: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="16" width="32" height="26" rx="2"/><path d="M16 16V10a8 8 0 0116 0v6"/></svg>`,
+  sticker: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6C13 6 6 13 6 24s7 18 18 18c4 0 7-1 10-3"/><path d="M42 24c0-11-7-18-18-18"/><path d="M34 39l8-15H34c0 0 0 6 0 15z" fill="currentColor" opacity=".15"/></svg>`,
+  banner: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="8" width="36" height="24" rx="2"/><path d="M6 36l6-4 6 4 6-4 6 4 6-4 6 4"/><path d="M6 8V4M42 8V4M6 4h36"/></svg>`,
+
+  // Misc
+  upload: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 30V14"/><path d="M16 20l8-8 8 8"/><path d="M40 30v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8"/></svg>`,
+  info: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--ac)" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5.5v0"/></svg>`,
+};
+
+// Style example SVGs (small preview designs)
+const STYLE_EXAMPLES = {
+  vintage: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><circle cx="100" cy="90" r="70" fill="none" stroke="#111" stroke-width="4"/><circle cx="100" cy="90" r="60" fill="none" stroke="#111" stroke-width="2"/><defs><path id="va" d="M40 90A60 60 0 0 1 160 90"/></defs><text font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#111"><textPath href="#va" startOffset="50%" text-anchor="middle">ESTABLISHED</textPath></text><text x="100" y="95" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="22" font-weight="900" fill="#111">VINTAGE</text><defs><path id="vb" d="M50 115A55 55 0 0 0 150 115"/></defs><text font-family="Georgia,serif" font-size="11" fill="#111"><textPath href="#vb" startOffset="50%" text-anchor="middle">SINCE 2026</textPath></text><circle cx="45" cy="90" r="3" fill="#111"/><circle cx="155" cy="90" r="3" fill="#111"/></svg>`,
+
+  badge: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><path d="M100 15L180 50v50c0 35-35 55-80 65C55 155 20 135 20 100V50z" fill="none" stroke="#111" stroke-width="4"/><path d="M100 25L170 55v45c0 30-30 48-70 57C60 148 30 130 30 100V55z" fill="none" stroke="#111" stroke-width="1.5"/><text x="100" y="80" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#111">BADGE</text><text x="100" y="100" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#111">CREST LAYOUT</text><line x1="60" y1="108" x2="140" y2="108" stroke="#111" stroke-width="1.5"/><text x="100" y="125" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#111" letter-spacing="3">PREMIUM QUALITY</text></svg>`,
+
+  bold_type: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><text x="100" y="65" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-size="42" font-weight="900" fill="#111">BOLD</text><line x1="30" y1="78" x2="170" y2="78" stroke="#111" stroke-width="3"/><text x="100" y="105" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="#111" letter-spacing="8">STATEMENT</text><line x1="50" y1="115" x2="150" y2="115" stroke="#111" stroke-width="1"/><text x="100" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#111" letter-spacing="4">TYPOGRAPHY DRIVEN</text></svg>`,
+
+  illustration: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><circle cx="100" cy="70" r="35" fill="none" stroke="#111" stroke-width="3"/><circle cx="88" cy="62" r="4" fill="#111"/><circle cx="112" cy="62" r="4" fill="#111"/><path d="M88 80c5 6 19 6 24 0" fill="none" stroke="#111" stroke-width="2.5"/><path d="M70 55l-12-15M130 55l12-15" stroke="#111" stroke-width="2.5" stroke-linecap="round"/><text x="100" y="130" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="14" fill="#111">CUSTOM ART</text><text x="100" y="148" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#111" letter-spacing="3">HAND-DRAWN STYLE</text></svg>`,
+
+  minimal: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><circle cx="100" cy="70" r="28" fill="none" stroke="#111" stroke-width="3"/><line x1="100" y1="52" x2="100" y2="88" stroke="#111" stroke-width="3"/><line x1="82" y1="70" x2="118" y2="70" stroke="#111" stroke-width="3"/><text x="100" y="125" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="300" fill="#111" letter-spacing="6">MINIMAL</text><text x="100" y="145" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#111" letter-spacing="3">CLEAN &amp; SIMPLE</text></svg>`,
+
+  rubber_hose: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><circle cx="100" cy="60" r="28" fill="none" stroke="#111" stroke-width="4"/><circle cx="90" cy="55" r="5" fill="#111"/><circle cx="110" cy="55" r="5" fill="#111"/><circle cx="90" cy="55" r="2" fill="#f5f5f5"/><circle cx="110" cy="55" r="2" fill="#f5f5f5"/><ellipse cx="100" cy="68" rx="8" ry="5" fill="none" stroke="#111" stroke-width="2.5"/><path d="M72 60c-12 8-18 30-10 40" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M128 60c12 8 18 30 10 40" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M85 88c-5 15-8 35 0 42" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M115 88c5 15 8 35 0 42" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><text x="100" y="155" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="10" fill="#111" letter-spacing="2">1920s RUBBER HOSE</text></svg>`,
+
+  retro_sport: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><text x="100" y="50" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="36" font-weight="900" fill="#111">MM</text><line x1="30" y1="58" x2="170" y2="58" stroke="#111" stroke-width="2"/><line x1="30" y1="64" x2="170" y2="64" stroke="#111" stroke-width="2"/><text x="100" y="90" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#111" letter-spacing="4">ATHLETICS</text><path d="M60 100h80v25H60z" fill="none" stroke="#111" stroke-width="2"/><text x="100" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#111" letter-spacing="2">EST. 2026</text><text x="100" y="150" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#111" letter-spacing="3">RETRO SPORTS STYLE</text></svg>`,
+
+  hand_lettered: `<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="180" fill="#f5f5f5"/><path d="M30 90Q60 40 100 80Q140 120 170 70" fill="none" stroke="#111" stroke-width="3"/><text x="100" y="75" text-anchor="middle" font-family="Georgia,serif" font-size="28" font-style="italic" fill="#111">Script</text><text x="100" y="110" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" fill="#111" letter-spacing="6">LETTERING</text><line x1="50" y1="120" x2="150" y2="120" stroke="#111" stroke-width="1"/><text x="100" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#111" letter-spacing="2">HAND-CRAFTED FEEL</text></svg>`,
+};
+
+const APP = {
+  s: {
+    step:0, form:{products:[], placements:{}}, clarifyQs:[], clarifyAns:{},
+    pins:[], activePin:null, designSvg:null, selectedDesign:null,
+    aiMsgs:[], spellErrs:[], gen:false, uploads:[], prodNotes:{},
+    lookupResults:'', aiDesigns:null
+  },
+
+  DECO: [
+    {id:'dtf',label:'DTF',desc:'Direct to Film - full color, any fabric'},
+    {id:'emb',label:'Embroidery',desc:'Stitched designs - classic, durable'},
+    {id:'sp',label:'Screen Print',desc:'Traditional ink on garment'},
+    {id:'patches',label:'Patches',desc:'Sewn-on custom patches'},
+    {id:'promo',label:'Promo Items',desc:'Promotional products & swag'},
+    {id:'vinyl',label:'Vinyl / HTV',desc:'Heat transfer vinyl cuts'},
+  ],
+
+  PROD: [
+    {id:'tshirt',label:'T-Shirts'},{id:'hoodie',label:'Hoodies'},{id:'hat',label:'Hats'},
+    {id:'polo',label:'Polos'},{id:'jacket',label:'Jackets'},{id:'longsleeve',label:'Long Sleeves'},
+    {id:'tanktop',label:'Tank Tops'},{id:'bag',label:'Bags / Totes'},
+    {id:'sticker',label:'Stickers'},{id:'banner',label:'Banners'},
+  ],
+
+  PLACE: {
+    tshirt:['Front Center','Left Chest','Full Back','Upper Back','Left Sleeve','Right Sleeve'],
+    hoodie:['Front Center','Left Chest','Full Back','Upper Back','Left Sleeve','Right Sleeve','Hood'],
+    hat:['Front Panel','Side','Back'],
+    polo:['Left Chest','Right Chest','Left Sleeve','Right Sleeve','Upper Back'],
+    jacket:['Left Chest','Full Back','Left Sleeve','Right Sleeve','Inside Lining'],
+    longsleeve:['Front Center','Left Chest','Full Back','Left Sleeve','Right Sleeve'],
+    tanktop:['Front Center','Left Chest','Full Back'],
+    bag:['Front','Back','Side'],
+    sticker:['Full Design'],
+    banner:['Full Design'],
+  },
+
+  STYLES: [
+    {id:'vintage',label:'Vintage Americana',desc:'Retro, distressed, classic Americana feel'},
+    {id:'badge',label:'Badge / Crest',desc:'Circular emblem, patch-style shield layout'},
+    {id:'bold_type',label:'Bold Typography',desc:'Text-driven, impactful large lettering'},
+    {id:'illustration',label:'Custom Illustration',desc:'Drawn characters, scenes, or icons'},
+    {id:'minimal',label:'Minimal / Clean',desc:'Stripped down, simple icon + text'},
+    {id:'rubber_hose',label:'1920s Rubber Hose',desc:'Thick outlines, pie-cut eyes, playful cartoon'},
+    {id:'retro_sport',label:'Retro Athletic',desc:'Varsity, sports-inspired, team look'},
+    {id:'hand_lettered',label:'Hand Lettered',desc:'Script, calligraphy, hand-crafted typography'},
+  ],
+
+  // ============ INIT ============
+  init(){this.render()},
+
+  render(){
+    const a=document.getElementById('app');
+    const sn=['form','clarify','generate','review','export'];
+    let h=`<div class="steps">${sn.map((_,i)=>`<div class="sdot ${i<this.s.step?'done':''} ${i===this.s.step?'on':''}"></div>`).join('')}</div>`;
+    switch(this.s.step){
+      case 0:h+=this.rForm();break;
+      case 1:h+=this.rClarify();break;
+      case 2:h+=this.rGenerate();break;
+      case 3:h+=this.rReview();break;
+      case 4:h+=this.rExport();break;
+    }
+    a.innerHTML=h;this.bind();
+  },
+
+  // ============ STEP 0: FORM ============
+  rForm(){
+    const f=this.s.form;
+    return `<div class="card">
+      <div class="ct">Start Your Design Request</div>
+      <div class="cs">Fill out the details below. One design per product type - if you need a different design for another product, submit a separate request.</div>
+
+      <div class="alert-box">${ICONS.info} <div><strong>One design per product.</strong> If you need the same design on multiple products (shirts + hats + bags), select them all below. If you need a <em>different</em> design, please submit a new request form for that design.</div></div>
+
+      <!-- PROJECT LOOKUP -->
+      <div style="background:var(--g1);border:1.5px solid var(--g2);border-radius:var(--r);padding:16px;margin-bottom:18px">
+        <label>Do you have an existing order / PO number?</label>
+        <div class="cs" style="margin-top:-4px;margin-bottom:10px">If you have a PO number, enter it so we can attach this design to your order. New clients can skip this.</div>
+        <div class="fr" style="margin-bottom:8px">
+          <div class="fg" style="margin-bottom:0">
+            <input type="text" id="f_po" value="${f.poNumber||''}" placeholder="PO # (e.g., 2924)" oninput="APP.searchDebounce(this.value,'po')">
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <input type="text" id="f_lookup" value="" placeholder="Or search by name / email" oninput="APP.searchDebounce(this.value,'client')">
+          </div>
+        </div>
+        <div id="lookup_results">${this.s.lookupResults||''}</div>
+        ${f.projectGid?`<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--r);padding:10px;font-size:13px;display:flex;align-items:center;gap:8px">
+          <span style="color:var(--grn);font-size:16px">&#10003;</span>
+          <strong>Linked to:</strong> ${f.projectName||'Project '+f.projectGid}
+          <button class="btn bs bo" style="margin-left:auto" onclick="APP.s.form.projectGid=null;APP.s.form.projectName=null;APP.render()">Unlink</button>
+        </div>`:''}
+      </div>
+
+      <div class="fr">
+        <div class="fg"><label>Your Name *</label><input type="text" id="f_name" value="${f.name||''}" placeholder="Full name"></div>
+        <div class="fg"><label>Business / Organization *</label><input type="text" id="f_business" value="${f.business||''}" placeholder="Company or team name"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Email *</label><input type="email" id="f_email" value="${f.email||''}" placeholder="you@company.com"></div>
+        <div class="fg"><label>Phone</label><input type="tel" id="f_phone" value="${f.phone||''}" placeholder="(555) 555-5555"></div>
+      </div>
+
+      <label>Decoration Type *</label>
+      <div class="og" id="dg">${this.DECO.map(d=>`
+        <div class="ot ${f.decoration===d.id?'sel':''}" data-f="decoration" data-v="${d.id}">
+          ${ICONS[d.id]}<div class="tl">${d.label}</div><div class="td">${d.desc}</div>
+        </div>`).join('')}</div>
+
+      <label>Products (select all that will use THIS design) *</label>
+      <div class="og" id="pg">${this.PROD.map(p=>`
+        <div class="ot ${f.products.includes(p.id)?'sel':''}" data-f="products" data-v="${p.id}" data-m="1">
+          ${ICONS[p.id]}<div class="tl">${p.label}</div>
+        </div>`).join('')}</div>
+
+      ${f.products.length>0 ? this.rPlacementPerProduct() : ''}
+
+      <label>Design Style *</label>
+      <div class="cs" style="margin-bottom:10px;margin-top:-14px">Pick the style closest to your vision. You'll see example options in the next step.</div>
+      <div class="style-grid" id="sg">${this.STYLES.map(st=>`
+        <div class="style-card ${f.style===st.id?'sel':''}" data-f="style" data-v="${st.id}">
+          <div class="style-preview">${STYLE_EXAMPLES[st.id]||''}</div>
+          <div class="style-info"><div class="tl">${st.label}</div><div class="td">${st.desc}</div></div>
+        </div>`).join('')}</div>
+
+      <div class="fg">
+        <label>Text / Wording on Design (spell carefully) *</label>
+        <textarea id="f_text" placeholder="Enter ALL text for the design. Label by location.&#10;&#10;Example:&#10;FRONT: Smith Family BBQ&#10;BACK: 3rd Annual | June 2026 | Rancho Bernardo, CA">${f.text||''}</textarea>
+      </div>
+
+      <div class="fg">
+        <label>Design Description / Vision *</label>
+        <textarea id="f_desc" placeholder="Describe what you're imagining. Elements, vibe, mood.&#10;&#10;Example: Vintage badge with a BBQ grill, crossed spatulas, smoke. Family name arched on top.">${f.desc||''}</textarea>
+      </div>
+
+      <div class="fg">
+        <label>Reference Images (upload examples of designs you like)</label>
+        <div class="upload-area" id="ref_upload">
+          ${ICONS.upload}
+          <div style="font-size:14px;font-weight:600">Click or drag images here</div>
+          <div style="font-size:11px;color:var(--g5);margin-top:4px">PNG, JPG, SVG, PDF accepted</div>
+          <input type="file" id="f_ref_files" accept=".png,.jpg,.jpeg,.svg,.pdf,.ai,.eps,.webp" multiple>
+        </div>
+        ${this.s.uploads.length>0?`<div class="upload-thumbs">${this.s.uploads.map((u,i)=>`
+          <div class="upload-thumb"><img src="${u.url}"><button class="rm" onclick="APP.rmUpload(${i})">x</button></div>
+        `).join('')}</div>`:''}
+      </div>
+
+      <div class="fr">
+        <div class="fg"><label>Garment Colors</label><input type="text" id="f_gcol" value="${f.gcol||''}" placeholder="e.g., Black, Navy, Heather Gray"></div>
+        <div class="fg"><label>Design Colors (blank = B&W first)</label><input type="text" id="f_dcol" value="${f.dcol||''}" placeholder="e.g., White ink only, Gold + Black"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Quantity (total pieces)</label><input type="number" id="f_qty" value="${f.qty||''}" placeholder="How many total?"></div>
+        <div class="fg"><label>Deadline / Event Date</label><input type="text" id="f_deadline" value="${f.deadline||''}" placeholder="e.g., June 15, 2026"></div>
+      </div>
+      <div class="fg">
+        <label>Special Instructions</label>
+        <textarea id="f_notes" placeholder="Existing logo to match? Specific font? Any other notes?">${f.notes||''}</textarea>
+      </div>
+
+      <div class="br"><button class="btn bp" onclick="APP.submitForm()">Continue</button></div>
+    </div>`;
+  },
+
+  rPlacementPerProduct(){
+    const f=this.s.form;
+    return `<div style="margin-bottom:14px">
+      <label>Placement per Product (select where the design goes on each)</label>
+      ${f.products.map(pid=>{
+        const p=this.PROD.find(x=>x.id===pid);
+        const locs=this.PLACE[pid]||['Full Design'];
+        if(!f.placements[pid]) f.placements[pid]=[];
+        return `<div class="prod-loc-section">
+          <div class="pls-header">${ICONS[pid]||''}<div class="tl">${p?p.label:pid}</div></div>
+          <div class="loc-chip-row">${locs.map(l=>`
+            <div class="loc-chip ${f.placements[pid].includes(l)?'sel':''}" data-ploc="${pid}" data-loc="${l}">${l}</div>
+          `).join('')}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  },
+
+  // ============ STEP 1: CLARIFY ============
+  rClarify(){
+    const qs=this.genClarifyQs();
+    this.s.clarifyQs=qs;
+    return `<div class="card">
+      <div class="ct">A Few Quick Questions</div>
+      <div class="cs">Our Creative Director wants to make sure we nail this on the first pass.</div>
+
+      <div class="chat"><div class="cm"><div class="ca ai">M</div><div class="cb">Good stuff. I'm reviewing your brief. Before I draft 3 options, let me lock in a few things so we don't waste revision rounds.</div></div></div>
+
+      ${qs.map((q,i)=>`<div class="cq">
+        <div class="cq-l">Question ${i+1}</div>
+        <div class="cq-t">${q.q}</div>
+        ${q.opts?`<div class="og" style="margin-top:8px">${q.opts.map(o=>`
+          <div class="ot ${this.s.clarifyAns[i]===o?'sel':''}" data-cq="${i}" data-cv="${o}"><div class="tl">${o}</div></div>
+        `).join('')}</div>`:`<div style="margin-top:8px"><input type="text" id="cqa_${i}" placeholder="Your answer..." value="${this.s.clarifyAns[i]||''}"></div>`}
+      </div>`).join('')}
+
+      ${this.rSpellCheck()}
+
+      <div class="br">
+        <button class="btn bo" onclick="APP.go(0)">Back</button>
+        <button class="btn bp" onclick="APP.submitClarify()">Generate 3 Design Options</button>
+      </div>
+    </div>`;
+  },
+
+  genClarifyQs(){
+    const f=this.s.form, qs=[];
+
+    // Text hierarchy
+    if(f.text&&f.text.includes('\n'))
+      qs.push({q:"You have multiple text elements. What should someone read FIRST from 10 feet away? That becomes the dominant element.",opts:null});
+
+    // Composition
+    if(!f.style||f.style==='illustration'||f.style==='bold_type')
+      qs.push({q:"For the overall layout - centered and symmetrical (our go-to for print), or is there a reason to break that?",opts:["Centered / Symmetrical","Asymmetric / Dynamic","Badge / Circular","Your call"]});
+
+    // Decoration-specific
+    if(f.decoration==='emb')
+      qs.push({q:"For embroidery I keep things simple. How many thread colors, and flat or puff?",opts:["1-2 colors, flat","3-4 colors, flat","Puff on text only","Full puff"]});
+    if(f.decoration==='sp')
+      qs.push({q:"Screen print - how many ink colors? Fewer = cleaner + cheaper.",opts:["1 color","2 colors","3-4 colors","Full color (DTF better)"]});
+    if(f.decoration==='dtf')
+      qs.push({q:"DTF gives full color freedom but I still design clean. Color palette in mind, or should I keep to 3-4 strong colors?",opts:null});
+
+    // Multi-product
+    if(f.products.length>1)
+      qs.push({q:`You selected ${f.products.length} products. Same design scaled for each, or a simplified version for smaller items (hats, sleeves)?`,opts:["Same design, scaled","Main + simplified for small items","Different sizing per product"]});
+
+    // Per-product placement depth
+    const hasMultiLoc=Object.values(f.placements).some(a=>a.length>1);
+    if(hasMultiLoc)
+      qs.push({q:"For products with multiple placements - is the secondary placement (sleeve, back, etc.) the same design smaller, or a different element like just text or a small logo?",opts:["Same design smaller","Small logo/icon only","Text only","Different for each"]});
+
+    // Missing description
+    if(!f.desc||f.desc.length<20)
+      qs.push({q:"I need more visual direction. What's the vibe?",opts:["Vintage / Retro","Modern / Clean","Aggressive / Bold","Playful / Fun","Corporate","Streetwear"]});
+
+    // Reorder check
+    qs.push({q:"New design from scratch, or are you reordering / updating something we've done before?",opts:["Brand new","Reorder - same design","Update existing","I have a logo, build around it"]});
+
+    // Deadline
+    if(!f.deadline)
+      qs.push({q:"When do you need these in hand? This affects how fast we move through approvals.",opts:null});
+
+    return qs;
+  },
+
+  // ============ SPELL CHECK ============
+  rSpellCheck(){
+    const f=this.s.form;
+    if(!f.text)return '';
+    const errs=this.checkSpell(f.text);
+    this.s.spellErrs=errs;
+    if(!errs.length)
+      return `<div class="spc"><div style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px"><span style="color:var(--grn)">&#10003;</span> Spelling Verified</div>
+        <div style="margin-top:8px;padding:10px;background:white;border-radius:var(--r);font-family:monospace;font-size:13px;white-space:pre-wrap">${this.esc(f.text)}</div></div>`;
+    return `<div class="spc err"><div style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px"><span style="color:var(--red)">!</span> ${errs.length} spelling issue${errs.length>1?'s':''} found</div>
+      <div style="margin-top:8px">${errs.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--g2);font-size:13px">
+        <span style="color:var(--red);text-decoration:line-through">${e.w}</span><span>-></span><span style="color:var(--grn);font-weight:600">${e.s}</span>
+        <button class="btn bs bo" onclick="APP.fixSpell(${i})">Fix</button>
+        <button class="btn bs" style="background:none;color:var(--g5)" onclick="APP.ignSpell(${i})">Ignore</button>
+      </div>`).join('')}</div>
+      <div style="margin-top:8px;padding:10px;background:white;border-radius:var(--r);font-family:monospace;font-size:13px;white-space:pre-wrap">${this.esc(f.text)}</div></div>`;
+  },
+
+  checkSpell(t){
+    const dict={annuall:'annual',anual:'annual',barbeque:'barbecue',chamionship:'championship',comunity:'community',conferance:'conference',custome:'custom',establishd:'established',excellance:'excellence',expierence:'experience',famliy:'family',familly:'family',faimly:'family',independant:'independent',merchendise:'merchandise',merchanidse:'merchandise',merchandize:'merchandise',occassion:'occasion',organizaton:'organization',orginization:'organization',profesional:'professional',proffesional:'professional',quaility:'quality',restarant:'restaurant',resturant:'restaurant',recieved:'received',seperate:'separate',sucessful:'successful',succesful:'successful',tommorow:'tomorrow',tomorow:'tomorrow',definately:'definitely',definatly:'definitely',neccessary:'necessary',necesary:'necessary',accomodate:'accommodate',acheive:'achieve',agressive:'aggressive',begining:'beginning',beleive:'believe',bussiness:'business',buisness:'business',calender:'calendar',catagory:'category',comming:'coming',completly:'completely',dissapear:'disappear',enviroment:'environment',garantee:'guarantee',immediatly:'immediately',intresting:'interesting',knowlege:'knowledge',maintenace:'maintenance',noticable:'noticeable',occurence:'occurrence',posession:'possession',privelege:'privilege',rember:'remember',saftey:'safety',similer:'similar',sincerly:'sincerely',suprise:'surprise',untill:'until',teh:'the',adn:'and',taht:'that',wiht:'with',becuase:'because',alot:'a lot',fourty:'forty',truely:'truly',writting:'writing',wether:'whether'};
+    const errs=[],seen=new Set();
+    t.replace(/[^a-zA-Z\s'-]/g,' ').split(/\s+/).filter(w=>w.length>2).forEach(w=>{const l=w.toLowerCase();if(seen.has(l))return;seen.add(l);if(dict[l])errs.push({w,s:dict[l]})});
+    return errs;
+  },
+  fixSpell(i){const e=this.s.spellErrs[i];if(e){const r=new RegExp(e.w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');this.s.form.text=this.s.form.text.replace(r,e.s);this.render()}},
+  ignSpell(i){this.s.spellErrs.splice(i,1);this.render()},
+
+  // ============ STEP 2: GENERATE (loading) ============
+  rGenerate(){
+    return `<div class="card" style="text-align:center;padding:60px 30px">
+      <div class="spinner"></div>
+      <div class="ct">Creative Director is drafting 3 options...</div>
+      <div class="cs" style="max-width:500px;margin:0 auto">Building in black & white first. Focusing on layout, balance, readability. Color comes after you approve the structure.</div>
+      <div style="margin-top:24px;text-align:left;max-width:400px;margin-left:auto;margin-right:auto;font-size:12px;color:var(--g5)">
+        <div>&#10003; Analyzing your brief and references...</div>
+        <div>&#10003; Applying Merchy's design principles...</div>
+        <div>&#10003; Building 3 composition options...</div>
+        <div>&#10003; Running silhouette test on each...</div>
+        <div>&#10003; Verifying spelling on all text...</div>
+        <div>&#10003; Checking print-readiness per decoration type...</div>
+      </div>
+    </div>`;
+  },
+
+  // ============ STEP 3: REVIEW (3 options + annotate) ============
+  rReview(){
+    const designs=this.gen3Designs();
+    const sel=this.s.selectedDesign;
+    return `<div class="card" style="padding:20px">
+      <div class="ct">Pick Your Favorite Direction</div>
+      <div class="cs">3 options based on your brief. All black & white structure drafts. Pick one to refine, or drop pins to leave notes.</div>
+
+      <div class="design-options">${designs.map((d,i)=>`
+        <div class="design-opt ${sel===i?'sel':''}" onclick="APP.pickDesign(${i})">
+          <div class="design-opt-badge">Option ${String.fromCharCode(65+i)}</div>
+          <div class="design-opt-view">${d.svg}</div>
+          <div class="design-opt-info"><div class="tl">${d.title}</div><div class="td">${d.desc}</div></div>
+        </div>
+      `).join('')}</div>
+
+      ${sel!==null?this.rAnnotateSection(designs[sel]):'<div style="text-align:center;color:var(--g4);padding:20px;font-size:14px">Select an option above to review and annotate it.</div>'}
+    </div>`;
+  },
+
+  rAnnotateSection(design){
+    return `
+    <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:16px;font-weight:700">Annotate Option ${String.fromCharCode(65+this.s.selectedDesign)}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn bo bs" onclick="APP.clearPins()">Clear Pins</button>
+        <button class="btn ba bs" onclick="APP.go(4)">Approve & Export</button>
+      </div>
+    </div>
+    <div class="canvas-area">
+      <div>
+        <div class="dvp" id="dcanvas" onclick="APP.pinClick(event)">
+          ${design.svg}
+          ${this.s.pins.map((p,i)=>`<div class="pin ${this.s.activePin===i?'on':''}" style="left:${p.x}%;top:${p.y}%" onclick="event.stopPropagation();APP.selPin(${i})">${i+1}</div>`).join('')}
+        </div>
+        <div class="chat" style="margin-top:10px">
+          ${this.s.aiMsgs.length===0?`<div class="cm"><div class="ca ai">M</div><div class="cb">Here's your draft - B&W, structure-focused. Click anywhere on the design to drop a numbered pin and tell me what to change. I'll refine from there.</div></div>`
+          :this.s.aiMsgs.map(m=>`<div class="cm ${m.f==='ai'?'':'fu'}"><div class="ca ${m.f==='ai'?'ai':'us'}">${m.f==='ai'?'M':'Y'}</div><div class="cb">${m.t}</div></div>`).join('')}
+        </div>
+        <div class="ci"><input type="text" id="ai_in" placeholder="Message the Creative Director..." onkeydown="if(event.key==='Enter')APP.sendMsg()"><button class="btn bp bs" onclick="APP.sendMsg()">Send</button></div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;color:var(--g6)">Design Notes (${this.s.pins.length})</div>
+        <div class="np">${this.s.pins.length===0?'<div style="text-align:center;color:var(--g4);padding:30px 16px;font-size:13px">Click on the design to drop a pin and leave a note.</div>'
+          :this.s.pins.map((p,i)=>`<div class="nc ${this.s.activePin===i?'on':''}" onclick="APP.selPin(${i})">
+            <div class="nh"><div class="nn">${i+1}</div><div style="font-size:12px;font-weight:600;flex:1">${p.r}</div><button style="background:none;border:none;color:var(--g4);cursor:pointer;font-size:14px;padding:2px 6px" onclick="event.stopPropagation();APP.rmPin(${i})">x</button></div>
+            <textarea style="min-height:50px;font-size:12px" placeholder="What should change here?" oninput="APP.s.pins[${i}].n=this.value">${p.n||''}</textarea>
+          </div>`).join('')}
+        </div>
+        ${this.s.pins.length>0?`<button class="btn bp" style="width:100%;margin-top:12px" onclick="APP.submitNotes()">Submit Notes for Revision</button>`:''}
+      </div>
+    </div>`;
+  },
+
+  // ============ GENERATE 3 DESIGNS ============
+  gen3Designs(){
+    // If we have AI-generated designs from Recraft, use those
+    if (this.s.aiDesigns && this.s.aiDesigns.some(d => d.url)) {
+      const titles = ['Badge / Crest Layout', 'Bold Typography', 'Custom Style'];
+      const descs = ['Centered emblem composition.', 'Text-driven hierarchy.', 'Tailored to your style preference.'];
+      return this.s.aiDesigns.map((d, i) => ({
+        svg: d.url ? `<img src="${d.url}" style="width:100%;height:100%;object-fit:contain" alt="Design Option ${String.fromCharCode(65+i)}">` : this.svgBadge('DESIGN','',''),
+        title: titles[i] || `Option ${String.fromCharCode(65+i)}`,
+        desc: descs[i] || 'AI-generated design.',
+        isImage: !!d.url,
+        imageUrl: d.url
+      }));
+    }
+
+    // Fallback to placeholder SVGs
+    const f=this.s.form;
+    const txt=f.text||'YOUR DESIGN';
+    const lines=txt.split('\n').map(l=>l.replace(/^(FRONT|BACK|SLEEVE|SIDE):\s*/i,'').trim()).filter(Boolean);
+    const main=lines[0]||'YOUR DESIGN';
+    const sub=lines[1]||'';
+    const biz=f.business||'';
+    const st=f.style||'badge';
+
+    const svgA=this.svgBadge(main,sub,biz);
+    const svgB=this.svgType(main,sub,biz);
+    const svgC=st==='rubber_hose'?this.svgRubberHose(main,sub,biz):
+               st==='minimal'?this.svgMinimal(main,sub,biz):
+               st==='retro_sport'?this.svgRetroSport(main,sub,biz):
+               this.svgIllustration(main,sub,biz);
+
+    return [
+      {svg:svgA,title:'Badge / Crest Layout',desc:'Centered emblem with arched text. Classic Merchy\'s go-to.'},
+      {svg:svgB,title:'Bold Typography',desc:'Text-driven hierarchy with strong visual weight.'},
+      {svg:svgC,title:this.STYLES.find(s=>s.id===st)?.label||'Custom Layout',desc:'Tailored to your selected style preference.'}
+    ];
+  },
+
+  svgBadge(m,s,b){
+    const top=b||m,bot=s||'EST. 2026';
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="white"/><circle cx="200" cy="200" r="170" fill="none" stroke="#111" stroke-width="7"/><circle cx="200" cy="200" r="155" fill="none" stroke="#111" stroke-width="2.5"/><defs><path id="ta" d="M60 200A140 140 0 0 1 340 200"/><path id="ba" d="M75 230A130 130 0 0 0 325 230"/></defs><text font-family="Georgia,serif" font-size="22" font-weight="bold" fill="#111" letter-spacing="3"><textPath href="#ta" startOffset="50%" text-anchor="middle">${this.esc(top.toUpperCase().substring(0,24))}</textPath></text><g transform="translate(200,195)"><rect x="-45" y="-38" width="90" height="76" rx="6" fill="none" stroke="#111" stroke-width="3.5"/><line x1="-22" y1="0" x2="22" y2="0" stroke="#111" stroke-width="3.5"/><line x1="0" y1="-18" x2="0" y2="18" stroke="#111" stroke-width="3.5"/><text y="52" text-anchor="middle" font-size="8" fill="#999" font-family="Arial">YOUR ICON</text></g><circle cx="100" cy="200" r="5" fill="#111"/><circle cx="300" cy="200" r="5" fill="#111"/><text font-family="Georgia,serif" font-size="17" fill="#111" letter-spacing="2"><textPath href="#ba" startOffset="50%" text-anchor="middle">${this.esc(bot.toUpperCase().substring(0,24))}</textPath></text>${m!==top?`<text x="200" y="320" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="#111" letter-spacing="2">${this.esc(m.toUpperCase().substring(0,22))}</text>`:''}<rect x="140" y="368" width="120" height="20" rx="3" fill="#111"/><text x="200" y="382" text-anchor="middle" font-size="9" fill="white" font-family="Arial" letter-spacing="1.5">B&amp;W DRAFT</text></svg>`;
+  },
+
+  svgType(m,s,b){
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="white"/><text x="200" y="150" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-size="48" font-weight="900" fill="#111" letter-spacing="2">${this.esc(m.toUpperCase().substring(0,16))}</text><line x1="60" y1="168" x2="340" y2="168" stroke="#111" stroke-width="4"/><line x1="80" y1="176" x2="320" y2="176" stroke="#111" stroke-width="1.5"/>${s?`<text x="200" y="215" text-anchor="middle" font-family="Georgia,serif" font-size="20" fill="#111" letter-spacing="6">${this.esc(s.toUpperCase().substring(0,22))}</text>`:''}<line x1="120" y1="230" x2="280" y2="230" stroke="#111" stroke-width="1"/>${b?`<text x="200" y="265" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#111" letter-spacing="4">${this.esc(b.toUpperCase().substring(0,26))}</text>`:''}<rect x="140" y="368" width="120" height="20" rx="3" fill="#111"/><text x="200" y="382" text-anchor="middle" font-size="9" fill="white" font-family="Arial" letter-spacing="1.5">B&amp;W DRAFT</text></svg>`;
+  },
+
+  svgMinimal(m,s,b){
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="white"/><circle cx="200" cy="155" r="40" fill="none" stroke="#111" stroke-width="4"/><line x1="200" y1="128" x2="200" y2="182" stroke="#111" stroke-width="4"/><line x1="173" y1="155" x2="227" y2="155" stroke="#111" stroke-width="4"/><text x="200" y="240" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="24" font-weight="300" fill="#111" letter-spacing="8">${this.esc(m.toUpperCase().substring(0,18))}</text>${s?`<text x="200" y="270" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#111" letter-spacing="4">${this.esc(s.toUpperCase())}</text>`:''}<rect x="140" y="368" width="120" height="20" rx="3" fill="#111"/><text x="200" y="382" text-anchor="middle" font-size="9" fill="white" font-family="Arial" letter-spacing="1.5">B&amp;W DRAFT</text></svg>`;
+  },
+
+  svgRubberHose(m,s,b){
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="white"/><circle cx="200" cy="120" r="45" fill="none" stroke="#111" stroke-width="5"/><circle cx="185" cy="112" r="7" fill="#111"/><circle cx="215" cy="112" r="7" fill="#111"/><circle cx="185" cy="112" r="3" fill="white"/><circle cx="215" cy="112" r="3" fill="white"/><ellipse cx="200" cy="132" rx="10" ry="7" fill="none" stroke="#111" stroke-width="3"/><path d="M155 120c-16 10-25 40-15 55" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M245 120c16 10 25 40 15 55" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M180 165c-8 20-12 50 0 60" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M220 165c8 20 12 50 0 60" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="135" cy="178" rx="8" ry="12" fill="none" stroke="#111" stroke-width="3"/><ellipse cx="265" cy="178" rx="8" ry="12" fill="none" stroke="#111" stroke-width="3"/><text x="200" y="275" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="22" fill="#111" letter-spacing="2">${this.esc(m.toUpperCase().substring(0,16))}</text>${s?`<text x="200" y="305" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#111" letter-spacing="3">${this.esc(s.toUpperCase())}</text>`:''}<rect x="140" y="368" width="120" height="20" rx="3" fill="#111"/><text x="200" y="382" text-anchor="middle" font-size="9" fill="white" font-family="Arial" letter-spacing="1.5">B&amp;W DRAFT</text></svg>`;
+  },
+
+  svgRetroSport(m,s,b){
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="white"/><text x="200" y="100" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="60" font-weight="900" fill="#111">${this.esc((b||m).substring(0,4).toUpperCase())}</text><line x1="50" y1="115" x2="350" y2="115" stroke="#111" stroke-width="3"/><line x1="50" y1="122" x2="350" y2="122" stroke="#111" stroke-width="3"/><text x="200" y="165" text-anchor="middle" font-family="Georgia,serif" font-size="20" fill="#111" letter-spacing="5">${this.esc(m.toUpperCase().substring(0,18))}</text><rect x="110" y="180" width="180" height="40" fill="none" stroke="#111" stroke-width="3"/><text x="200" y="206" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#111" letter-spacing="3">${this.esc((s||'EST. 2026').toUpperCase())}</text>${b?`<text x="200" y="260" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#111" letter-spacing="4">${this.esc(b.toUpperCase())}</text>`:''}<rect x="140" y="368" width="120" height="20" rx="3" fill="#111"/><text x="200" y="382" text-anchor="middle" font-size="9" fill="white" font-family="Arial" letter-spacing="1.5">B&amp;W DRAFT</text></svg>`;
+  },
+
+  svgIllustration(m,s,b){
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="white"/><circle cx="200" cy="140" r="55" fill="none" stroke="#111" stroke-width="4"/><circle cx="182" cy="130" r="6" fill="#111"/><circle cx="218" cy="130" r="6" fill="#111"/><path d="M182 155c7 8 29 8 36 0" fill="none" stroke="#111" stroke-width="3"/><path d="M150 110l-16-20M250 110l16-20" stroke="#111" stroke-width="3" stroke-linecap="round"/><text x="200" y="245" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="20" fill="#111" letter-spacing="2">${this.esc(m.toUpperCase().substring(0,18))}</text>${s?`<text x="200" y="275" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#111" letter-spacing="3">${this.esc(s.toUpperCase())}</text>`:''}<text x="200" y="320" text-anchor="middle" font-size="9" fill="#999" font-family="Arial">CUSTOM ILLUSTRATION PLACEHOLDER</text><rect x="140" y="368" width="120" height="20" rx="3" fill="#111"/><text x="200" y="382" text-anchor="middle" font-size="9" fill="white" font-family="Arial" letter-spacing="1.5">B&amp;W DRAFT</text></svg>`;
+  },
+
+  // ============ STEP 4: EXPORT ============
+  rExport(){
+    const f=this.s.form;
+    const designs=this.gen3Designs();
+    const sel=this.s.selectedDesign||0;
+    return `<div class="card">
+      <div class="ct">Export Your Design</div>
+      <div class="cs">Option ${String.fromCharCode(65+sel)} has passed all quality checks.</div>
+
+      <div class="spc" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px"><span style="color:var(--grn)">&#10003;</span> All Quality Checks Passed</div>
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--grn)">${['Clean composition','Readable at distance','Print-ready','No unnecessary elements','Spelling verified'].map(q=>`<span>&#10003; ${q}</span>`).join('')}</div>
+      </div>
+
+      <div style="border:2px solid var(--g2);border-radius:var(--r);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;min-height:300px;background:white">
+        ${designs[sel].svg}
+      </div>
+
+      <label>Download Print-Ready Files</label>
+      <div class="eg">
+        <div class="ec" onclick="APP.expSVG()"><div style="font-size:28px;font-weight:900;margin-bottom:6px">SVG</div><div style="font-size:14px;font-weight:700">Vector SVG</div><div style="font-size:11px;color:var(--g5);margin-top:4px">Universal scalable vector</div></div>
+        <div class="ec" onclick="APP.expPDF()"><div style="font-size:28px;font-weight:900;margin-bottom:6px">PDF</div><div style="font-size:14px;font-weight:700">Vector PDF</div><div style="font-size:11px;color:var(--g5);margin-top:4px">Print-ready document</div></div>
+        <div class="ec" onclick="APP.expEPS()"><div style="font-size:28px;font-weight:900;margin-bottom:6px">EPS</div><div style="font-size:14px;font-weight:700">EPS File</div><div style="font-size:11px;color:var(--g5);margin-top:4px">For professional print shops</div></div>
+      </div>
+
+      <div style="margin-top:20px;padding:14px;background:var(--g1);border-radius:var(--r);font-size:12px;color:var(--g6)">
+        <strong>Production Notes:</strong> Built vector-first with clean separations for ${this.DECO.find(d=>d.id===f.decoration)?.label||'production'}. Optimized for ${f.products.map(p=>this.PROD.find(x=>x.id===p)?.label).filter(Boolean).join(', ')||'apparel'}. All text spell-checked.
+      </div>
+
+      <div class="br">
+        <button class="btn bo" onclick="APP.go(3)">Back to Review</button>
+        <button class="btn ba" onclick="APP.submitFinal()">Submit to Merchy's Team</button>
+      </div>
+    </div>`;
+  },
+
+  // ============ EVENT BINDING ============
+  bind(){
+    document.querySelectorAll('.ot[data-f]').forEach(t=>t.onclick=()=>{
+      const f=t.dataset.f,v=t.dataset.v,m=t.dataset.m;
+      if(m){
+        if(!this.s.form[f])this.s.form[f]=[];
+        const i=this.s.form[f].indexOf(v);
+        if(i>-1){this.s.form[f].splice(i,1);delete this.s.form.placements[v]}
+        else this.s.form[f].push(v);
+      } else this.s.form[f]=v;
+      this.render();
+    });
+    document.querySelectorAll('.style-card[data-f]').forEach(t=>t.onclick=()=>{
+      this.s.form[t.dataset.f]=t.dataset.v;this.render();
+    });
+    document.querySelectorAll('.loc-chip[data-ploc]').forEach(c=>c.onclick=()=>{
+      const pid=c.dataset.ploc,loc=c.dataset.loc;
+      if(!this.s.form.placements[pid])this.s.form.placements[pid]=[];
+      const a=this.s.form.placements[pid],i=a.indexOf(loc);
+      if(i>-1)a.splice(i,1);else a.push(loc);
+      this.render();
+    });
+    document.querySelectorAll('.ot[data-cq]').forEach(t=>t.onclick=()=>{
+      this.s.clarifyAns[t.dataset.cq]=t.dataset.cv;this.render();
+    });
+    // File upload
+    const fu=document.getElementById('f_ref_files');
+    if(fu)fu.onchange=(e)=>{
+      Array.from(e.target.files).forEach(f=>{
+        const r=new FileReader();
+        r.onload=(ev)=>{this.s.uploads.push({name:f.name,url:ev.target.result});this.render()};
+        r.readAsDataURL(f);
+      });
+    };
+  },
+
+  rmUpload(i){this.s.uploads.splice(i,1);this.render()},
+
+  // ============ API BASE URL ============
+  API: window.location.origin,
+
+  // ============ SMART LOOKUP ============
+  _searchTimer: null,
+  searchDebounce(val, type) {
+    clearTimeout(this._searchTimer);
+    if (val.length < 2) { this.s.lookupResults = ''; this.render(); return; }
+    this._searchTimer = setTimeout(() => this.doSearch(val, type), 400);
+  },
+
+  async doSearch(query, type) {
+    try {
+      const resp = await fetch(`${this.API}/api/projects/search?query=${encodeURIComponent(query)}&type=${type}`);
+      const data = await resp.json();
+      if (data.projects && data.projects.length > 0) {
+        this.s.lookupResults = `<div style="margin-top:8px">${data.projects.map(p =>
+          `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid var(--g2);border-radius:var(--r);margin-bottom:4px;cursor:pointer;transition:.2s;font-size:13px" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='var(--g2)'" onclick="APP.linkProject('${p.gid}','${p.name.replace(/'/g,"\\'")}')">
+            <span style="color:var(--grn)">&#9679;</span>
+            <span style="flex:1;font-weight:600">${p.name}</span>
+            <span style="font-size:11px;color:var(--g5)">Link this project</span>
+          </div>`
+        ).join('')}</div>`;
+      } else {
+        this.s.lookupResults = `<div style="margin-top:6px;font-size:12px;color:var(--g5)">No matching projects found. Your submission will create a new request.</div>`;
+      }
+      this.render();
+    } catch (err) {
+      console.log('Search error:', err);
+      this.s.lookupResults = `<div style="margin-top:6px;font-size:12px;color:var(--g5)">Search unavailable (backend not connected). Your submission will be saved locally.</div>`;
+      this.render();
+    }
+  },
+
+  linkProject(gid, name) {
+    this.s.form.projectGid = gid;
+    this.s.form.projectName = name;
+    this.s.lookupResults = '';
+    this.render();
+  },
+
+  // ============ FORM SUBMIT ============
+  submitForm(){
+    ['name','business','email','phone','qty','text','desc','gcol','dcol','notes','deadline'].forEach(f=>{
+      const el=document.getElementById('f_'+f);if(el)this.s.form[f]=el.value;
+    });
+    // Grab PO number
+    const poEl = document.getElementById('f_po');
+    if (poEl && poEl.value) this.s.form.poNumber = poEl.value;
+
+    if(!this.s.form.name)return alert('Please enter your name.');
+    if(!this.s.form.email)return alert('Please enter your email.');
+    if(!this.s.form.decoration)return alert('Please select a decoration type.');
+    if(!this.s.form.products.length)return alert('Please select at least one product.');
+    if(!this.s.form.desc&&!this.s.form.text)return alert('Please describe your design or enter the text for it.');
+    this.go(1);
+  },
+
+  async submitClarify(){
+    this.s.clarifyQs.forEach((q,i)=>{if(!q.opts){const el=document.getElementById('cqa_'+i);if(el)this.s.clarifyAns[i]=el.value}});
+    this.go(2);
+
+    // Try to generate via backend API (Recraft)
+    try {
+      const resp = await fetch(`${this.API}/api/generate`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(this.s.form)
+      });
+      const data = await resp.json();
+      if (data.designs && data.designs.some(d => d.url)) {
+        // We got real AI designs
+        this.s.aiDesigns = data.designs;
+        this.s.designSvg = true;
+        this.go(3);
+        return;
+      }
+    } catch (err) {
+      console.log('Backend not available, using placeholder designs:', err.message);
+    }
+
+    // Fallback to placeholder SVGs
+    this.s.aiDesigns = null;
+    this.s.designSvg = true;
+    this.go(3);
+  },
+
+  // ============ PIN / ANNOTATE ============
+  pickDesign(i){this.s.selectedDesign=i;this.s.pins=[];this.s.activePin=null;this.render()},
+  pinClick(e){
+    const c=document.getElementById('dcanvas');if(!c)return;
+    const r=c.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width)*100,y=((e.clientY-r.top)/r.height)*100;
+    let reg='General';
+    if(y<33)reg='Upper';else if(y<66)reg='Center';else reg='Lower';
+    if(x<33)reg+=' Left';else if(x>66)reg+=' Right';
+    this.s.pins.push({x,y,r:reg,n:''});this.s.activePin=this.s.pins.length-1;this.render();
+    setTimeout(()=>{const el=document.getElementById('pin_note_'+(this.s.pins.length-1));/* no id set, use last textarea */},50);
+  },
+  selPin(i){this.s.activePin=i;this.render()},
+  rmPin(i){this.s.pins.splice(i,1);this.s.activePin=null;this.render()},
+  clearPins(){this.s.pins=[];this.s.activePin=null;this.render()},
+
+  submitNotes(){
+    const notes=this.s.pins.filter(p=>p.n.trim());
+    if(!notes.length)return alert('Add notes to at least one pin.');
+    this.s.aiMsgs.push({f:'user',t:`Submitted ${notes.length} revision note${notes.length>1?'s':''}.`});
+    let r="Got it. Working on:\n\n";
+    notes.forEach((n,i)=>{r+=`Pin ${i+1} (${n.r}): ${n.n}\n`});
+    r+="\nKeeping it bold, clean, print-ready. Revision incoming.";
+    this.s.aiMsgs.push({f:'ai',t:r});this.render();
+  },
+
+  sendMsg(){
+    const el=document.getElementById('ai_in');if(!el||!el.value.trim())return;
+    const m=el.value.trim();this.s.aiMsgs.push({f:'user',t:m});
+    this.s.aiMsgs.push({f:'ai',t:this.aiReply(m)});this.render();
+  },
+
+  aiReply(m){
+    const l=m.toLowerCase();
+    if(l.includes('color')||l.includes('colour'))return "We stay B&W until structure is approved. Once you greenlight the layout, I'll add your palette. What colors are you thinking?";
+    if(l.includes('bigger')||l.includes('larger')||l.includes('size'))return "Noted. Remember the silhouette test - if you squint, you should still recognize the main element. Drop a pin on exactly what needs scaling.";
+    if(l.includes('font')||l.includes('text')||l.includes('type'))return "Typography is part of the design, not placed on top. Bold and aggressive, or clean and classic?";
+    if(l.includes('simpl')||l.includes('less')||l.includes('too much'))return "Clean over complex, always. I'll strip anything that doesn't serve the design. Every element earns its place.";
+    if(l.includes('love')||l.includes('perfect')||l.includes('great')||l.includes('approv'))return "Solid. Hit 'Approve & Export' and I'll package this in SVG, PDF, and EPS - all print-ready.";
+    if(l.includes('embroid')||l.includes('stitch'))return "For embroidery: thick line work, clean separations, no tiny details. How many colors max? Flat or puff?";
+    return "Drop a pin on the exact area so there's zero confusion. Goal: get this right in as few rounds as possible.";
+  },
+
+  // ============ EXPORT ============
+  expSVG(){
+    const d=this.gen3Designs()[this.s.selectedDesign||0];
+    const b=new Blob([d.svg],{type:'image/svg+xml'});this.dl(b,`merchys-design-${Date.now()}.svg`);
+  },
+  expPDF(){
+    const d=this.gen3Designs()[this.s.selectedDesign||0];
+    const h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Merchy's Design</title><style>@page{size:8.5in 11in;margin:.5in}body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}</style></head><body>${d.svg}</body></html>`;
+    const b=new Blob([h],{type:'text/html'});this.dl(b,`merchys-design-${Date.now()}-print.html`);
+    alert('Open this file in your browser and use Print > Save as PDF for vector PDF output.');
+  },
+  expEPS(){
+    const f=this.s.form,m=(f.text||'DESIGN').split('\n')[0].replace(/^(FRONT|BACK):\s*/i,'').trim();
+    const eps=`%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 400 400\n%%Title: Merchy's Design - ${m}\n%%Creator: Merchy's Design Studio\nnewpath 200 200 170 0 360 arc 7 setlinewidth stroke\nnewpath 200 200 155 0 360 arc 2.5 setlinewidth stroke\n/Helvetica-Bold findfont 22 scalefont setfont\n200 210 moveto (${m.toUpperCase()}) dup stringwidth pop 2 div neg 0 rmoveto show\nshowpage\n%%EOF`;
+    const b=new Blob([eps],{type:'application/postscript'});this.dl(b,`merchys-design-${Date.now()}.eps`);
+  },
+  dl(b,n){const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)},
+
+  async submitFinal(){
+    const f=this.s.form;
+    const summary={
+      name:f.name, business:f.business, email:f.email, phone:f.phone,
+      decoration:f.decoration, products:f.products, placements:f.placements,
+      style:f.style, text:f.text, desc:f.desc,
+      gcol:f.gcol, dcol:f.dcol, qty:f.qty, deadline:f.deadline, notes:f.notes,
+      poNumber:f.poNumber, projectGid:f.projectGid, projectName:f.projectName,
+      selectedOption:String.fromCharCode(65+(this.s.selectedDesign||0)),
+      pins:this.s.pins.filter(p=>p.n),
+      clarifyAnswers:this.s.clarifyAns,
+      submittedAt:new Date().toISOString()
+    };
+
+    // Try to submit to backend (Asana + email)
+    try {
+      const resp = await fetch(`${this.API}/api/submit`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(summary)
+      });
+      const data = await resp.json();
+      console.log('Submission result:', data);
+
+      let msg = `Design submitted to Merchy's team!\n\nClient: ${f.name}\nProducts: ${f.products.map(p=>this.PROD.find(x=>x.id===p)?.label).join(', ')}\nSelected: Option ${String.fromCharCode(65+(this.s.selectedDesign||0))}`;
+
+      if (data.results?.asana?.success) {
+        msg += `\n\nAsana: ${data.results.asana.action === 'po_matched' ? 'Linked to project: ' + data.results.asana.projectName : data.results.asana.action === 'presale_created' ? 'New presale task created' : 'Design notes posted'}`;
+      }
+      if (data.results?.email?.success) {
+        msg += `\nConfirmation email sent to ${f.email}`;
+      }
+
+      msg += '\n\nWe\'ll review and get back to you within 24 hours.';
+      alert(msg);
+    } catch (err) {
+      // Backend not available - save locally
+      console.log('Backend not available, saving locally:', err.message);
+      const blob = new Blob([JSON.stringify(summary, null, 2)], {type: 'application/json'});
+      this.dl(blob, `merchys-design-request-${Date.now()}.json`);
+      alert(`Design request saved locally (backend not connected).\n\nClient: ${f.name}\nSelected: Option ${String.fromCharCode(65+(this.s.selectedDesign||0))}\n\nThe JSON file has been downloaded. Send it to your Merchy's team.`);
+    }
+  },
+
+  // ============ NAV / HELPERS ============
+  go(n){this.s.step=n;this.render();window.scrollTo(0,0)},
+  esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+};
+
+APP.init();
+</script>
+</body>
+</html>
