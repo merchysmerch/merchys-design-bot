@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merchy's AI Design Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:#fff;color:#111;overflow-x:hidden}
+.header{background:#111;color:#d4a017;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017}
+.header h1{font-size:15px;font-weight:700;letter-spacing:1px}
+.header .steps{font-size:11px;color:#888}
+.close-btn{background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px}
+.close-btn:hover{color:#fff}
+.content{padding:16px;overflow-y:auto;height:calc(100vh - 120px)}
+.step{display:none}
+.step.active{display:block;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Search */
+.search-bar{width:100%;padding:10px 14px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:13px;margin-bottom:14px;outline:none;transition:border .2s}
+.search-bar:focus{border-color:#d4a017}
+
+/* Category heading */
+.cat-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;padding-left:2px}
+
+/* Service cards grid */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.svc-card{padding:10px;border:2px solid #eee;border-radius:8px;cursor:pointer;transition:all .2s;text-align:center}
+.svc-card:hover{border-color:#d4a017;background:#fffaf0}
+.svc-card.sel{border-color:#d4a017;background:#d4a017;color:#fff}
+.svc-card .svc-name{font-size:12px;font-weight:600;line-height:1.3}
+.svc-card .svc-price{font-size:10px;color:#888;margin-top:2px}
+.svc-card.sel .svc-price{color:rgba(255,255,255,.8)}
+
+/* Form */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#333}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border:2px solid #e5e5e5;border-radius:6px;font-family:inherit;font-size:13px;outline:none;transition:border .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#d4a017}
+.form-group textarea{resize:vertical;min-height:70px}
+
+/* Style picker */
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.style-tile{padding:8px 4px;border:2px solid #eee;border-radius:6px;cursor:pointer;text-align:center;font-size:10px;font-weight:600;transition:all .2s}
+.style-tile:hover{border-color:#d4a017}
+.style-tile.sel{border-color:#d4a017;background:#d4a017;color:#fff}
+
+/* Upload zone */
+.upload-zone{border:2px dashed #ddd;border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;font-size:12px;color:#888}
+.upload-zone:hover{border-color:#d4a017;background:#fffaf0}
+.upload-zone.has-file{border-color:#4caf50;background:#f0faf0;color:#333}
+
+/* Buttons */
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-gold{background:#d4a017;color:#fff}
+.btn-gold:hover{background:#b8890f}
+.btn-gold:disabled{background:#ccc;cursor:not-allowed}
+.btn-black{background:#111;color:#d4a017;border:2px solid #d4a017}
+.btn-black:hover{background:#d4a017;color:#111}
+.btn-orange{background:#e97730;color:#fff}
+.btn-orange:hover{background:#d06620}
+.btn-outline{background:transparent;color:#111;border:2px solid #ddd}
+.btn-outline:hover{border-color:#d4a017;color:#d4a017}
+.btn+.btn{margin-top:8px}
+
+/* Results */
+.design-option{border:2px solid #eee;border-radius:10px;overflow:hidden;margin-bottom:12px;transition:all .2s}
+.design-option:hover{border-color:#d4a017}
+.design-option.sel{border-color:#d4a017;box-shadow:0 2px 12px rgba(212,160,23,.2)}
+.design-preview{position:relative;width:100%;aspect-ratio:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.design-preview img{width:100%;height:100%;object-fit:contain}
+.watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.watermark::after{content:'PREVIEW';font-size:36px;font-weight:700;color:rgba(212,160,23,.2);transform:rotate(-35deg);letter-spacing:6px}
+.design-actions{padding:10px;display:flex;gap:6px}
+.design-actions .btn{font-size:12px;padding:8px}
+
+/* Loading */
+.loading{text-align:center;padding:40px 20px}
+.loading .spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:13px;color:#666}
+
+/* Smart Lookup */
+.lookup-section{background:#f9f9f9;border:2px solid #eee;border-radius:8px;padding:12px;margin-bottom:14px}
+.lookup-section h4{font-size:12px;font-weight:600;margin-bottom:8px}
+.lookup-row{display:flex;gap:8px;margin-bottom:8px}
+.lookup-row input{flex:1}
+.lookup-results{max-height:120px;overflow-y:auto}
+.lookup-item{padding:8px;border:1px solid #eee;border-radius:4px;margin-bottom:4px;cursor:pointer;font-size:12px;transition:all .15s}
+.lookup-item:hover{background:#fffaf0;border-color:#d4a017}
+
+/* Footer */
+.footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:10px 16px;text-align:center}
+.footer-text{font-size:10px;color:#999}
+
+/* Paywall notice */
+.paywall-notice{background:#fffaf0;border:1px solid #f5d9c0;border-radius:8px;padding:12px;margin:12px 0;font-size:11px;color:#666;line-height:1.5;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>MERCHY'S AI DESIGNER</h1>
+  <div class="steps" id="stepLabel">Step 1 of 3</div>
+  <button class="close-btn" onclick="parent.postMessage('merchys-close','*')" title="Close">X</button>
+</div>
+
+<div class="content" id="content">
+
+  <!-- STEP 1: Pick a Service -->
+  <div class="step active" id="step1">
+    <input type="text" class="search-bar" id="searchServices" placeholder="Search services..." oninput="filterServices()">
+
+    <div id="servicesList">
+      <div class="cat-label">APPAREL & MERCHANDISE</div>
+      <div class="svc-grid" data-cat="apparel"></div>
+      <div class="cat-label">PRINT DESIGN</div>
+      <div class="svc-grid" data-cat="print_design"></div>
+      <div class="cat-label">BRAND & IDENTITY</div>
+      <div class="svc-grid" data-cat="brand_identity"></div>
+      <div class="cat-label">DIGITAL DESIGN</div>
+      <div class="svc-grid" data-cat="digital"></div>
+      <div class="cat-label">SPECIALTY</div>
+      <div class="svc-grid" data-cat="specialty"></div>
+    </div>
+
+    <button class="btn btn-gold" id="btnStep1" disabled onclick="goStep(2)">Select a Service to Continue</button>
+  </div>
+
+  <!-- STEP 2: Design Form -->
+  <div class="step" id="step2">
+    <div style="font-size:13px;font-weight:600;color:#d4a017;margin-bottom:12px" id="selectedServiceLabel"></div>
+
+    <div class="form-group">
+      <label>Business / Brand Name *</label>
+      <input type="text" id="fBusiness" placeholder="Your business or brand name" oninput="checkForm()">
+    </div>
+    <div class="form-group">
+      <label>Design Text (exact spelling) *</label>
+      <input type="text" id="fText" placeholder="Text to include in the design" oninput="checkForm()">
+    </div>
+    <div class="form-group">
+      <label>Describe What You Want *</label>
+      <textarea id="fDesc" placeholder="Badge logo with mountains, retro feel..." oninput="checkForm()"></textarea>
+    </div>
+
+    <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block">Design Style</label>
+    <div class="style-grid">
+      <div class="style-tile" data-style="vintage" onclick="pickStyle(this)">Vintage</div>
+      <div class="style-tile sel" data-style="badge" onclick="pickStyle(this)">Badge</div>
+      <div class="style-tile" data-style="bold_type" onclick="pickStyle(this)">Bold Type</div>
+      <div class="style-tile" data-style="illustration" onclick="pickStyle(this)">Illustr.</div>
+      <div class="style-tile" data-style="minimal" onclick="pickStyle(this)">Minimal</div>
+      <div class="style-tile" data-style="rubber_hose" onclick="pickStyle(this)">Cartoon</div>
+      <div class="style-tile" data-style="retro_sport" onclick="pickStyle(this)">Retro</div>
+      <div class="style-tile" data-style="hand_lettered" onclick="pickStyle(this)">Lettering</div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      Drop reference image here or click to upload
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this)">
+
+    <button class="btn btn-gold" id="btnGenerate" disabled onclick="generateDesigns()">Generate 3 AI Design Options</button>
+    <button class="btn btn-outline" onclick="goStep(1)">Back to Services</button>
+  </div>
+
+  <!-- STEP 2.5: Loading -->
+  <div class="step" id="stepLoading">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Our AI Creative Director is designing<br>3 options for you...</p>
+      <p style="font-size:11px;color:#999;margin-top:12px">This typically takes 15-30 seconds</p>
+    </div>
+  </div>
+
+  <!-- STEP 3: Results + Paywall -->
+  <div class="step" id="step3">
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px">Your Design Options</div>
+    <div class="paywall-notice">AI-generated previews are free. Vector files and production-ready artwork require purchase or an active project.</div>
+
+    <div id="designResults"></div>
+
+    <div class="lookup-section" id="lookupSection" style="display:none">
+      <h4>Link to Your Project</h4>
+      <div class="lookup-row">
+        <input type="text" id="lookupPO" placeholder="PO Number" style="flex:0 0 100px">
+        <input type="text" id="lookupName" placeholder="Name or email" oninput="doLookup()">
+      </div>
+      <div class="lookup-results" id="lookupResults"></div>
+    </div>
+
+    <button class="btn btn-gold" id="btnSubmit" style="display:none" onclick="submitToProject()">Submit Design Notes to Project</button>
+    <button class="btn btn-outline" onclick="goStep(2)">Back to Form</button>
+    <button class="btn btn-outline" onclick="requestQuote()" style="margin-top:4px">No Project? Request a Quote Instead</button>
+  </div>
+
+  <!-- STEP 4: Success / Quote -->
+  <div class="step" id="step4">
+    <div style="text-align:center;padding:30px 10px">
+      <div style="font-size:48px;margin-bottom:12px;color:#4caf50">&#10003;</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px" id="successTitle">Submitted</div>
+      <div style="font-size:13px;color:#666;line-height:1.6" id="successMsg">Your design request has been submitted. Our team will follow up within 24 hours.</div>
+      <div style="margin-top:20px;font-size:12px;color:#999">Questions? Text us at 619-800-0949</div>
+      <button class="btn btn-black" style="margin-top:20px" onclick="resetWidget()">Start New Design</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-text">Merchy's Merch - San Diego, CA - 619-800-0949</div>
+</div>
+
+<script>
+// ---- State ----
+const API = (function() {
+  try { return new URL(window.location.href).origin; } catch(e) { return ''; }
+})();
+let state = { service: null, style: 'badge', file: null, designs: [], linkedProject: null };
+
+// ---- Services (loaded from server, fallback hardcoded) ----
+const SERVICES = [
+  {id:'shirt-design',name:'Shirt Design',priceRange:'$25-$200',category:'apparel'},
+  {id:'embroidery-design',name:'Embroidery Design',priceRange:'$25-$100',category:'apparel'},
+  {id:'digitizing',name:'Digitizing',priceRange:'$30',category:'apparel'},
+  {id:'patch-design',name:'Patch Design',priceRange:'$25-$75',category:'apparel'},
+  {id:'promo-item-design',name:'Promotional Item Design',priceRange:'$25-$100',category:'apparel'},
+  {id:'uniform-design',name:'Uniform Program Design',priceRange:'$100-$300',category:'apparel'},
+  {id:'screen-print-seps',name:'Screen Print Separations',priceRange:'$25-$50',category:'apparel'},
+  {id:'banner-design',name:'Banner Design',priceRange:'$25-$100',category:'print_design'},
+  {id:'event-posters',name:'Event Posters',priceRange:'$50-$125',category:'print_design'},
+  {id:'flyer-design',name:'Flyer Design',priceRange:'$25-$125',category:'print_design'},
+  {id:'menus',name:'Menus',priceRange:'$100-$200',category:'print_design'},
+  {id:'signage',name:'Signage',priceRange:'$50-$125',category:'print_design'},
+  {id:'catalog-design',name:'Catalog / Lookbook',priceRange:'$150-$400',category:'print_design'},
+  {id:'certificate-design',name:'Certificate / Award',priceRange:'$25-$75',category:'print_design'},
+  {id:'invitation-design',name:'Invitation / Stationery',priceRange:'$25-$100',category:'print_design'},
+  {id:'logo-design',name:'Logo Design',priceRange:'$50-$100',category:'brand_identity'},
+  {id:'business-cards',name:'Business Cards',priceRange:'$25-$75',category:'brand_identity'},
+  {id:'brand-identity',name:'Brand Identity Package',priceRange:'$200-$500',category:'brand_identity'},
+  {id:'mockups',name:'Mockups',priceRange:'$10 / Free',category:'digital'},
+  {id:'social-media',name:'Social Media Graphics',priceRange:'$25-$250',category:'digital'},
+  {id:'qr-code-design',name:'QR Code Design',priceRange:'$10-$25',category:'digital'},
+  {id:'photo-editing',name:'Photo Editing',priceRange:'$15-$75/hr',category:'digital'},
+  {id:'infographic-design',name:'Infographic Design',priceRange:'$50-$150',category:'digital'},
+  {id:'favicon-design',name:'Favicon / App Icon',priceRange:'$15-$35',category:'digital'},
+  {id:'vectorizing',name:'Vectorizing',priceRange:'$10-$50',category:'specialty'},
+  {id:'vehicle-wraps',name:'Vehicle Wraps',priceRange:'$200-$300',category:'specialty'},
+  {id:'product-labels',name:'Product Labels',priceRange:'$100-$200',category:'specialty'},
+  {id:'packaging-design',name:'Packaging Design',priceRange:'$75-$250',category:'specialty'},
+  {id:'sticker-design',name:'Sticker / Decal Design',priceRange:'$15-$50',category:'specialty'},
+  {id:'illustration',name:'Illustration',priceRange:'$75-$300',category:'specialty'},
+  {id:'lettering-design',name:'Lettering / Typography',priceRange:'$50-$200',category:'specialty'}
+];
+
+// ---- Render services ----
+function renderServices(filter) {
+  const cats = {apparel:'apparel',print_design:'print_design',brand_identity:'brand_identity',digital:'digital',specialty:'specialty'};
+  Object.keys(cats).forEach(cat => {
+    const grid = document.querySelector(`.svc-grid[data-cat="${cat}"]`);
+    const items = SERVICES.filter(s => s.category === cat && (!filter || s.name.toLowerCase().includes(filter.toLowerCase())));
+    grid.innerHTML = items.map(s => `
+      <div class="svc-card${state.service && state.service.id === s.id ? ' sel' : ''}" onclick="pickService('${s.id}')">
+        <div class="svc-name">${s.name}</div>
+        <div class="svc-price">${s.priceRange}</div>
+      </div>
+    `).join('');
+    // Hide category label if no items
+    grid.previousElementSibling.style.display = items.length ? '' : 'none';
+    grid.style.display = items.length ? '' : 'none';
+  });
+}
+
+function filterServices() {
+  renderServices(document.getElementById('searchServices').value);
+}
+
+function pickService(id) {
+  state.service = SERVICES.find(s => s.id === id);
+  renderServices(document.getElementById('searchServices').value);
+  document.getElementById('btnStep1').disabled = false;
+  document.getElementById('btnStep1').textContent = 'Continue with ' + state.service.name;
+}
+
+// ---- Style picker ----
+function pickStyle(el) {
+  document.querySelectorAll('.style-tile').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+  state.style = el.dataset.style;
+}
+
+// ---- File upload ----
+function handleFile(input) {
+  if (input.files[0]) {
+    state.file = input.files[0];
+    document.getElementById('uploadZone').textContent = state.file.name;
+    document.getElementById('uploadZone').classList.add('has-file');
+  }
+}
+
+// ---- Form validation ----
+function checkForm() {
+  const b = document.getElementById('fBusiness').value.trim();
+  const t = document.getElementById('fText').value.trim();
+  const d = document.getElementById('fDesc').value.trim();
+  document.getElementById('btnGenerate').disabled = !(b && t && d);
+}
+
+// ---- Navigation ----
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(n === 2.5 ? 'stepLoading' : 'step' + n).classList.add('active');
+  document.getElementById('stepLabel').textContent = n > 3 ? 'Done' : 'Step ' + Math.min(Math.ceil(n), 3) + ' of 3';
+  if (n === 2) {
+    document.getElementById('selectedServiceLabel').textContent = state.service ? state.service.name + ' (' + state.service.priceRange + ')' : '';
+    checkForm();
+  }
+}
+
+// ---- Generate designs ----
+async function generateDesigns() {
+  goStep(2.5);
+  const formData = {
+    name: document.getElementById('fBusiness').value,
+    business: document.getElementById('fBusiness').value,
+    text: document.getElementById('fText').value,
+    desc: document.getElementById('fDesc').value,
+    style: state.style,
+    serviceType: state.service ? state.service.id : 'general',
+    decoration: state.service ? state.service.category : 'general'
+  };
+
+  try {
+    const resp = await fetch(API + '/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formData)
+    });
+    const data = await resp.json();
+    if (data.designs && data.designs.length) {
+      state.designs = data.designs;
+    } else {
+      // Fallback placeholders
+      state.designs = [
+        {url: null, variation: 0, label: 'Option A'},
+        {url: null, variation: 1, label: 'Option B'},
+        {url: null, variation: 2, label: 'Option C'}
+      ];
+    }
+  } catch(e) {
+    state.designs = [
+      {url: null, variation: 0, label: 'Option A'},
+      {url: null, variation: 1, label: 'Option B'},
+      {url: null, variation: 2, label: 'Option C'}
+    ];
+  }
+  renderResults();
+  goStep(3);
+}
+
+// ---- Render results ----
+function renderResults() {
+  const container = document.getElementById('designResults');
+  container.innerHTML = state.designs.map((d, i) => {
+    const label = d.label || ('Option ' + String.fromCharCode(65 + i));
+    const hasImg = d.url && !d.error;
+    return `
+      <div class="design-option" onclick="selectDesign(${i})" id="opt${i}">
+        <div class="design-preview">
+          ${hasImg ? `<img src="${d.url}" alt="${label}">` : `<div style="font-size:14px;color:#999">${label} - Preview</div>`}
+          <div class="watermark"></div>
+        </div>
+        <div class="design-actions">
+          <button class="btn btn-gold" style="flex:1" onclick="event.stopPropagation();buyVector(${i})">Get Vector - $10</button>
+          <button class="btn btn-black" style="flex:1" onclick="event.stopPropagation();addToProject(${i})">Add to Project</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectDesign(idx) {
+  document.querySelectorAll('.design-option').forEach((el,i) => el.classList.toggle('sel', i === idx));
+  state.selectedDesign = idx;
+}
+
+// ---- Buy vector (Stripe checkout) ----
+async function buyVector(idx) {
+  const design = state.designs[idx];
+  try {
+    const resp = await fetch(API + '/api/create-checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ tier: 'basic', designUrl: design.url || '', email: '' })
+    });
+    const data = await resp.json();
+    if (data.url) {
+      window.open(data.url, '_blank');
+    } else {
+      alert('Payment not configured yet. Contact us at 619-800-0949 to purchase vector files.');
+    }
+  } catch(e) {
+    alert('Contact us at 619-800-0949 to purchase vector files.');
+  }
+}
+
+// ---- Add to project (show lookup) ----
+function addToProject(idx) {
+  state.selectedDesign = idx;
+  document.getElementById('lookupSection').style.display = 'block';
+  document.getElementById('btnSubmit').style.display = 'block';
+  document.getElementById('lookupPO').focus();
+}
+
+// ---- Smart lookup ----
+let lookupTimer = null;
+function doLookup() {
+  clearTimeout(lookupTimer);
+  lookupTimer = setTimeout(async () => {
+    const po = document.getElementById('lookupPO').value.trim();
+    const name = document.getElementById('lookupName').value.trim();
+    const query = po || name;
+    if (!query || query.length < 2) { document.getElementById('lookupResults').innerHTML = ''; return; }
+
+    try {
+      const type = po ? 'po' : 'client';
+      const resp = await fetch(API + '/api/projects/search?query=' + encodeURIComponent(query) + '&type=' + type);
+      const data = await resp.json();
+      const results = data.projects || [];
+      document.getElementById('lookupResults').innerHTML = results.length
+        ? results.map(p => `<div class="lookup-item" onclick="linkProject('${p.gid}','${p.name.replace(/'/g,"\\\'")}')">${p.name}</div>`).join('')
+        : '<div style="font-size:11px;color:#999;padding:8px">No projects found</div>';
+    } catch(e) {
+      document.getElementById('lookupResults').innerHTML = '<div style="font-size:11px;color:#c00;padding:8px">Search unavailable</div>';
+    }
+  }, 400);
+}
+
+function linkProject(gid, name) {
+  state.linkedProject = { gid, name };
+  document.getElementById('lookupResults').innerHTML = '<div style="font-size:12px;color:#4caf50;padding:8px;font-weight:600">Linked: ' + name + '</div>';
+  document.getElementById('btnSubmit').textContent = 'Submit Design Notes to ' + name.substring(0, 30);
+}
+
+// ---- Submit to Asana project ----
+async function submitToProject() {
+  const formData = {
+    name: document.getElementById('fBusiness').value,
+    business: document.getElementById('fBusiness').value,
+    text: document.getElementById('fText').value,
+    desc: document.getElementById('fDesc').value,
+    style: state.style,
+    serviceType: state.service ? state.service.id : '',
+    decoration: state.service ? state.service.category : '',
+    selectedOption: state.selectedDesign != null ? 'Option ' + String.fromCharCode(65 + state.selectedDesign) : '',
+    projectGid: state.linkedProject ? state.linkedProject.gid : '',
+    poNumber: document.getElementById('lookupPO').value.trim()
+  };
+
+  try {
+    const resp = await fetch(API + '/api/submit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formData)
+    });
+    const data = await resp.json();
+    document.getElementById('successTitle').textContent = 'Design Notes Submitted';
+    document.getElementById('successMsg').textContent = state.linkedProject
+      ? 'Your design notes have been posted to ' + state.linkedProject.name + '. Our team will review and follow up.'
+      : 'Your design request has been created. Our team will follow up within 24 hours.';
+    goStep(4);
+  } catch(e) {
+    alert('Submission failed. Please contact us at 619-800-0949.');
+  }
+}
+
+// ---- Request quote (no project) ----
+async function requestQuote() {
+  const formData = {
+    name: document.getElementById('fBusiness').value,
+    business: document.getElementById('fBusiness').value,
+    text: document.getElementById('fText').value,
+    desc: document.getElementById('fDesc').value,
+    style: state.style,
+    serviceType: state.service ? state.service.id : '',
+    selectedOption: state.selectedDesign != null ? 'Option ' + String.fromCharCode(65 + state.selectedDesign) : ''
+  };
+
+  try {
+    await fetch(API + '/api/submit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formData)
+    });
+  } catch(e) {}
+
+  document.getElementById('successTitle').textContent = 'Quote Requested';
+  document.getElementById('successMsg').textContent = 'We have your design details. Our team will reach out with a quote within 24 hours. Text us at 619-800-0949 if you need it sooner.';
+  goStep(4);
+}
+
+// ---- Reset ----
+function resetWidget() {
+  state = { service: null, style: 'badge', file: null, designs: [], linkedProject: null };
+  document.getElementById('fBusiness').value = '';
+  document.getElementById('fText').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('searchServices').value = '';
+  document.getElementById('uploadZone').textContent = 'Drop reference image here or click to upload';
+  document.getElementById('uploadZone').classList.remove('has-file');
+  document.getElementById('btnStep1').disabled = true;
+  document.getElementById('btnStep1').textContent = 'Select a Service to Continue';
+  document.getElementById('lookupSection').style.display = 'none';
+  document.getElementById('btnSubmit').style.display = 'none';
+  document.querySelectorAll('.style-tile').forEach(t => t.classList.remove('sel'));
+  document.querySelector('.style-tile[data-style="badge"]').classList.add('sel');
+  renderServices();
+  goStep(1);
+}
+
+// ---- Init ----
+renderServices();
+</script>
+</body>
+</html>
