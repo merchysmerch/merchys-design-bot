@@ -292,11 +292,14 @@ function buildDesignPrompt(formData, variation) {
   const styleDescs = styles.map(s => styleMap[s]).filter(Boolean);
   const styleDesc = styleDescs.length > 0 ? styleDescs.join(' ALSO BLEND IN: ') : styleMap.badge;
 
-  // Each variation targets a different composition approach
+  // 6 variations - each targets a different composition approach
   const variations = [
     'LAYOUT A: Classic centered symmetrical composition. The icon or main visual sits dead center with text arching above and below. Most traditional merchandise layout.',
     'LAYOUT B: Typography-forward composition. The text and lettering drive the visual weight. Supporting icon or graphic is secondary, integrated into or behind the text structure.',
-    'LAYOUT C: Illustration-forward composition. The graphic, character, or scene is the dominant element taking up 60-70% of the design. Text is compact and positioned below or integrated.'
+    'LAYOUT C: Illustration-forward composition. The graphic, character, or scene is the dominant element taking up 60-70% of the design. Text is compact and positioned below or integrated.',
+    'LAYOUT D: Horizontal wide composition. Elements spread across the width. Text and icon side by side or in a landscape banner arrangement. Great for back-of-shirt prints.',
+    'LAYOUT E: Stacked vertical composition. Elements stacked top to bottom: icon on top, text centered below, supporting details at bottom. Clean column layout.',
+    'LAYOUT F: Asymmetric bold composition. Main element pushed to one side with text balanced on the opposite side. Dynamic and modern with intentional visual tension.'
   ];
 
   const prompt = `Create a production-ready custom merchandise design.
@@ -325,7 +328,7 @@ async function generateDesigns(formData) {
 
   const designs = [];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 6; i++) {
     try {
       const prompt = buildDesignPrompt(formData, i);
 
@@ -907,13 +910,16 @@ textarea{resize:vertical;min-height:70px}
 .btn-back{background:none;border:2px solid #eee;color:#555;margin-bottom:8px;font-size:14px;padding:10px}
 .btn-back:hover{border-color:#111;color:#111}
 
-/* Design results */
+/* Design results - 6 designs in 3x2 grid, multi-select */
 .designs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
 .design-card{border:2px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
 .design-card:hover{border-color:#d4a017}
 .design-card.selected{border-color:#d4a017;box-shadow:0 0 0 3px #d4a017}
+.design-card .check-badge{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#d4a017;color:#111;font-size:14px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
+.design-card.selected .check-badge{display:flex}
 .design-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .design-card .watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(0,0,0,.12);pointer-events:none;transform:rotate(-30deg);letter-spacing:2px}
+.sel-count{font-size:13px;color:#888;margin-bottom:8px;text-align:right}
 
 /* Loading */
 .loading{text-align:center;padding:30px}
@@ -927,6 +933,29 @@ textarea{resize:vertical;min-height:70px}
 .summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
 .summary-row .label{color:#888}
 .summary-row .val{font-weight:600}
+
+/* Step 4: Three path cards */
+.path-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.path-card{border:2px solid #eee;border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px}
+.path-card:hover{border-color:#d4a017;background:#fffdf5;transform:translateY(-1px)}
+.path-card .p-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.path-card .p-icon svg{width:28px;height:28px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.path-card .p-icon.gold{background:#111}
+.path-card .p-icon.dark{background:#f5f5f5}
+.path-card .p-info h3{font-size:16px;font-weight:700;margin-bottom:2px;color:#111}
+.path-card .p-info p{font-size:13px;color:#888;line-height:1.3}
+.path-card .p-arrow{margin-left:auto;font-size:20px;color:#ccc}
+
+/* Sub-pages (vector, save, product) */
+.sub-page{display:none;animation:fadeUp .2s ease}
+.sub-page.active{display:block}
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.product-card{border:2px solid #eee;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .15s}
+.product-card:hover{border-color:#d4a017}
+.product-card.selected{border-color:#d4a017;background:#111;color:#d4a017}
+.product-card .pc-icon{font-size:28px;margin-bottom:6px}
+.product-card .pc-name{font-size:14px;font-weight:700}
+.product-card .pc-desc{font-size:11px;color:#999;margin-top:2px}
 </style>
 </head>
 <body>
@@ -988,48 +1017,156 @@ textarea{resize:vertical;min-height:70px}
       <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <button class="btn btn-primary" onclick="generateDesigns()" id="generateBtn">Generate 3 AI Designs</button>
+    <button class="btn btn-primary" onclick="generateDesigns()" id="generateBtn">Generate 6 AI Designs</button>
   </div>
 
-  <!-- STEP 3: Review Designs -->
+  <!-- STEP 3: Review Designs (6 designs, multi-select) -->
   <div class="step" id="step3">
     <button class="btn btn-back" onclick="goStep(2)">Back to Details</button>
     <div class="loading" id="loadingState">
       <div class="spinner"></div>
       <p>Creating your designs...</p>
-      <p style="font-size:12px;color:#aaa;margin-top:4px">This may take 15-30 seconds</p>
+      <p style="font-size:12px;color:#aaa;margin-top:4px">This may take 30-60 seconds</p>
     </div>
     <div id="designResults" style="display:none">
-      <p style="font-size:15px;font-weight:600;margin-bottom:10px">Select your favorite:</p>
+      <p style="font-size:15px;font-weight:600;margin-bottom:4px">Select your favorites:</p>
+      <div class="sel-count" id="designSelCount">0 selected</div>
       <div class="designs-grid" id="designsGrid"></div>
-      <div class="summary-box" id="designSummary"></div>
-      <button class="btn btn-primary" onclick="goStep(4)" id="continueBtn" disabled>Continue with Selected Design</button>
-      <button class="btn btn-back" onclick="regenerate()" style="margin-top:6px">Regenerate</button>
+      <button class="btn btn-primary" onclick="goStep(4)" id="continueBtn" disabled>Continue with Selected Designs</button>
+      <button class="btn btn-back" onclick="regenerate()" style="margin-top:6px">Regenerate All</button>
     </div>
   </div>
 
-  <!-- STEP 4: Get Vector / Submit -->
+  <!-- STEP 4: Choose Your Path -->
   <div class="step" id="step4">
-    <button class="btn btn-back" onclick="goStep(3)">Back</button>
-    <div style="text-align:center;margin-bottom:16px">
-      <img id="finalDesignImg" src="" style="max-width:180px;border-radius:8px;border:2px solid #eee">
+    <button class="btn btn-back" onclick="goStep(3)">Back to Designs</button>
+
+    <!-- Selected designs preview -->
+    <div id="selectedPreview" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center"></div>
+
+    <!-- Main path selection -->
+    <div id="pathSelection">
+      <p style="font-size:16px;font-weight:700;margin-bottom:12px;text-align:center">What would you like to do?</p>
+      <div class="path-cards">
+        <div class="path-card" onclick="showSubPage('vector')">
+          <div class="p-icon gold"><svg viewBox="0 0 24 24"><path d="M12 2L2 7L12 12L22 7L12 2Z"/><path d="M2 17L12 22L22 17"/><path d="M2 12L12 17L22 12"/></svg></div>
+          <div class="p-info">
+            <h3>Get Vector File - \$25</h3>
+            <p>Production-ready SVG vector. Scalable to any size. Instant download after payment.</p>
+          </div>
+          <span class="p-arrow">&#8250;</span>
+        </div>
+        <div class="path-card" onclick="showSubPage('save')">
+          <div class="p-icon dark"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
+          <div class="p-info">
+            <h3>Save for Later</h3>
+            <p>Log in to save your designs to your account. Come back anytime to continue.</p>
+          </div>
+          <span class="p-arrow">&#8250;</span>
+        </div>
+        <div class="path-card" onclick="showSubPage('product')">
+          <div class="p-icon dark"><svg viewBox="0 0 24 24"><path d="M14 2L20 6L20 10L14 14L8 10L8 6Z"/><path d="M4 10L10 14L10 22L4 18Z"/><path d="M20 10L14 14L14 22L20 18Z"/></svg></div>
+          <div class="p-info">
+            <h3>Add to Product</h3>
+            <p>Put your design on apparel, hats, bags, or any product. Pick your item and order.</p>
+          </div>
+          <span class="p-arrow">&#8250;</span>
+        </div>
+      </div>
     </div>
-    <div style="background:#f8f8f8;border-radius:8px;padding:14px;margin-bottom:14px">
-      <p style="font-size:16px;font-weight:700;margin-bottom:6px">Want a production-ready vector file?</p>
-      <p style="font-size:14px;color:#666;margin-bottom:10px">Scalable SVG vector for crisp printing at any size. \$25 one-time.</p>
-      <button class="btn btn-primary" onclick="purchaseVector()" id="vectorBtn">Get Vector File - \$25</button>
+
+    <!-- SUB-PAGE: Vector Purchase -->
+    <div class="sub-page" id="subVector">
+      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
+      <div style="text-align:center;margin-bottom:16px">
+        <div id="vectorPreviewImgs" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"></div>
+      </div>
+      <div style="background:#f8f8f8;border-radius:12px;padding:20px;text-align:center">
+        <p style="font-size:18px;font-weight:700;margin-bottom:4px">Production-Ready Vector File</p>
+        <p style="font-size:14px;color:#666;margin-bottom:16px">Scalable SVG format. Clean paths. Ready for screen print, embroidery, or any production method.</p>
+        <p style="font-size:28px;font-weight:700;color:#d4a017;margin-bottom:16px">\$25</p>
+        <button class="btn btn-primary" onclick="purchaseVector()" id="vectorBtn">Pay & Download Vector</button>
+        <p style="font-size:11px;color:#aaa;margin-top:8px">Secure payment via Stripe. Instant delivery.</p>
+      </div>
     </div>
-    <p style="font-size:14px;color:#888;text-align:center;margin-bottom:10px">or</p>
-    <button class="btn btn-primary" onclick="submitDesign()" id="submitBtn" style="background:#111;color:#d4a017">Submit Design Request (Free)</button>
-    <p style="font-size:12px;color:#999;text-align:center;margin-top:6px">Our team will review and finalize your design.</p>
+
+    <!-- SUB-PAGE: Save for Later (login required) -->
+    <div class="sub-page" id="subSave">
+      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
+      <div style="background:#f8f8f8;border-radius:12px;padding:24px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">&#128274;</div>
+        <p style="font-size:18px;font-weight:700;margin-bottom:6px">Log In to Save Your Designs</p>
+        <p style="font-size:14px;color:#666;margin-bottom:20px">Create an account or log in to save your designs and come back to them anytime.</p>
+        <div style="text-align:left;max-width:300px;margin:0 auto">
+          <label>Email</label>
+          <input type="email" id="saveEmail" placeholder="your@email.com">
+          <label>Password</label>
+          <input type="text" id="savePassword" placeholder="Password" style="-webkit-text-security:disc">
+        </div>
+        <button class="btn btn-primary" onclick="handleSaveLogin()" id="saveLoginBtn" style="max-width:300px;margin:0 auto">Log In & Save</button>
+        <p style="font-size:12px;color:#888;margin-top:10px">Don't have an account? <a href="https://merchysmarket.com/register" target="_blank" style="color:#d4a017;font-weight:600">Sign up at merchysmarket.com</a></p>
+      </div>
+    </div>
+
+    <!-- SUB-PAGE: Add to Product -->
+    <div class="sub-page" id="subProduct">
+      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
+      <p style="font-size:16px;font-weight:700;margin-bottom:12px">What type of product?</p>
+      <div class="product-grid" id="productTypeGrid">
+        <div class="product-card" onclick="selectProductType('tshirts')">
+          <div class="pc-icon">&#128085;</div>
+          <div class="pc-name">T-Shirts</div>
+          <div class="pc-desc">Crew neck, V-neck, long sleeve</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('hoodies')">
+          <div class="pc-icon">&#129509;</div>
+          <div class="pc-name">Hoodies & Sweats</div>
+          <div class="pc-desc">Pullover, zip-up, crewneck</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('polos')">
+          <div class="pc-icon">&#128084;</div>
+          <div class="pc-name">Polos & Uniforms</div>
+          <div class="pc-desc">Polos, button-downs, work wear</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('hats')">
+          <div class="pc-icon">&#129506;</div>
+          <div class="pc-name">Hats & Caps</div>
+          <div class="pc-desc">Snapback, dad hat, beanie, fitted</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('bags')">
+          <div class="pc-icon">&#128092;</div>
+          <div class="pc-name">Bags & Totes</div>
+          <div class="pc-desc">Canvas totes, backpacks, duffels</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('jackets')">
+          <div class="pc-icon">&#129509;</div>
+          <div class="pc-name">Jackets & Outerwear</div>
+          <div class="pc-desc">Coach, bomber, windbreaker</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('accessories')">
+          <div class="pc-icon">&#127991;</div>
+          <div class="pc-name">Accessories</div>
+          <div class="pc-desc">Patches, pins, stickers, koozies</div>
+        </div>
+        <div class="product-card" onclick="selectProductType('other')">
+          <div class="pc-icon">&#128230;</div>
+          <div class="pc-name">Other Products</div>
+          <div class="pc-desc">Signs, mugs, drinkware, promo</div>
+        </div>
+      </div>
+      <div id="productRedirect" style="display:none;text-align:center;padding:20px">
+        <div class="spinner"></div>
+        <p style="font-size:14px;color:#888">Taking you to our product catalog...</p>
+      </div>
+    </div>
   </div>
 
   <!-- STEP 5: Confirmation -->
   <div class="step" id="step5">
     <div style="text-align:center;padding:24px 0">
       <div style="font-size:40px;margin-bottom:10px;color:#d4a017">&#10003;</div>
-      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px">Design Submitted!</h2>
-      <p style="font-size:15px;color:#666;margin-bottom:16px">Our team will get back to you within 1 business day.</p>
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px" id="confirmTitle">Design Submitted!</h2>
+      <p style="font-size:15px;color:#666;margin-bottom:16px" id="confirmMsg">Our team will get back to you within 1 business day.</p>
       <div class="summary-box" id="finalSummary"></div>
       <p style="font-size:13px;color:#888;margin-top:14px">619-800-0949 | start@merchysmerch.com</p>
     </div>
@@ -1045,7 +1182,7 @@ let selectedLocations = {};
 let selectedStyles = ['badge'];
 let uploadedFileUrl = null;
 let designs = [];
-let selectedDesignIdx = null;
+let selectedDesignIdxs = [];
 
 const DEFAULT_LOCATIONS = [
   { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
@@ -1287,8 +1424,14 @@ function goStep(n) {
     document.getElementById('locationSection').style.display = selectedService.category==='apparel_decoration'?'block':'none';
   }
   if(n===4) {
-    const d = designs[selectedDesignIdx]||{};
-    document.getElementById('finalDesignImg').src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
+    hideSubPages();
+    document.getElementById('pathSelection').style.display = 'block';
+    // Show selected design thumbnails
+    document.getElementById('selectedPreview').innerHTML = selectedDesignIdxs.map(i => {
+      const d = designs[i]||{};
+      const src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
+      return \`<img src="\${src}" style="width:80px;height:80px;border-radius:8px;border:2px solid #d4a017;object-fit:cover">\`;
+    }).join('');
   }
   document.querySelector('.content').scrollTop = 0;
 }
@@ -1331,46 +1474,58 @@ async function generateDesigns() {
 function showDesignResults() {
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('designResults').style.display = 'block';
-  selectedDesignIdx = null;
+  selectedDesignIdxs = [];
   document.getElementById('designsGrid').innerHTML = designs.map((d,i) => {
     if(d.error) return \`<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8"><span style="font-size:12px;color:#888">Failed</span></div>\`;
     const src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
     const fallback = d.url ? \`\${API_BASE}\${d.url}\` : '';
-    return \`<div class="design-card" onclick="selectDesign(\${i})" id="dcard-\${i}"><img src="\${src}" alt="Design \${i+1}" onerror="if(this.src!=='\${fallback}')this.src='\${fallback}'"><div class="watermark">PREVIEW</div></div>\`;
+    return \`<div class="design-card" onclick="toggleDesign(\${i})" id="dcard-\${i}"><div class="check-badge">&#10003;</div><img src="\${src}" alt="Design \${i+1}" onerror="if(this.src!=='\${fallback}')this.src='\${fallback}'"><div class="watermark">PREVIEW</div></div>\`;
   }).join('');
-  document.getElementById('continueBtn').disabled = true;
+  updateDesignSelection();
 }
 
-function selectDesign(idx) {
+function toggleDesign(idx) {
   if(designs[idx]?.error) return;
-  selectedDesignIdx = idx;
-  document.querySelectorAll('.design-card').forEach((c,i) => c.classList.toggle('selected', i===idx));
-  document.getElementById('continueBtn').disabled = false;
+  const pos = selectedDesignIdxs.indexOf(idx);
+  if(pos > -1) selectedDesignIdxs.splice(pos, 1);
+  else selectedDesignIdxs.push(idx);
+  updateDesignSelection();
+}
 
-  const styleNames = selectedStyles.map(sid => {
-    const s = (config?.styles||[]).find(x => x.id===sid);
-    return s?.name || sid;
-  }).join(', ');
-
-  const locNames = Object.keys(selectedLocations).length > 0
-    ? Object.keys(selectedLocations).map(k => { const l=(config?.locations||DEFAULT_LOCATIONS).find(x=>x.id===k); return l?.name||k; }).join(', ')
-    : 'N/A';
-
-  document.getElementById('designSummary').innerHTML = \`
-    <h3>Summary</h3>
-    <div class="summary-row"><span class="label">Service</span><span class="val">\${selectedService?.name||'-'}</span></div>
-    <div class="summary-row"><span class="label">Styles</span><span class="val">\${styleNames}</span></div>
-    <div class="summary-row"><span class="label">Locations</span><span class="val">\${locNames}</span></div>
-  \`;
+function updateDesignSelection() {
+  document.querySelectorAll('.design-card').forEach((c,i) => c.classList.toggle('selected', selectedDesignIdxs.includes(i)));
+  document.getElementById('designSelCount').textContent = selectedDesignIdxs.length > 0 ? selectedDesignIdxs.length + ' selected' : '0 selected';
+  document.getElementById('continueBtn').disabled = selectedDesignIdxs.length === 0;
+  document.getElementById('continueBtn').textContent = selectedDesignIdxs.length === 1 ? 'Continue with Selected Design' : \`Continue with \${selectedDesignIdxs.length} Designs\`;
 }
 
 function regenerate() { generateDesigns(); }
 
-// Stripe vector purchase
+// Sub-page navigation
+function showSubPage(page) {
+  document.getElementById('pathSelection').style.display = 'none';
+  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('sub' + page.charAt(0).toUpperCase() + page.slice(1));
+  if(el) el.classList.add('active');
+  if(page === 'vector') {
+    document.getElementById('vectorPreviewImgs').innerHTML = selectedDesignIdxs.map(i => {
+      const d = designs[i]||{};
+      const src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
+      return \`<img src="\${src}" style="width:100px;height:100px;border-radius:8px;border:2px solid #eee;object-fit:cover">\`;
+    }).join('');
+  }
+}
+
+function hideSubPages() {
+  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pathSelection').style.display = 'block';
+}
+
+// PATH 1: Vector purchase via Stripe
 async function purchaseVector() {
   const btn = document.getElementById('vectorBtn');
   btn.disabled=true; btn.textContent='Processing...';
-  const d = designs[selectedDesignIdx]||{};
+  const d = designs[selectedDesignIdxs[0]]||{};
   try {
     const res = await fetch(\`\${API_BASE}/api/create-checkout\`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -1380,15 +1535,18 @@ async function purchaseVector() {
     if(data.url) window.open(data.url,'_blank');
     else alert(data.error||'Checkout failed. Call 619-800-0949.');
   } catch(e) { alert('Payment error. Call 619-800-0949.'); }
-  btn.disabled=false; btn.textContent='Get Vector File - \$25';
+  btn.disabled=false; btn.textContent='Pay & Download Vector';
 }
 
-// Submit design request
-async function submitDesign() {
-  const btn = document.getElementById('submitBtn');
-  btn.disabled=true; btn.textContent='Submitting...';
-  const d = designs[selectedDesignIdx]||{};
+// PATH 2: Save for Later (login required)
+async function handleSaveLogin() {
+  const btn = document.getElementById('saveLoginBtn');
+  const email = document.getElementById('saveEmail').value.trim();
+  const pass = document.getElementById('savePassword').value;
+  if(!email||!pass) { alert('Please enter your email and password.'); return; }
+  btn.disabled=true; btn.textContent='Saving...';
   try {
+    const designUrls = selectedDesignIdxs.map(i => designs[i]?.remoteUrl || designs[i]?.url || '');
     await fetch(\`\${API_BASE}/api/submit\`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -1401,21 +1559,79 @@ async function submitDesign() {
         serviceName: selectedService?.name||'',
         styles: selectedStyles,
         locations: selectedLocations,
-        designUrl: d.remoteUrl||d.url||'',
-        designVariation: selectedDesignIdx
+        designUrls: designUrls,
+        selectedDesigns: selectedDesignIdxs,
+        action: 'save_for_later',
+        saveEmail: email
       })
     });
+    document.getElementById('confirmTitle').textContent = 'Designs Saved!';
+    document.getElementById('confirmMsg').textContent = 'Your designs have been saved to your account. Log in at merchysmarket.com to access them anytime.';
     document.getElementById('finalSummary').innerHTML = \`
-      <h3>Your Request</h3>
-      <div class="summary-row"><span class="label">Name</span><span class="val">\${document.getElementById('userName').value.trim()}</span></div>
+      <h3>Saved Designs</h3>
+      <div class="summary-row"><span class="label">Designs saved</span><span class="val">\${selectedDesignIdxs.length}</span></div>
+      <div class="summary-row"><span class="label">Account</span><span class="val">\${email}</span></div>
       <div class="summary-row"><span class="label">Service</span><span class="val">\${selectedService?.name||'-'}</span></div>
-      <div class="summary-row"><span class="label">Styles</span><span class="val">\${selectedStyles.length} selected</span></div>
     \`;
     goStep(5);
   } catch(e) {
-    alert('Submission error. Try again or call 619-800-0949.');
-    btn.disabled=false; btn.textContent='Submit Design Request (Free)';
+    alert('Save failed. Try again or call 619-800-0949.');
+    btn.disabled=false; btn.textContent='Log In & Save';
   }
+}
+
+// PATH 3: Add to Product
+function selectProductType(type) {
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  // Submit design request with product type, then redirect to product page
+  const designUrls = selectedDesignIdxs.map(i => designs[i]?.remoteUrl || designs[i]?.url || '');
+  fetch(\`\${API_BASE}/api/submit\`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      name: document.getElementById('userName').value.trim(),
+      email: document.getElementById('userEmail').value.trim(),
+      business: document.getElementById('userBusiness').value.trim(),
+      text: document.getElementById('designText').value.trim(),
+      desc: document.getElementById('designDesc').value.trim(),
+      service: selectedService?.id||'',
+      serviceName: selectedService?.name||'',
+      styles: selectedStyles,
+      locations: selectedLocations,
+      designUrls: designUrls,
+      selectedDesigns: selectedDesignIdxs,
+      action: 'add_to_product',
+      productType: type
+    })
+  }).catch(console.error);
+
+  // Show redirect state then go to product page
+  document.getElementById('productTypeGrid').style.display = 'none';
+  document.getElementById('productRedirect').style.display = 'block';
+  const productUrls = {
+    tshirts: 'https://merchysmarket.com/collections/t-shirts',
+    hoodies: 'https://merchysmarket.com/collections/hoodies-sweatshirts',
+    polos: 'https://merchysmarket.com/collections/polos-uniforms',
+    hats: 'https://merchysmarket.com/collections/hats-caps',
+    bags: 'https://merchysmarket.com/collections/bags-totes',
+    jackets: 'https://merchysmarket.com/collections/jackets-outerwear',
+    accessories: 'https://merchysmarket.com/collections/accessories',
+    other: 'https://merchysmarket.com/collections/all'
+  };
+  setTimeout(() => {
+    window.open(productUrls[type] || productUrls.other, '_blank');
+    document.getElementById('productTypeGrid').style.display = 'grid';
+    document.getElementById('productRedirect').style.display = 'none';
+    document.getElementById('confirmTitle').textContent = 'Design Request Sent!';
+    document.getElementById('confirmMsg').textContent = 'Browse products in the new tab. Our team will match your design to your selected product.';
+    document.getElementById('finalSummary').innerHTML = \`
+      <h3>Your Request</h3>
+      <div class="summary-row"><span class="label">Product type</span><span class="val">\${type}</span></div>
+      <div class="summary-row"><span class="label">Designs selected</span><span class="val">\${selectedDesignIdxs.length}</span></div>
+      <div class="summary-row"><span class="label">Service</span><span class="val">\${selectedService?.name||'-'}</span></div>
+    \`;
+    goStep(5);
+  }, 1500);
 }
 
 init();
