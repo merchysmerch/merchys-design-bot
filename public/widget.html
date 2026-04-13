@@ -8,520 +8,619 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:#fff;color:#111;overflow-x:hidden}
-.header{background:#111;color:#d4a017;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017}
-.header h1{font-size:15px;font-weight:700;letter-spacing:1px}
+.header{background:#111;color:#d4a017;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;position:sticky;top:0;z-index:100}
+.header h1{font-size:14px;font-weight:700;letter-spacing:1px}
 .header .steps{font-size:11px;color:#888}
 .close-btn{background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px}
 .close-btn:hover{color:#fff}
-.content{padding:16px;overflow-y:auto;height:calc(100vh - 120px)}
+.content{padding:16px;overflow-y:auto;height:calc(100vh - 56px)}
 .step{display:none}
-.step.active{display:block;animation:fadeUp .25s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.step.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Category Tabs */
+.cat-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
+.cat-tabs::-webkit-scrollbar{height:0}
+.cat-tab{padding:7px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;border:2px solid #eee;background:#fff;transition:all .2s;flex-shrink:0}
+.cat-tab:hover{border-color:#d4a017}
+.cat-tab.active{background:#111;color:#d4a017;border-color:#111}
 
 /* Search */
-.search-bar{width:100%;padding:10px 14px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:13px;margin-bottom:14px;outline:none;transition:border .2s}
+.search-bar{width:100%;padding:9px 12px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:12px;margin-bottom:10px;outline:none;transition:border .2s}
 .search-bar:focus{border-color:#d4a017}
 
-/* Category heading */
-.cat-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px;padding-left:2px}
+/* Service cards */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.svc-card{padding:8px;border:2px solid #eee;border-radius:8px;cursor:pointer;transition:all .15s;text-align:center}
+.svc-card:hover{border-color:#d4a017;background:#fffdf5}
+.svc-card.selected{border-color:#d4a017;background:#111;color:#d4a017}
+.svc-card .name{font-size:12px;font-weight:600}
+.svc-card .price{font-size:10px;color:#888;margin-top:2px}
+.svc-card.selected .price{color:#999}
+.svc-card .desc{font-size:9px;color:#999;margin-top:3px;line-height:1.3}
+.svc-card.selected .desc{color:#888}
+.no-results{text-align:center;color:#888;font-size:12px;padding:20px 0}
 
-/* Service cards grid */
-.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.svc-card{padding:10px;border:2px solid #eee;border-radius:8px;cursor:pointer;transition:all .2s;text-align:center}
-.svc-card:hover{border-color:#d4a017;background:#fffaf0}
-.svc-card.sel{border-color:#d4a017;background:#d4a017;color:#fff}
-.svc-card .svc-name{font-size:12px;font-weight:600;line-height:1.3}
-.svc-card .svc-price{font-size:10px;color:#888;margin-top:2px}
-.svc-card.sel .svc-price{color:rgba(255,255,255,.8)}
+/* Form fields */
+label{display:block;font-size:11px;font-weight:600;margin-bottom:4px;color:#333;text-transform:uppercase;letter-spacing:.5px}
+input[type="text"],input[type="email"],textarea,select{width:100%;padding:9px 12px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:12px;outline:none;transition:border .2s;margin-bottom:12px}
+input:focus,textarea:focus,select:focus{border-color:#d4a017}
+textarea{resize:vertical;min-height:60px}
 
-/* Form */
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#333}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border:2px solid #e5e5e5;border-radius:6px;font-family:inherit;font-size:13px;outline:none;transition:border .2s}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#d4a017}
-.form-group textarea{resize:vertical;min-height:70px}
+/* Multi-location picker */
+.loc-section{margin-bottom:14px}
+.loc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
+.loc-btn{padding:8px 4px;border:2px solid #eee;border-radius:8px;cursor:pointer;text-align:center;font-size:11px;font-weight:600;transition:all .15s;background:#fff}
+.loc-btn:hover{border-color:#d4a017}
+.loc-btn.active{background:#111;color:#d4a017;border-color:#111}
+.loc-detail{background:#f8f8f8;border-radius:8px;padding:10px;margin-bottom:8px;display:none;animation:fadeUp .2s ease}
+.loc-detail.visible{display:block}
+.loc-detail h4{font-size:11px;font-weight:700;margin-bottom:6px;color:#111}
+.loc-detail textarea{min-height:50px;margin-bottom:6px}
+.loc-detail select{margin-bottom:0}
+
+/* Upload area */
+.upload-area{border:2px dashed #ddd;border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.upload-area:hover{border-color:#d4a017;background:#fffdf5}
+.upload-area.has-file{border-color:#d4a017;background:#f0f7e6}
+.upload-area p{font-size:11px;color:#888}
+.upload-area .icon{font-size:20px;margin-bottom:4px}
+.upload-preview{max-width:80px;max-height:60px;margin:6px auto;display:block;border-radius:4px}
 
 /* Style picker */
 .style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-.style-tile{padding:8px 4px;border:2px solid #eee;border-radius:6px;cursor:pointer;text-align:center;font-size:10px;font-weight:600;transition:all .2s}
-.style-tile:hover{border-color:#d4a017}
-.style-tile.sel{border-color:#d4a017;background:#d4a017;color:#fff}
-
-/* Upload zone */
-.upload-zone{border:2px dashed #ddd;border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;font-size:12px;color:#888}
-.upload-zone:hover{border-color:#d4a017;background:#fffaf0}
-.upload-zone.has-file{border-color:#4caf50;background:#f0faf0;color:#333}
+.style-chip{padding:6px 4px;border:2px solid #eee;border-radius:8px;cursor:pointer;text-align:center;font-size:10px;font-weight:600;transition:all .15s}
+.style-chip:hover{border-color:#d4a017}
+.style-chip.active{background:#111;color:#d4a017;border-color:#111}
 
 /* Buttons */
-.btn{width:100%;padding:12px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-gold{background:#d4a017;color:#fff}
-.btn-gold:hover{background:#b8890f}
-.btn-gold:disabled{background:#ccc;cursor:not-allowed}
-.btn-black{background:#111;color:#d4a017;border:2px solid #d4a017}
-.btn-black:hover{background:#d4a017;color:#111}
-.btn-orange{background:#e97730;color:#fff}
-.btn-orange:hover{background:#d06620}
-.btn-outline{background:transparent;color:#111;border:2px solid #ddd}
-.btn-outline:hover{border-color:#d4a017;color:#d4a017}
-.btn+.btn{margin-top:8px}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.5px}
+.btn-primary{background:#d4a017;color:#111}
+.btn-primary:hover{background:#e8b420}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-back{background:none;border:2px solid #eee;color:#555;margin-bottom:8px}
+.btn-back:hover{border-color:#111;color:#111}
 
-/* Results */
-.design-option{border:2px solid #eee;border-radius:10px;overflow:hidden;margin-bottom:12px;transition:all .2s}
-.design-option:hover{border-color:#d4a017}
-.design-option.sel{border-color:#d4a017;box-shadow:0 2px 12px rgba(212,160,23,.2)}
-.design-preview{position:relative;width:100%;aspect-ratio:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.design-preview img{width:100%;height:100%;object-fit:contain}
-.watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.watermark::after{content:'PREVIEW';font-size:36px;font-weight:700;color:rgba(212,160,23,.2);transform:rotate(-35deg);letter-spacing:6px}
-.design-actions{padding:10px;display:flex;gap:6px}
-.design-actions .btn{font-size:12px;padding:8px}
+/* Design results */
+.designs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.design-card{border:2px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
+.design-card:hover{border-color:#d4a017}
+.design-card.selected{border-color:#d4a017;box-shadow:0 0 0 2px #d4a017}
+.design-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.design-card .watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:rgba(0,0,0,.15);pointer-events:none;transform:rotate(-30deg);letter-spacing:2px}
 
 /* Loading */
-.loading{text-align:center;padding:40px 20px}
-.loading .spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+.loading{text-align:center;padding:30px}
+.spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading p{font-size:13px;color:#666}
+.loading p{font-size:12px;color:#888}
 
-/* Smart Lookup */
-.lookup-section{background:#f9f9f9;border:2px solid #eee;border-radius:8px;padding:12px;margin-bottom:14px}
-.lookup-section h4{font-size:12px;font-weight:600;margin-bottom:8px}
-.lookup-row{display:flex;gap:8px;margin-bottom:8px}
-.lookup-row input{flex:1}
-.lookup-results{max-height:120px;overflow-y:auto}
-.lookup-item{padding:8px;border:1px solid #eee;border-radius:4px;margin-bottom:4px;cursor:pointer;font-size:12px;transition:all .15s}
-.lookup-item:hover{background:#fffaf0;border-color:#d4a017}
+/* Summary */
+.summary-box{background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:12px}
+.summary-box h3{font-size:12px;font-weight:700;margin-bottom:8px}
+.summary-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.summary-row .label{color:#888}
+.summary-row .val{font-weight:600}
 
 /* Footer */
-.footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:10px 16px;text-align:center}
-.footer-text{font-size:10px;color:#999}
-
-/* Paywall notice */
-.paywall-notice{background:#fffaf0;border:1px solid #f5d9c0;border-radius:8px;padding:12px;margin:12px 0;font-size:11px;color:#666;line-height:1.5;text-align:center}
+.footer{padding:12px 16px;background:#fafafa;border-top:1px solid #eee;position:sticky;bottom:0}
+.footer .powered{text-align:center;font-size:9px;color:#bbb;margin-top:6px}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>MERCHY'S AI DESIGNER</h1>
-  <div class="steps" id="stepLabel">Step 1 of 3</div>
-  <button class="close-btn" onclick="parent.postMessage('merchys-close','*')" title="Close">X</button>
+  <div>
+    <h1>AI DESIGN STUDIO</h1>
+    <div class="steps" id="stepLabel">Step 1 of 4 - Choose Service</div>
+  </div>
+  <button class="close-btn" onclick="window.parent?.postMessage({type:'close-widget'},'*')">&times;</button>
 </div>
 
 <div class="content" id="content">
 
-  <!-- STEP 1: Pick a Service -->
+  <!-- STEP 1: Service Selection -->
   <div class="step active" id="step1">
-    <input type="text" class="search-bar" id="searchServices" placeholder="Search services..." oninput="filterServices()">
-
-    <div id="servicesList">
-      <div class="cat-label">APPAREL & MERCHANDISE</div>
-      <div class="svc-grid" data-cat="apparel"></div>
-      <div class="cat-label">PRINT DESIGN</div>
-      <div class="svc-grid" data-cat="print_design"></div>
-      <div class="cat-label">BRAND & IDENTITY</div>
-      <div class="svc-grid" data-cat="brand_identity"></div>
-      <div class="cat-label">DIGITAL DESIGN</div>
-      <div class="svc-grid" data-cat="digital"></div>
-      <div class="cat-label">SPECIALTY</div>
-      <div class="svc-grid" data-cat="specialty"></div>
-    </div>
-
-    <button class="btn btn-gold" id="btnStep1" disabled onclick="goStep(2)">Select a Service to Continue</button>
+    <div class="cat-tabs" id="catTabs"></div>
+    <input type="text" class="search-bar" placeholder="Search services..." id="searchBar" oninput="filterServices()">
+    <div id="serviceGrid" class="svc-grid"></div>
+    <div id="noResults" class="no-results" style="display:none">No services match your search.</div>
   </div>
 
-  <!-- STEP 2: Design Form -->
+  <!-- STEP 2: Design Details -->
   <div class="step" id="step2">
-    <div style="font-size:13px;font-weight:600;color:#d4a017;margin-bottom:12px" id="selectedServiceLabel"></div>
-
-    <div class="form-group">
-      <label>Business / Brand Name *</label>
-      <input type="text" id="fBusiness" placeholder="Your business or brand name" oninput="checkForm()">
-    </div>
-    <div class="form-group">
-      <label>Design Text (exact spelling) *</label>
-      <input type="text" id="fText" placeholder="Text to include in the design" oninput="checkForm()">
-    </div>
-    <div class="form-group">
-      <label>Describe What You Want *</label>
-      <textarea id="fDesc" placeholder="Badge logo with mountains, retro feel..." oninput="checkForm()"></textarea>
+    <button class="btn btn-back" onclick="goStep(1)">Back</button>
+    <div id="selectedServiceInfo" style="background:#f8f8f8;border-radius:8px;padding:10px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700" id="selSvcName"></div>
+      <div style="font-size:10px;color:#888" id="selSvcDesc"></div>
     </div>
 
-    <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block">Design Style</label>
-    <div class="style-grid">
-      <div class="style-tile" data-style="vintage" onclick="pickStyle(this)">Vintage</div>
-      <div class="style-tile sel" data-style="badge" onclick="pickStyle(this)">Badge</div>
-      <div class="style-tile" data-style="bold_type" onclick="pickStyle(this)">Bold Type</div>
-      <div class="style-tile" data-style="illustration" onclick="pickStyle(this)">Illustr.</div>
-      <div class="style-tile" data-style="minimal" onclick="pickStyle(this)">Minimal</div>
-      <div class="style-tile" data-style="rubber_hose" onclick="pickStyle(this)">Cartoon</div>
-      <div class="style-tile" data-style="retro_sport" onclick="pickStyle(this)">Retro</div>
-      <div class="style-tile" data-style="hand_lettered" onclick="pickStyle(this)">Lettering</div>
+    <label>Your Name</label>
+    <input type="text" id="userName" placeholder="e.g. John Smith">
+
+    <label>Email</label>
+    <input type="email" id="userEmail" placeholder="e.g. john@company.com">
+
+    <label>Business / Brand Name (optional)</label>
+    <input type="text" id="userBusiness" placeholder="e.g. Your Company Name">
+
+    <label>Text for Your Design</label>
+    <textarea id="designText" placeholder="e.g. Your Brand Name, Est. 2024, Your Tagline Here"></textarea>
+
+    <label>Describe What You Want</label>
+    <textarea id="designDesc" placeholder="e.g. A bold logo with a mountain icon for an outdoor adventure company"></textarea>
+
+    <!-- Print Location Picker (shown for apparel_decoration) -->
+    <div class="loc-section" id="locationSection" style="display:none">
+      <label>Print Locations (select all that apply)</label>
+      <div class="loc-grid" id="locGrid"></div>
+      <div id="locDetails"></div>
     </div>
 
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-      Drop reference image here or click to upload
+    <!-- Reference Upload -->
+    <label>Reference Image (optional)</label>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div class="icon">+</div>
+      <p>Click to upload a reference image</p>
     </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this)">
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleUpload(this)">
 
-    <button class="btn btn-gold" id="btnGenerate" disabled onclick="generateDesigns()">Generate 3 AI Design Options</button>
-    <button class="btn btn-outline" onclick="goStep(1)">Back to Services</button>
+    <!-- Style Picker -->
+    <label>Design Style</label>
+    <div class="style-grid" id="styleGrid"></div>
+
+    <button class="btn btn-primary" onclick="generateDesigns()" id="generateBtn">Generate 3 AI Designs</button>
   </div>
 
-  <!-- STEP 2.5: Loading -->
-  <div class="step" id="stepLoading">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Our AI Creative Director is designing<br>3 options for you...</p>
-      <p style="font-size:11px;color:#999;margin-top:12px">This typically takes 15-30 seconds</p>
-    </div>
-  </div>
-
-  <!-- STEP 3: Results + Paywall -->
+  <!-- STEP 3: Review Designs -->
   <div class="step" id="step3">
-    <div style="font-size:14px;font-weight:600;margin-bottom:4px">Your Design Options</div>
-    <div class="paywall-notice">AI-generated previews are free. Vector files and production-ready artwork require purchase or an active project.</div>
+    <button class="btn btn-back" onclick="goStep(2)">Back to Details</button>
 
-    <div id="designResults"></div>
-
-    <div class="lookup-section" id="lookupSection" style="display:none">
-      <h4>Link to Your Project</h4>
-      <div class="lookup-row">
-        <input type="text" id="lookupPO" placeholder="PO Number" style="flex:0 0 100px">
-        <input type="text" id="lookupName" placeholder="Name or email" oninput="doLookup()">
-      </div>
-      <div class="lookup-results" id="lookupResults"></div>
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      <p>Creating your designs...</p>
+      <p style="font-size:10px;color:#aaa;margin-top:4px">This may take 15-30 seconds</p>
     </div>
 
-    <button class="btn btn-gold" id="btnSubmit" style="display:none" onclick="submitToProject()">Submit Design Notes to Project</button>
-    <button class="btn btn-outline" onclick="goStep(2)">Back to Form</button>
-    <button class="btn btn-outline" onclick="requestQuote()" style="margin-top:4px">No Project? Request a Quote Instead</button>
+    <div id="designResults" style="display:none">
+      <p style="font-size:12px;font-weight:600;margin-bottom:8px">Select your favorite design:</p>
+      <div class="designs-grid" id="designsGrid"></div>
+
+      <div class="summary-box" id="designSummary"></div>
+
+      <button class="btn btn-primary" onclick="goStep(4)" id="continueBtn" disabled>Continue with Selected Design</button>
+      <button class="btn btn-back" onclick="regenerate()" style="margin-top:6px">Regenerate Designs</button>
+    </div>
   </div>
 
-  <!-- STEP 4: Success / Quote -->
+  <!-- STEP 4: Get Vector / Submit -->
   <div class="step" id="step4">
-    <div style="text-align:center;padding:30px 10px">
-      <div style="font-size:48px;margin-bottom:12px;color:#4caf50">&#10003;</div>
-      <div style="font-size:16px;font-weight:600;margin-bottom:8px" id="successTitle">Submitted</div>
-      <div style="font-size:13px;color:#666;line-height:1.6" id="successMsg">Your design request has been submitted. Our team will follow up within 24 hours.</div>
-      <div style="margin-top:20px;font-size:12px;color:#999">Questions? Text us at 619-800-0949</div>
-      <button class="btn btn-black" style="margin-top:20px" onclick="resetWidget()">Start New Design</button>
+    <button class="btn btn-back" onclick="goStep(3)">Back to Designs</button>
+
+    <div id="selectedPreview" style="text-align:center;margin-bottom:14px">
+      <img id="finalDesignImg" src="" style="max-width:160px;border-radius:8px;border:2px solid #eee">
+    </div>
+
+    <div style="background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:14px">
+      <p style="font-size:12px;font-weight:700;margin-bottom:6px">Want a production-ready vector file?</p>
+      <p style="font-size:11px;color:#666;margin-bottom:8px">Get a scalable SVG vector file for just $25. Perfect for printing at any size with crisp clean edges.</p>
+      <button class="btn btn-primary" onclick="purchaseVector()" id="vectorBtn">Get Vector File - $25</button>
+    </div>
+
+    <p style="font-size:11px;color:#888;text-align:center;margin-bottom:10px">or</p>
+
+    <button class="btn btn-primary" onclick="submitDesign()" id="submitBtn" style="background:#111;color:#d4a017">Submit Design Request (Free)</button>
+    <p style="font-size:10px;color:#999;text-align:center;margin-top:6px">Our team will review and finalize your design.</p>
+  </div>
+
+  <!-- STEP 5: Confirmation -->
+  <div class="step" id="step5">
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:36px;margin-bottom:10px">&#10003;</div>
+      <h2 style="font-size:16px;font-weight:700;margin-bottom:8px">Design Submitted!</h2>
+      <p style="font-size:12px;color:#666;margin-bottom:16px">Our design team will review your request and get back to you within 1 business day.</p>
+      <div class="summary-box" id="finalSummary"></div>
+      <p style="font-size:11px;color:#888;margin-top:12px">Questions? Call 619-800-0949 or email start@merchysmerch.com</p>
     </div>
   </div>
-</div>
-
-<div class="footer">
-  <div class="footer-text">Merchy's Merch - San Diego, CA - 619-800-0949</div>
 </div>
 
 <script>
-// ---- State ----
-const API = (function() {
-  try { return new URL(window.location.href).origin; } catch(e) { return ''; }
-})();
-let state = { service: null, style: 'badge', file: null, designs: [], linkedProject: null };
+// State
+const API_BASE = window.location.origin;
+let config = null;
+let selectedService = null;
+let selectedCategory = 'all';
+let selectedLocations = {};
+let selectedStyle = 'badge';
+let uploadedFileUrl = null;
+let designs = [];
+let selectedDesignIdx = null;
 
-// ---- Services (loaded from server, fallback hardcoded) ----
-const SERVICES = [
-  {id:'shirt-design',name:'Shirt Design',priceRange:'$25-$200',category:'apparel'},
-  {id:'embroidery-design',name:'Embroidery Design',priceRange:'$25-$100',category:'apparel'},
-  {id:'digitizing',name:'Digitizing',priceRange:'$30',category:'apparel'},
-  {id:'patch-design',name:'Patch Design',priceRange:'$25-$75',category:'apparel'},
-  {id:'promo-item-design',name:'Promotional Item Design',priceRange:'$25-$100',category:'apparel'},
-  {id:'uniform-design',name:'Uniform Program Design',priceRange:'$100-$300',category:'apparel'},
-  {id:'screen-print-seps',name:'Screen Print Separations',priceRange:'$25-$50',category:'apparel'},
-  {id:'banner-design',name:'Banner Design',priceRange:'$25-$100',category:'print_design'},
-  {id:'event-posters',name:'Event Posters',priceRange:'$50-$125',category:'print_design'},
-  {id:'flyer-design',name:'Flyer Design',priceRange:'$25-$125',category:'print_design'},
-  {id:'menus',name:'Menus',priceRange:'$100-$200',category:'print_design'},
-  {id:'signage',name:'Signage',priceRange:'$50-$125',category:'print_design'},
-  {id:'catalog-design',name:'Catalog / Lookbook',priceRange:'$150-$400',category:'print_design'},
-  {id:'certificate-design',name:'Certificate / Award',priceRange:'$25-$75',category:'print_design'},
-  {id:'invitation-design',name:'Invitation / Stationery',priceRange:'$25-$100',category:'print_design'},
-  {id:'logo-design',name:'Logo Design',priceRange:'$50-$100',category:'brand_identity'},
-  {id:'business-cards',name:'Business Cards',priceRange:'$25-$75',category:'brand_identity'},
-  {id:'brand-identity',name:'Brand Identity Package',priceRange:'$200-$500',category:'brand_identity'},
-  {id:'mockups',name:'Mockups',priceRange:'$10 / Free',category:'digital'},
-  {id:'social-media',name:'Social Media Graphics',priceRange:'$25-$250',category:'digital'},
-  {id:'qr-code-design',name:'QR Code Design',priceRange:'$10-$25',category:'digital'},
-  {id:'photo-editing',name:'Photo Editing',priceRange:'$15-$75/hr',category:'digital'},
-  {id:'infographic-design',name:'Infographic Design',priceRange:'$50-$150',category:'digital'},
-  {id:'favicon-design',name:'Favicon / App Icon',priceRange:'$15-$35',category:'digital'},
-  {id:'vectorizing',name:'Vectorizing',priceRange:'$10-$50',category:'specialty'},
-  {id:'vehicle-wraps',name:'Vehicle Wraps',priceRange:'$200-$300',category:'specialty'},
-  {id:'product-labels',name:'Product Labels',priceRange:'$100-$200',category:'specialty'},
-  {id:'packaging-design',name:'Packaging Design',priceRange:'$75-$250',category:'specialty'},
-  {id:'sticker-design',name:'Sticker / Decal Design',priceRange:'$15-$50',category:'specialty'},
-  {id:'illustration',name:'Illustration',priceRange:'$75-$300',category:'specialty'},
-  {id:'lettering-design',name:'Lettering / Typography',priceRange:'$50-$200',category:'specialty'}
+// Styles display names
+const STYLE_NAMES = {
+  vintage: 'Vintage', badge: 'Badge', bold_type: 'Bold Type', illustration: 'Illustration',
+  minimal: 'Minimal', rubber_hose: 'Cartoon', retro_sport: 'Retro Sport', hand_lettered: 'Script'
+};
+
+// Print locations config (used when API config not loaded yet)
+const DEFAULT_LOCATIONS = [
+  { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
+  { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
+  { id: 'left-sleeve', name: 'Left Sleeve' },
+  { id: 'right-sleeve', name: 'Right Sleeve' },
+  { id: 'neck-label', name: 'Neck Label' },
+  { id: 'hat', name: 'Hat' }
 ];
 
-// ---- Render services ----
-function renderServices(filter) {
-  const cats = {apparel:'apparel',print_design:'print_design',brand_identity:'brand_identity',digital:'digital',specialty:'specialty'};
-  Object.keys(cats).forEach(cat => {
-    const grid = document.querySelector(`.svc-grid[data-cat="${cat}"]`);
-    const items = SERVICES.filter(s => s.category === cat && (!filter || s.name.toLowerCase().includes(filter.toLowerCase())));
-    grid.innerHTML = items.map(s => `
-      <div class="svc-card${state.service && state.service.id === s.id ? ' sel' : ''}" onclick="pickService('${s.id}')">
-        <div class="svc-name">${s.name}</div>
-        <div class="svc-price">${s.priceRange}</div>
-      </div>
-    `).join('');
-    // Hide category label if no items
-    grid.previousElementSibling.style.display = items.length ? '' : 'none';
-    grid.style.display = items.length ? '' : 'none';
+// Init
+async function init() {
+  try {
+    const res = await fetch(`${API_BASE}/api/widget-config`);
+    config = await res.json();
+  } catch (e) {
+    console.error('Config load failed:', e);
+    config = { services: [], categories: [], styles: Object.keys(STYLE_NAMES), locations: DEFAULT_LOCATIONS };
+  }
+  renderCategoryTabs();
+  renderServices();
+  renderStylePicker();
+  renderLocationPicker();
+}
+
+// Category tabs
+function renderCategoryTabs() {
+  const tabs = document.getElementById('catTabs');
+  const cats = config.categories || [];
+  let html = '<div class="cat-tab active" onclick="selectCategory(\'all\')">All</div>';
+  cats.forEach(c => {
+    html += `<div class="cat-tab" onclick="selectCategory('${c.id}')">${c.name}</div>`;
   });
+  tabs.innerHTML = html;
 }
 
-function filterServices() {
-  renderServices(document.getElementById('searchServices').value);
+function selectCategory(catId) {
+  selectedCategory = catId;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderServices();
 }
 
-function pickService(id) {
-  state.service = SERVICES.find(s => s.id === id);
-  renderServices(document.getElementById('searchServices').value);
-  document.getElementById('btnStep1').disabled = false;
-  document.getElementById('btnStep1').textContent = 'Continue with ' + state.service.name;
+// Services grid
+function renderServices() {
+  const grid = document.getElementById('serviceGrid');
+  const noRes = document.getElementById('noResults');
+  const search = (document.getElementById('searchBar').value || '').toLowerCase();
+  let services = config?.services || [];
+
+  if (selectedCategory !== 'all') {
+    services = services.filter(s => s.category === selectedCategory);
+  }
+  if (search) {
+    services = services.filter(s => s.name.toLowerCase().includes(search) || s.desc.toLowerCase().includes(search));
+  }
+
+  if (services.length === 0) {
+    grid.innerHTML = '';
+    noRes.style.display = 'block';
+    return;
+  }
+  noRes.style.display = 'none';
+
+  grid.innerHTML = services.map(s => `
+    <div class="svc-card ${selectedService?.id === s.id ? 'selected' : ''}" onclick="selectService('${s.id}')">
+      <div class="name">${s.name}</div>
+      <div class="price">${s.priceRange}</div>
+      <div class="desc">${s.desc}</div>
+    </div>
+  `).join('');
 }
 
-// ---- Style picker ----
-function pickStyle(el) {
-  document.querySelectorAll('.style-tile').forEach(t => t.classList.remove('sel'));
-  el.classList.add('sel');
-  state.style = el.dataset.style;
-}
+function filterServices() { renderServices(); }
 
-// ---- File upload ----
-function handleFile(input) {
-  if (input.files[0]) {
-    state.file = input.files[0];
-    document.getElementById('uploadZone').textContent = state.file.name;
-    document.getElementById('uploadZone').classList.add('has-file');
+function selectService(id) {
+  selectedService = (config?.services || []).find(s => s.id === id);
+  renderServices();
+  if (selectedService) {
+    setTimeout(() => goStep(2), 200);
   }
 }
 
-// ---- Form validation ----
-function checkForm() {
-  const b = document.getElementById('fBusiness').value.trim();
-  const t = document.getElementById('fText').value.trim();
-  const d = document.getElementById('fDesc').value.trim();
-  document.getElementById('btnGenerate').disabled = !(b && t && d);
+// Location picker
+function renderLocationPicker() {
+  const locs = config?.locations || DEFAULT_LOCATIONS;
+  const grid = document.getElementById('locGrid');
+  const details = document.getElementById('locDetails');
+
+  grid.innerHTML = locs.map(l =>
+    `<div class="loc-btn" id="loc-${l.id}" onclick="toggleLocation('${l.id}')">${l.name}</div>`
+  ).join('');
 }
 
-// ---- Navigation ----
+function toggleLocation(locId) {
+  const btn = document.getElementById(`loc-${locId}`);
+  if (selectedLocations[locId]) {
+    delete selectedLocations[locId];
+    btn.classList.remove('active');
+  } else {
+    selectedLocations[locId] = { instructions: '', position: '' };
+    btn.classList.add('active');
+  }
+  renderLocationDetails();
+}
+
+function renderLocationDetails() {
+  const locs = config?.locations || DEFAULT_LOCATIONS;
+  const container = document.getElementById('locDetails');
+  let html = '';
+
+  Object.keys(selectedLocations).forEach(locId => {
+    const loc = locs.find(l => l.id === locId);
+    if (!loc) return;
+    const hasPositions = loc.positions && loc.positions.length > 0;
+    html += `<div class="loc-detail visible">
+      <h4>${loc.name}</h4>
+      ${hasPositions ? `<select onchange="selectedLocations['${locId}'].position=this.value">
+        <option value="">Select position...</option>
+        ${loc.positions.map(p => `<option value="${p}">${p}</option>`).join('')}
+      </select>` : ''}
+      <textarea placeholder="Instructions for ${loc.name} (e.g. logo centered, 4 inches wide)" oninput="selectedLocations['${locId}'].instructions=this.value"></textarea>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// Style picker
+function renderStylePicker() {
+  const grid = document.getElementById('styleGrid');
+  const styles = config?.styles || Object.keys(STYLE_NAMES);
+  grid.innerHTML = styles.map(s =>
+    `<div class="style-chip ${s === selectedStyle ? 'active' : ''}" onclick="selectStyle('${s}')">${STYLE_NAMES[s] || s}</div>`
+  ).join('');
+}
+
+function selectStyle(s) {
+  selectedStyle = s;
+  renderStylePicker();
+}
+
+// Upload
+function handleUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const area = document.getElementById('uploadArea');
+
+  // Upload to backend
+  const fd = new FormData();
+  fd.append('files', file);
+  fetch(`${API_BASE}/api/upload`, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.files && data.files.length > 0) {
+        uploadedFileUrl = data.files[0].url;
+      }
+    })
+    .catch(console.error);
+
+  // Preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    area.innerHTML = `<img class="upload-preview" src="${e.target.result}"><p style="font-size:10px;color:#888">${file.name}</p>`;
+    area.classList.add('has-file');
+  };
+  reader.readAsDataURL(file);
+}
+
+// Navigation
 function goStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById(n === 2.5 ? 'stepLoading' : 'step' + n).classList.add('active');
-  document.getElementById('stepLabel').textContent = n > 3 ? 'Done' : 'Step ' + Math.min(Math.ceil(n), 3) + ' of 3';
-  if (n === 2) {
-    document.getElementById('selectedServiceLabel').textContent = state.service ? state.service.name + ' (' + state.service.priceRange + ')' : '';
-    checkForm();
+  document.getElementById(`step${n}`).classList.add('active');
+
+  const labels = ['Choose Service', 'Design Details', 'Review Designs', 'Get Your File', 'Confirmation'];
+  document.getElementById('stepLabel').textContent = `Step ${n} of 4 - ${labels[n-1] || ''}`;
+
+  if (n === 2 && selectedService) {
+    document.getElementById('selSvcName').textContent = selectedService.name;
+    document.getElementById('selSvcDesc').textContent = selectedService.desc;
+    // Show location picker for apparel decoration services
+    const showLoc = selectedService.category === 'apparel_decoration';
+    document.getElementById('locationSection').style.display = showLoc ? 'block' : 'none';
   }
+
+  document.querySelector('.content').scrollTop = 0;
 }
 
-// ---- Generate designs ----
+// Generate designs via backend
 async function generateDesigns() {
-  goStep(2.5);
+  const name = document.getElementById('userName').value.trim();
+  const email = document.getElementById('userEmail').value.trim();
+  if (!name || !email) {
+    alert('Please enter your name and email.');
+    return;
+  }
+
+  goStep(3);
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('designResults').style.display = 'none';
+
   const formData = {
-    name: document.getElementById('fBusiness').value,
-    business: document.getElementById('fBusiness').value,
-    text: document.getElementById('fText').value,
-    desc: document.getElementById('fDesc').value,
-    style: state.style,
-    serviceType: state.service ? state.service.id : 'general',
-    decoration: state.service ? state.service.category : 'general'
+    name: name,
+    email: email,
+    business: document.getElementById('userBusiness').value.trim(),
+    text: document.getElementById('designText').value.trim(),
+    desc: document.getElementById('designDesc').value.trim(),
+    service: selectedService?.id || '',
+    decoration: selectedService?.name || '',
+    style: selectedStyle,
+    locations: selectedLocations,
+    referenceImage: uploadedFileUrl
   };
 
   try {
-    const resp = await fetch(API + '/api/generate', {
+    const res = await fetch(`${API_BASE}/api/generate`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
-    const data = await resp.json();
-    if (data.designs && data.designs.length) {
-      state.designs = data.designs;
-    } else {
-      // Fallback placeholders
-      state.designs = [
-        {url: null, variation: 0, label: 'Option A'},
-        {url: null, variation: 1, label: 'Option B'},
-        {url: null, variation: 2, label: 'Option C'}
-      ];
-    }
-  } catch(e) {
-    state.designs = [
-      {url: null, variation: 0, label: 'Option A'},
-      {url: null, variation: 1, label: 'Option B'},
-      {url: null, variation: 2, label: 'Option C'}
-    ];
+    const data = await res.json();
+    designs = data.designs || [];
+    showDesignResults();
+  } catch (err) {
+    console.error('Generate error:', err);
+    document.getElementById('loadingState').innerHTML = `
+      <p style="color:#c00;font-size:12px">Something went wrong. Please try again.</p>
+      <button class="btn btn-back" onclick="goStep(2)" style="margin-top:10px">Go Back</button>
+    `;
   }
-  renderResults();
-  goStep(3);
 }
 
-// ---- Render results ----
-function renderResults() {
-  const container = document.getElementById('designResults');
-  container.innerHTML = state.designs.map((d, i) => {
-    const label = d.label || ('Option ' + String.fromCharCode(65 + i));
-    const hasImg = d.url && !d.error;
-    return `
-      <div class="design-option" onclick="selectDesign(${i})" id="opt${i}">
-        <div class="design-preview">
-          ${hasImg ? `<img src="${d.url}" alt="${label}">` : `<div style="font-size:14px;color:#999">${label} - Preview</div>`}
-          <div class="watermark"></div>
-        </div>
-        <div class="design-actions">
-          <button class="btn btn-gold" style="flex:1" onclick="event.stopPropagation();buyVector(${i})">Get Vector - $10</button>
-          <button class="btn btn-black" style="flex:1" onclick="event.stopPropagation();addToProject(${i})">Add to Project</button>
-        </div>
-      </div>
-    `;
+function showDesignResults() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('designResults').style.display = 'block';
+  selectedDesignIdx = null;
+
+  const grid = document.getElementById('designsGrid');
+  grid.innerHTML = designs.map((d, i) => {
+    if (d.error) {
+      return `<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8">
+        <span style="font-size:10px;color:#888;padding:8px;text-align:center">Generation failed</span>
+      </div>`;
+    }
+    const imgSrc = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl || '');
+    return `<div class="design-card" onclick="selectDesign(${i})" id="dcard-${i}">
+      <img src="${imgSrc}" alt="Design ${i+1}">
+      <div class="watermark">PREVIEW</div>
+    </div>`;
   }).join('');
+
+  document.getElementById('continueBtn').disabled = true;
 }
 
 function selectDesign(idx) {
-  document.querySelectorAll('.design-option').forEach((el,i) => el.classList.toggle('sel', i === idx));
-  state.selectedDesign = idx;
+  if (designs[idx]?.error) return;
+  selectedDesignIdx = idx;
+  document.querySelectorAll('.design-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('continueBtn').disabled = false;
+
+  // Update summary
+  const d = designs[idx];
+  const locSummary = Object.keys(selectedLocations).length > 0
+    ? Object.keys(selectedLocations).map(k => {
+        const loc = (config?.locations || DEFAULT_LOCATIONS).find(l => l.id === k);
+        return loc?.name || k;
+      }).join(', ')
+    : 'N/A';
+
+  document.getElementById('designSummary').innerHTML = `
+    <h3>Design Summary</h3>
+    <div class="summary-row"><span class="label">Service</span><span class="val">${selectedService?.name || '-'}</span></div>
+    <div class="summary-row"><span class="label">Style</span><span class="val">${STYLE_NAMES[selectedStyle] || selectedStyle}</span></div>
+    <div class="summary-row"><span class="label">Locations</span><span class="val">${locSummary}</span></div>
+    <div class="summary-row"><span class="label">Variation</span><span class="val">${idx + 1} of ${designs.length}</span></div>
+  `;
 }
 
-// ---- Buy vector (Stripe checkout) ----
-async function buyVector(idx) {
-  const design = state.designs[idx];
+function regenerate() {
+  generateDesigns();
+}
+
+// Step 4 - Show selected design
+function goToStep4() {
+  if (selectedDesignIdx === null) return;
+  const d = designs[selectedDesignIdx];
+  const imgSrc = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl || '');
+  document.getElementById('finalDesignImg').src = imgSrc;
+}
+
+// Override goStep for step 4
+const _origGoStep = goStep;
+goStep = function(n) {
+  _origGoStep(n);
+  if (n === 4) goToStep4();
+};
+
+// Purchase vector via Stripe
+async function purchaseVector() {
+  const btn = document.getElementById('vectorBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  const d = designs[selectedDesignIdx];
+  const designUrl = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl || '');
+
   try {
-    const resp = await fetch(API + '/api/create-checkout', {
+    const res = await fetch(`${API_BASE}/api/create-checkout`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ tier: 'basic', designUrl: design.url || '', email: '' })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tier: 'detailed',
+        designUrl: designUrl,
+        email: document.getElementById('userEmail').value.trim()
+      })
     });
-    const data = await resp.json();
+    const data = await res.json();
     if (data.url) {
       window.open(data.url, '_blank');
     } else {
-      alert('Payment not configured yet. Contact us at 619-800-0949 to purchase vector files.');
+      alert(data.error || 'Checkout failed. Call 619-800-0949 for help.');
     }
-  } catch(e) {
-    alert('Contact us at 619-800-0949 to purchase vector files.');
+  } catch (err) {
+    alert('Payment error. Please call 619-800-0949.');
   }
+
+  btn.disabled = false;
+  btn.textContent = 'Get Vector File - $25';
 }
 
-// ---- Add to project (show lookup) ----
-function addToProject(idx) {
-  state.selectedDesign = idx;
-  document.getElementById('lookupSection').style.display = 'block';
-  document.getElementById('btnSubmit').style.display = 'block';
-  document.getElementById('lookupPO').focus();
-}
+// Submit design request
+async function submitDesign() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
 
-// ---- Smart lookup ----
-let lookupTimer = null;
-function doLookup() {
-  clearTimeout(lookupTimer);
-  lookupTimer = setTimeout(async () => {
-    const po = document.getElementById('lookupPO').value.trim();
-    const name = document.getElementById('lookupName').value.trim();
-    const query = po || name;
-    if (!query || query.length < 2) { document.getElementById('lookupResults').innerHTML = ''; return; }
-
-    try {
-      const type = po ? 'po' : 'client';
-      const resp = await fetch(API + '/api/projects/search?query=' + encodeURIComponent(query) + '&type=' + type);
-      const data = await resp.json();
-      const results = data.projects || [];
-      document.getElementById('lookupResults').innerHTML = results.length
-        ? results.map(p => `<div class="lookup-item" onclick="linkProject('${p.gid}','${p.name.replace(/'/g,"\\\'")}')">${p.name}</div>`).join('')
-        : '<div style="font-size:11px;color:#999;padding:8px">No projects found</div>';
-    } catch(e) {
-      document.getElementById('lookupResults').innerHTML = '<div style="font-size:11px;color:#c00;padding:8px">Search unavailable</div>';
-    }
-  }, 400);
-}
-
-function linkProject(gid, name) {
-  state.linkedProject = { gid, name };
-  document.getElementById('lookupResults').innerHTML = '<div style="font-size:12px;color:#4caf50;padding:8px;font-weight:600">Linked: ' + name + '</div>';
-  document.getElementById('btnSubmit').textContent = 'Submit Design Notes to ' + name.substring(0, 30);
-}
-
-// ---- Submit to Asana project ----
-async function submitToProject() {
+  const d = designs[selectedDesignIdx] || {};
   const formData = {
-    name: document.getElementById('fBusiness').value,
-    business: document.getElementById('fBusiness').value,
-    text: document.getElementById('fText').value,
-    desc: document.getElementById('fDesc').value,
-    style: state.style,
-    serviceType: state.service ? state.service.id : '',
-    decoration: state.service ? state.service.category : '',
-    selectedOption: state.selectedDesign != null ? 'Option ' + String.fromCharCode(65 + state.selectedDesign) : '',
-    projectGid: state.linkedProject ? state.linkedProject.gid : '',
-    poNumber: document.getElementById('lookupPO').value.trim()
+    name: document.getElementById('userName').value.trim(),
+    email: document.getElementById('userEmail').value.trim(),
+    business: document.getElementById('userBusiness').value.trim(),
+    text: document.getElementById('designText').value.trim(),
+    desc: document.getElementById('designDesc').value.trim(),
+    service: selectedService?.id || '',
+    serviceName: selectedService?.name || '',
+    style: selectedStyle,
+    locations: selectedLocations,
+    designUrl: d.url || d.remoteUrl || '',
+    designVariation: selectedDesignIdx
   };
 
   try {
-    const resp = await fetch(API + '/api/submit', {
+    const res = await fetch(`${API_BASE}/api/submit`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
-    const data = await resp.json();
-    document.getElementById('successTitle').textContent = 'Design Notes Submitted';
-    document.getElementById('successMsg').textContent = state.linkedProject
-      ? 'Your design notes have been posted to ' + state.linkedProject.name + '. Our team will review and follow up.'
-      : 'Your design request has been created. Our team will follow up within 24 hours.';
-    goStep(4);
-  } catch(e) {
-    alert('Submission failed. Please contact us at 619-800-0949.');
+    const data = await res.json();
+
+    // Show confirmation
+    document.getElementById('finalSummary').innerHTML = `
+      <h3>Your Request</h3>
+      <div class="summary-row"><span class="label">Name</span><span class="val">${formData.name}</span></div>
+      <div class="summary-row"><span class="label">Service</span><span class="val">${formData.serviceName}</span></div>
+      <div class="summary-row"><span class="label">Style</span><span class="val">${STYLE_NAMES[selectedStyle] || selectedStyle}</span></div>
+    `;
+    goStep(5);
+  } catch (err) {
+    alert('Submission error. Please try again or call 619-800-0949.');
+    btn.disabled = false;
+    btn.textContent = 'Submit Design Request (Free)';
   }
 }
 
-// ---- Request quote (no project) ----
-async function requestQuote() {
-  const formData = {
-    name: document.getElementById('fBusiness').value,
-    business: document.getElementById('fBusiness').value,
-    text: document.getElementById('fText').value,
-    desc: document.getElementById('fDesc').value,
-    style: state.style,
-    serviceType: state.service ? state.service.id : '',
-    selectedOption: state.selectedDesign != null ? 'Option ' + String.fromCharCode(65 + state.selectedDesign) : ''
-  };
-
-  try {
-    await fetch(API + '/api/submit', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(formData)
-    });
-  } catch(e) {}
-
-  document.getElementById('successTitle').textContent = 'Quote Requested';
-  document.getElementById('successMsg').textContent = 'We have your design details. Our team will reach out with a quote within 24 hours. Text us at 619-800-0949 if you need it sooner.';
-  goStep(4);
-}
-
-// ---- Reset ----
-function resetWidget() {
-  state = { service: null, style: 'badge', file: null, designs: [], linkedProject: null };
-  document.getElementById('fBusiness').value = '';
-  document.getElementById('fText').value = '';
-  document.getElementById('fDesc').value = '';
-  document.getElementById('searchServices').value = '';
-  document.getElementById('uploadZone').textContent = 'Drop reference image here or click to upload';
-  document.getElementById('uploadZone').classList.remove('has-file');
-  document.getElementById('btnStep1').disabled = true;
-  document.getElementById('btnStep1').textContent = 'Select a Service to Continue';
-  document.getElementById('lookupSection').style.display = 'none';
-  document.getElementById('btnSubmit').style.display = 'none';
-  document.querySelectorAll('.style-tile').forEach(t => t.classList.remove('sel'));
-  document.querySelector('.style-tile[data-style="badge"]').classList.add('sel');
-  renderServices();
-  goStep(1);
-}
-
-// ---- Init ----
-renderServices();
+// Start
+init();
 </script>
 </body>
 </html>
