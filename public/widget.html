@@ -3,115 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Merchy's AI Design Studio</title>
+<title>Merchy's Design Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:#fff;color:#111;overflow-x:hidden}
-.header{background:#111;color:#d4a017;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;position:sticky;top:0;z-index:100}
-.header h1{font-size:14px;font-weight:700;letter-spacing:1px}
-.header .steps{font-size:11px;color:#888}
-.close-btn{background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px}
+
+/* Header */
+.header{background:#111;color:#d4a017;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;position:sticky;top:0;z-index:100}
+.header h1{font-size:13px;font-weight:700;letter-spacing:1px}
+.header .steps{font-size:10px;color:#888;margin-top:2px}
+.close-btn{background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:4px}
 .close-btn:hover{color:#fff}
-.content{padding:16px;overflow-y:auto;height:calc(100vh - 56px)}
+
+/* Content */
+.content{padding:14px;overflow-y:auto;height:calc(100vh - 52px)}
 .step{display:none}
 .step.active{display:block;animation:fadeUp .2s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-/* Category Tabs */
-.cat-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
+/* Category Tabs - compact */
+.cat-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:10px;margin-bottom:8px;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
 .cat-tabs::-webkit-scrollbar{height:0}
-.cat-tab{padding:7px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;border:2px solid #eee;background:#fff;transition:all .2s;flex-shrink:0}
+.cat-tab{padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid #e5e5e5;background:#fff;transition:all .15s;flex-shrink:0}
 .cat-tab:hover{border-color:#d4a017}
 .cat-tab.active{background:#111;color:#d4a017;border-color:#111}
 
 /* Search */
-.search-bar{width:100%;padding:9px 12px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:12px;margin-bottom:10px;outline:none;transition:border .2s}
+.search-bar{width:100%;padding:7px 10px;border:1.5px solid #e5e5e5;border-radius:6px;font-family:inherit;font-size:11px;margin-bottom:8px;outline:none;transition:border .15s}
 .search-bar:focus{border-color:#d4a017}
 
-/* Service cards */
-.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.svc-card{padding:8px;border:2px solid #eee;border-radius:8px;cursor:pointer;transition:all .15s;text-align:center}
-.svc-card:hover{border-color:#d4a017;background:#fffdf5}
-.svc-card.selected{border-color:#d4a017;background:#111;color:#d4a017}
-.svc-card .name{font-size:12px;font-weight:600}
-.svc-card .price{font-size:10px;color:#888;margin-top:2px}
-.svc-card.selected .price{color:#999}
-.svc-card .desc{font-size:9px;color:#999;margin-top:3px;line-height:1.3}
-.svc-card.selected .desc{color:#888}
-.no-results{text-align:center;color:#888;font-size:12px;padding:20px 0}
+/* Service list - compact rows instead of grid cards */
+.svc-list{margin-bottom:8px}
+.svc-row{display:flex;align-items:center;padding:7px 10px;border:1.5px solid #eee;border-radius:6px;cursor:pointer;transition:all .12s;margin-bottom:4px;gap:8px}
+.svc-row:hover{border-color:#d4a017;background:#fffdf5}
+.svc-row.selected{border-color:#d4a017;background:#111;color:#d4a017}
+.svc-row .svc-name{font-size:11px;font-weight:600;flex:1}
+.svc-row .svc-desc{font-size:9px;color:#999;flex:2;line-height:1.3}
+.svc-row.selected .svc-desc{color:#888}
+.svc-row .svc-arrow{font-size:14px;color:#ccc;flex-shrink:0}
+.svc-row.selected .svc-arrow{color:#d4a017}
+.no-results{text-align:center;color:#888;font-size:11px;padding:16px 0}
 
-/* Form fields */
-label{display:block;font-size:11px;font-weight:600;margin-bottom:4px;color:#333;text-transform:uppercase;letter-spacing:.5px}
-input[type="text"],input[type="email"],textarea,select{width:100%;padding:9px 12px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:12px;outline:none;transition:border .2s;margin-bottom:12px}
+/* Form layout - side by side */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row.full{grid-template-columns:1fr}
+label{display:block;font-size:10px;font-weight:600;margin-bottom:3px;color:#555;text-transform:uppercase;letter-spacing:.4px}
+input[type="text"],input[type="email"],textarea,select{width:100%;padding:7px 10px;border:1.5px solid #e5e5e5;border-radius:6px;font-family:inherit;font-size:11px;outline:none;transition:border .15s;margin-bottom:10px}
 input:focus,textarea:focus,select:focus{border-color:#d4a017}
-textarea{resize:vertical;min-height:60px}
+textarea{resize:vertical;min-height:50px}
 
 /* Multi-location picker */
-.loc-section{margin-bottom:14px}
-.loc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
-.loc-btn{padding:8px 4px;border:2px solid #eee;border-radius:8px;cursor:pointer;text-align:center;font-size:11px;font-weight:600;transition:all .15s;background:#fff}
+.loc-section{margin-bottom:10px}
+.loc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px}
+.loc-btn{padding:6px 4px;border:1.5px solid #eee;border-radius:6px;cursor:pointer;text-align:center;font-size:10px;font-weight:600;transition:all .12s;background:#fff}
 .loc-btn:hover{border-color:#d4a017}
 .loc-btn.active{background:#111;color:#d4a017;border-color:#111}
-.loc-detail{background:#f8f8f8;border-radius:8px;padding:10px;margin-bottom:8px;display:none;animation:fadeUp .2s ease}
+.loc-detail{background:#f8f8f8;border-radius:6px;padding:8px;margin-bottom:6px;display:none;animation:fadeUp .15s ease}
 .loc-detail.visible{display:block}
-.loc-detail h4{font-size:11px;font-weight:700;margin-bottom:6px;color:#111}
-.loc-detail textarea{min-height:50px;margin-bottom:6px}
-.loc-detail select{margin-bottom:0}
+.loc-detail h4{font-size:10px;font-weight:700;margin-bottom:4px;color:#111}
+.loc-detail textarea{min-height:40px;margin-bottom:4px}
 
-/* Upload area */
-.upload-area{border:2px dashed #ddd;border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}
+/* Upload area - compact */
+.upload-area{border:1.5px dashed #ddd;border-radius:6px;padding:10px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px;display:flex;align-items:center;gap:8px;justify-content:center}
 .upload-area:hover{border-color:#d4a017;background:#fffdf5}
 .upload-area.has-file{border-color:#d4a017;background:#f0f7e6}
-.upload-area p{font-size:11px;color:#888}
-.upload-area .icon{font-size:20px;margin-bottom:4px}
-.upload-preview{max-width:80px;max-height:60px;margin:6px auto;display:block;border-radius:4px}
+.upload-area p{font-size:10px;color:#888}
+.upload-preview{max-width:40px;max-height:32px;border-radius:3px}
 
-/* Style picker */
-.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-.style-chip{padding:6px 4px;border:2px solid #eee;border-radius:8px;cursor:pointer;text-align:center;font-size:10px;font-weight:600;transition:all .15s}
-.style-chip:hover{border-color:#d4a017}
-.style-chip.active{background:#111;color:#d4a017;border-color:#111}
+/* Style picker - 20 styles with icons, multi-select up to 3 */
+.style-section{margin-bottom:12px}
+.style-counter{font-size:9px;color:#888;margin-bottom:6px;text-align:right}
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.style-card{padding:6px 4px;border:1.5px solid #eee;border-radius:6px;cursor:pointer;text-align:center;transition:all .12s;background:#fff}
+.style-card:hover{border-color:#d4a017;background:#fffdf5}
+.style-card.active{background:#111;color:#d4a017;border-color:#111}
+.style-card.disabled{opacity:.35;cursor:not-allowed}
+.style-card .s-icon{width:24px;height:24px;margin:0 auto 3px;display:flex;align-items:center;justify-content:center}
+.style-card .s-icon svg{width:18px;height:18px}
+.style-card.active .s-icon svg{stroke:#d4a017}
+.style-card .s-name{font-size:8px;font-weight:600;line-height:1.2}
+.style-card .s-desc{font-size:7px;color:#aaa;line-height:1.2;margin-top:1px}
+.style-card.active .s-desc{color:#888}
 
 /* Buttons */
-.btn{width:100%;padding:12px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.5px}
+.btn{width:100%;padding:10px;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;letter-spacing:.5px}
 .btn-primary{background:#d4a017;color:#111}
 .btn-primary:hover{background:#e8b420}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-back{background:none;border:2px solid #eee;color:#555;margin-bottom:8px}
+.btn-back{background:none;border:1.5px solid #eee;color:#555;margin-bottom:6px;font-size:11px;padding:8px}
 .btn-back:hover{border-color:#111;color:#111}
 
 /* Design results */
-.designs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
-.design-card{border:2px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
+.designs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.design-card{border:1.5px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;transition:all .12s;position:relative}
 .design-card:hover{border-color:#d4a017}
 .design-card.selected{border-color:#d4a017;box-shadow:0 0 0 2px #d4a017}
 .design-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.design-card .watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:rgba(0,0,0,.15);pointer-events:none;transform:rotate(-30deg);letter-spacing:2px}
+.design-card .watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(0,0,0,.12);pointer-events:none;transform:rotate(-30deg);letter-spacing:2px}
 
 /* Loading */
-.loading{text-align:center;padding:30px}
-.spinner{width:32px;height:32px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+.loading{text-align:center;padding:24px}
+.spinner{width:28px;height:28px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading p{font-size:12px;color:#888}
+.loading p{font-size:11px;color:#888}
 
 /* Summary */
-.summary-box{background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:12px}
-.summary-box h3{font-size:12px;font-weight:700;margin-bottom:8px}
-.summary-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.summary-box{background:#f8f8f8;border-radius:6px;padding:10px;margin-bottom:10px}
+.summary-box h3{font-size:11px;font-weight:700;margin-bottom:6px}
+.summary-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px}
 .summary-row .label{color:#888}
 .summary-row .val{font-weight:600}
 
-/* Footer */
-.footer{padding:12px 16px;background:#fafafa;border-top:1px solid #eee;position:sticky;bottom:0}
-.footer .powered{text-align:center;font-size:9px;color:#bbb;margin-top:6px}
+/* Selected service pill */
+.sel-pill{display:inline-flex;align-items:center;gap:6px;background:#f8f8f8;border-radius:6px;padding:6px 10px;margin-bottom:12px;font-size:11px;font-weight:600}
+.sel-pill .dot{width:8px;height:8px;border-radius:50%;background:#d4a017}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div>
-    <h1>AI DESIGN STUDIO</h1>
+    <h1>DESIGN STUDIO</h1>
     <div class="steps" id="stepLabel">Step 1 of 4 - Choose Service</div>
   </div>
   <button class="close-btn" onclick="window.parent?.postMessage({type:'close-widget'},'*')">&times;</button>
@@ -123,51 +137,48 @@ textarea{resize:vertical;min-height:60px}
   <div class="step active" id="step1">
     <div class="cat-tabs" id="catTabs"></div>
     <input type="text" class="search-bar" placeholder="Search services..." id="searchBar" oninput="filterServices()">
-    <div id="serviceGrid" class="svc-grid"></div>
-    <div id="noResults" class="no-results" style="display:none">No services match your search.</div>
+    <div id="serviceList" class="svc-list"></div>
+    <div id="noResults" class="no-results" style="display:none">No services found.</div>
   </div>
 
   <!-- STEP 2: Design Details -->
   <div class="step" id="step2">
     <button class="btn btn-back" onclick="goStep(1)">Back</button>
-    <div id="selectedServiceInfo" style="background:#f8f8f8;border-radius:8px;padding:10px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700" id="selSvcName"></div>
-      <div style="font-size:10px;color:#888" id="selSvcDesc"></div>
+    <div class="sel-pill" id="selPill"><span class="dot"></span><span id="selSvcName"></span></div>
+
+    <div class="form-row">
+      <div><label>Name</label><input type="text" id="userName" placeholder="John Smith"></div>
+      <div><label>Email</label><input type="email" id="userEmail" placeholder="john@company.com"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Business / Brand</label><input type="text" id="userBusiness" placeholder="Your Company Name"></div>
+      <div><label>Text for Design</label><input type="text" id="designText" placeholder="Brand Name, Est. 2024"></div>
+    </div>
+    <div class="form-row full">
+      <div><label>Describe What You Want</label><textarea id="designDesc" placeholder="A bold logo with a mountain icon for an outdoor company"></textarea></div>
     </div>
 
-    <label>Your Name</label>
-    <input type="text" id="userName" placeholder="e.g. John Smith">
-
-    <label>Email</label>
-    <input type="email" id="userEmail" placeholder="e.g. john@company.com">
-
-    <label>Business / Brand Name (optional)</label>
-    <input type="text" id="userBusiness" placeholder="e.g. Your Company Name">
-
-    <label>Text for Your Design</label>
-    <textarea id="designText" placeholder="e.g. Your Brand Name, Est. 2024, Your Tagline Here"></textarea>
-
-    <label>Describe What You Want</label>
-    <textarea id="designDesc" placeholder="e.g. A bold logo with a mountain icon for an outdoor adventure company"></textarea>
-
-    <!-- Print Location Picker (shown for apparel_decoration) -->
+    <!-- Print Location Picker (apparel only) -->
     <div class="loc-section" id="locationSection" style="display:none">
       <label>Print Locations (select all that apply)</label>
       <div class="loc-grid" id="locGrid"></div>
       <div id="locDetails"></div>
     </div>
 
-    <!-- Reference Upload -->
+    <!-- Upload -->
     <label>Reference Image (optional)</label>
     <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-      <div class="icon">+</div>
-      <p>Click to upload a reference image</p>
+      <span style="font-size:16px;color:#ccc">+</span>
+      <p>Upload a reference</p>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleUpload(this)">
 
-    <!-- Style Picker -->
-    <label>Design Style</label>
-    <div class="style-grid" id="styleGrid"></div>
+    <!-- Style Picker - up to 3 -->
+    <div class="style-section">
+      <label>Design Style <span style="font-weight:400;color:#aaa">(pick up to 3)</span></label>
+      <div class="style-counter" id="styleCounter">0 of 3 selected</div>
+      <div class="style-grid" id="styleGrid"></div>
+    </div>
 
     <button class="btn btn-primary" onclick="generateDesigns()" id="generateBtn">Generate 3 AI Designs</button>
   </div>
@@ -175,75 +186,59 @@ textarea{resize:vertical;min-height:60px}
   <!-- STEP 3: Review Designs -->
   <div class="step" id="step3">
     <button class="btn btn-back" onclick="goStep(2)">Back to Details</button>
-
     <div class="loading" id="loadingState">
       <div class="spinner"></div>
       <p>Creating your designs...</p>
-      <p style="font-size:10px;color:#aaa;margin-top:4px">This may take 15-30 seconds</p>
+      <p style="font-size:9px;color:#aaa;margin-top:3px">This may take 15-30 seconds</p>
     </div>
-
     <div id="designResults" style="display:none">
-      <p style="font-size:12px;font-weight:600;margin-bottom:8px">Select your favorite design:</p>
+      <p style="font-size:11px;font-weight:600;margin-bottom:6px">Select your favorite:</p>
       <div class="designs-grid" id="designsGrid"></div>
-
       <div class="summary-box" id="designSummary"></div>
-
       <button class="btn btn-primary" onclick="goStep(4)" id="continueBtn" disabled>Continue with Selected Design</button>
-      <button class="btn btn-back" onclick="regenerate()" style="margin-top:6px">Regenerate Designs</button>
+      <button class="btn btn-back" onclick="regenerate()" style="margin-top:4px">Regenerate</button>
     </div>
   </div>
 
   <!-- STEP 4: Get Vector / Submit -->
   <div class="step" id="step4">
-    <button class="btn btn-back" onclick="goStep(3)">Back to Designs</button>
-
-    <div id="selectedPreview" style="text-align:center;margin-bottom:14px">
-      <img id="finalDesignImg" src="" style="max-width:160px;border-radius:8px;border:2px solid #eee">
+    <button class="btn btn-back" onclick="goStep(3)">Back</button>
+    <div id="selectedPreview" style="text-align:center;margin-bottom:12px">
+      <img id="finalDesignImg" src="" style="max-width:140px;border-radius:6px;border:1.5px solid #eee">
     </div>
-
-    <div style="background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:14px">
-      <p style="font-size:12px;font-weight:700;margin-bottom:6px">Want a production-ready vector file?</p>
-      <p style="font-size:11px;color:#666;margin-bottom:8px">Get a scalable SVG vector file for just $25. Perfect for printing at any size with crisp clean edges.</p>
+    <div style="background:#f8f8f8;border-radius:6px;padding:10px;margin-bottom:12px">
+      <p style="font-size:11px;font-weight:700;margin-bottom:4px">Want a production-ready vector file?</p>
+      <p style="font-size:10px;color:#666;margin-bottom:6px">Scalable SVG vector for crisp printing at any size. $25 one-time.</p>
       <button class="btn btn-primary" onclick="purchaseVector()" id="vectorBtn">Get Vector File - $25</button>
     </div>
-
-    <p style="font-size:11px;color:#888;text-align:center;margin-bottom:10px">or</p>
-
+    <p style="font-size:10px;color:#888;text-align:center;margin-bottom:8px">or</p>
     <button class="btn btn-primary" onclick="submitDesign()" id="submitBtn" style="background:#111;color:#d4a017">Submit Design Request (Free)</button>
-    <p style="font-size:10px;color:#999;text-align:center;margin-top:6px">Our team will review and finalize your design.</p>
+    <p style="font-size:9px;color:#999;text-align:center;margin-top:4px">Our team will review and finalize your design.</p>
   </div>
 
   <!-- STEP 5: Confirmation -->
   <div class="step" id="step5">
-    <div style="text-align:center;padding:20px 0">
-      <div style="font-size:36px;margin-bottom:10px">&#10003;</div>
-      <h2 style="font-size:16px;font-weight:700;margin-bottom:8px">Design Submitted!</h2>
-      <p style="font-size:12px;color:#666;margin-bottom:16px">Our design team will review your request and get back to you within 1 business day.</p>
+    <div style="text-align:center;padding:16px 0">
+      <div style="font-size:32px;margin-bottom:8px;color:#d4a017">&#10003;</div>
+      <h2 style="font-size:14px;font-weight:700;margin-bottom:6px">Design Submitted!</h2>
+      <p style="font-size:11px;color:#666;margin-bottom:12px">Our team will get back to you within 1 business day.</p>
       <div class="summary-box" id="finalSummary"></div>
-      <p style="font-size:11px;color:#888;margin-top:12px">Questions? Call 619-800-0949 or email start@merchysmerch.com</p>
+      <p style="font-size:10px;color:#888;margin-top:10px">619-800-0949 | start@merchysmerch.com</p>
     </div>
   </div>
 </div>
 
 <script>
-// State
 const API_BASE = window.location.origin;
 let config = null;
 let selectedService = null;
 let selectedCategory = 'all';
 let selectedLocations = {};
-let selectedStyle = 'badge';
+let selectedStyles = ['badge'];
 let uploadedFileUrl = null;
 let designs = [];
 let selectedDesignIdx = null;
 
-// Styles display names
-const STYLE_NAMES = {
-  vintage: 'Vintage', badge: 'Badge', bold_type: 'Bold Type', illustration: 'Illustration',
-  minimal: 'Minimal', rubber_hose: 'Cartoon', retro_sport: 'Retro Sport', hand_lettered: 'Script'
-};
-
-// Print locations config (used when API config not loaded yet)
 const DEFAULT_LOCATIONS = [
   { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
   { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
@@ -253,65 +248,63 @@ const DEFAULT_LOCATIONS = [
   { id: 'hat', name: 'Hat' }
 ];
 
-// Init
+// Lucide icon map for styles
+const ICON_MAP = {
+  shield:'shield', target:'target', type:'type', smile:'smile', image:'image',
+  globe:'globe', grid:'grid-3x3', feather:'feather', zap:'zap', tool:'wrench',
+  award:'award', layers:'layers', hash:'hash', layout:'layout-grid', box:'box',
+  bookmark:'bookmark', 'pen-tool':'pen-tool', hexagon:'hexagon', calendar:'calendar'
+};
+
 async function init() {
   try {
     const res = await fetch(`${API_BASE}/api/widget-config`);
     config = await res.json();
-  } catch (e) {
-    console.error('Config load failed:', e);
-    config = { services: [], categories: [], styles: Object.keys(STYLE_NAMES), locations: DEFAULT_LOCATIONS };
+  } catch(e) {
+    config = { services: [], categories: [], styles: [], locations: DEFAULT_LOCATIONS };
   }
   renderCategoryTabs();
   renderServices();
   renderStylePicker();
   renderLocationPicker();
+  // Init lucide icons after DOM is populated
+  setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 100);
 }
 
 // Category tabs
 function renderCategoryTabs() {
-  const tabs = document.getElementById('catTabs');
   const cats = config.categories || [];
-  let html = '<div class="cat-tab active" onclick="selectCategory(\'all\')">All</div>';
+  let html = '<div class="cat-tab active" onclick="selectCategory(\'all\',this)">All</div>';
   cats.forEach(c => {
-    html += `<div class="cat-tab" onclick="selectCategory('${c.id}')">${c.name}</div>`;
+    html += `<div class="cat-tab" onclick="selectCategory('${c.id}',this)">${c.name}</div>`;
   });
-  tabs.innerHTML = html;
+  document.getElementById('catTabs').innerHTML = html;
 }
 
-function selectCategory(catId) {
-  selectedCategory = catId;
+function selectCategory(id, el) {
+  selectedCategory = id;
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  if(el) el.classList.add('active');
   renderServices();
 }
 
-// Services grid
+// Services - compact row list
 function renderServices() {
-  const grid = document.getElementById('serviceGrid');
-  const noRes = document.getElementById('noResults');
   const search = (document.getElementById('searchBar').value || '').toLowerCase();
-  let services = config?.services || [];
+  let svcs = config?.services || [];
+  if(selectedCategory !== 'all') svcs = svcs.filter(s => s.category === selectedCategory);
+  if(search) svcs = svcs.filter(s => s.name.toLowerCase().includes(search) || s.desc.toLowerCase().includes(search));
 
-  if (selectedCategory !== 'all') {
-    services = services.filter(s => s.category === selectedCategory);
-  }
-  if (search) {
-    services = services.filter(s => s.name.toLowerCase().includes(search) || s.desc.toLowerCase().includes(search));
-  }
+  const list = document.getElementById('serviceList');
+  const noRes = document.getElementById('noResults');
+  if(!svcs.length) { list.innerHTML=''; noRes.style.display='block'; return; }
+  noRes.style.display='none';
 
-  if (services.length === 0) {
-    grid.innerHTML = '';
-    noRes.style.display = 'block';
-    return;
-  }
-  noRes.style.display = 'none';
-
-  grid.innerHTML = services.map(s => `
-    <div class="svc-card ${selectedService?.id === s.id ? 'selected' : ''}" onclick="selectService('${s.id}')">
-      <div class="name">${s.name}</div>
-      <div class="price">${s.priceRange}</div>
-      <div class="desc">${s.desc}</div>
+  list.innerHTML = svcs.map(s => `
+    <div class="svc-row ${selectedService?.id===s.id?'selected':''}" onclick="selectService('${s.id}')">
+      <span class="svc-name">${s.name}</span>
+      <span class="svc-desc">${s.desc}</span>
+      <span class="svc-arrow">&rsaquo;</span>
     </div>
   `).join('');
 }
@@ -319,94 +312,90 @@ function renderServices() {
 function filterServices() { renderServices(); }
 
 function selectService(id) {
-  selectedService = (config?.services || []).find(s => s.id === id);
+  selectedService = (config?.services||[]).find(s => s.id === id);
   renderServices();
-  if (selectedService) {
-    setTimeout(() => goStep(2), 200);
-  }
+  if(selectedService) setTimeout(() => goStep(2), 150);
 }
 
 // Location picker
 function renderLocationPicker() {
   const locs = config?.locations || DEFAULT_LOCATIONS;
-  const grid = document.getElementById('locGrid');
-  const details = document.getElementById('locDetails');
-
-  grid.innerHTML = locs.map(l =>
+  document.getElementById('locGrid').innerHTML = locs.map(l =>
     `<div class="loc-btn" id="loc-${l.id}" onclick="toggleLocation('${l.id}')">${l.name}</div>`
   ).join('');
 }
 
-function toggleLocation(locId) {
-  const btn = document.getElementById(`loc-${locId}`);
-  if (selectedLocations[locId]) {
-    delete selectedLocations[locId];
-    btn.classList.remove('active');
-  } else {
-    selectedLocations[locId] = { instructions: '', position: '' };
-    btn.classList.add('active');
-  }
+function toggleLocation(id) {
+  const btn = document.getElementById(`loc-${id}`);
+  if(selectedLocations[id]) { delete selectedLocations[id]; btn.classList.remove('active'); }
+  else { selectedLocations[id] = { instructions:'', position:'' }; btn.classList.add('active'); }
   renderLocationDetails();
 }
 
 function renderLocationDetails() {
   const locs = config?.locations || DEFAULT_LOCATIONS;
-  const container = document.getElementById('locDetails');
   let html = '';
-
-  Object.keys(selectedLocations).forEach(locId => {
-    const loc = locs.find(l => l.id === locId);
-    if (!loc) return;
-    const hasPositions = loc.positions && loc.positions.length > 0;
+  Object.keys(selectedLocations).forEach(id => {
+    const loc = locs.find(l => l.id === id);
+    if(!loc) return;
+    const hasPos = loc.positions?.length > 0;
     html += `<div class="loc-detail visible">
       <h4>${loc.name}</h4>
-      ${hasPositions ? `<select onchange="selectedLocations['${locId}'].position=this.value">
+      ${hasPos ? `<select onchange="selectedLocations['${id}'].position=this.value">
         <option value="">Select position...</option>
         ${loc.positions.map(p => `<option value="${p}">${p}</option>`).join('')}
       </select>` : ''}
-      <textarea placeholder="Instructions for ${loc.name} (e.g. logo centered, 4 inches wide)" oninput="selectedLocations['${locId}'].instructions=this.value"></textarea>
+      <textarea placeholder="Instructions for ${loc.name}" oninput="selectedLocations['${id}'].instructions=this.value"></textarea>
     </div>`;
   });
-
-  container.innerHTML = html;
+  document.getElementById('locDetails').innerHTML = html;
 }
 
-// Style picker
+// Style picker - multi-select up to 3 with icons
 function renderStylePicker() {
+  const styles = config?.styles || [];
   const grid = document.getElementById('styleGrid');
-  const styles = config?.styles || Object.keys(STYLE_NAMES);
-  grid.innerHTML = styles.map(s =>
-    `<div class="style-chip ${s === selectedStyle ? 'active' : ''}" onclick="selectStyle('${s}')">${STYLE_NAMES[s] || s}</div>`
-  ).join('');
+  const isObj = styles.length > 0 && typeof styles[0] === 'object';
+
+  grid.innerHTML = (isObj ? styles : []).map(s => {
+    const isActive = selectedStyles.includes(s.id);
+    const atMax = selectedStyles.length >= 3 && !isActive;
+    return `<div class="style-card ${isActive?'active':''} ${atMax?'disabled':''}" onclick="toggleStyle('${s.id}')">
+      <div class="s-icon"><i data-lucide="${s.icon || 'circle'}"></i></div>
+      <div class="s-name">${s.name}</div>
+      <div class="s-desc">${s.desc}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('styleCounter').textContent = `${selectedStyles.length} of 3 selected`;
+  setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 50);
 }
 
-function selectStyle(s) {
-  selectedStyle = s;
+function toggleStyle(id) {
+  const idx = selectedStyles.indexOf(id);
+  if(idx > -1) {
+    selectedStyles.splice(idx, 1);
+  } else {
+    if(selectedStyles.length >= 3) return;
+    selectedStyles.push(id);
+  }
   renderStylePicker();
 }
 
 // Upload
 function handleUpload(input) {
   const file = input.files[0];
-  if (!file) return;
+  if(!file) return;
   const area = document.getElementById('uploadArea');
-
-  // Upload to backend
   const fd = new FormData();
   fd.append('files', file);
-  fetch(`${API_BASE}/api/upload`, { method: 'POST', body: fd })
+  fetch(`${API_BASE}/api/upload`, { method:'POST', body:fd })
     .then(r => r.json())
-    .then(data => {
-      if (data.files && data.files.length > 0) {
-        uploadedFileUrl = data.files[0].url;
-      }
-    })
+    .then(d => { if(d.files?.length) uploadedFileUrl = d.files[0].url; })
     .catch(console.error);
-
-  // Preview
   const reader = new FileReader();
-  reader.onload = (e) => {
-    area.innerHTML = `<img class="upload-preview" src="${e.target.result}"><p style="font-size:10px;color:#888">${file.name}</p>`;
+  reader.onload = e => {
+    area.innerHTML = `<img class="upload-preview" src="${e.target.result}"><p style="font-size:9px;color:#888">${file.name}</p>`;
     area.classList.add('has-file');
   };
   reader.readAsDataURL(file);
@@ -416,62 +405,52 @@ function handleUpload(input) {
 function goStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById(`step${n}`).classList.add('active');
-
-  const labels = ['Choose Service', 'Design Details', 'Review Designs', 'Get Your File', 'Confirmation'];
-  document.getElementById('stepLabel').textContent = `Step ${n} of 4 - ${labels[n-1] || ''}`;
-
-  if (n === 2 && selectedService) {
+  const labels = ['Choose Service','Design Details','Review Designs','Get Your File','Confirmation'];
+  document.getElementById('stepLabel').textContent = `Step ${n} of 4 - ${labels[n-1]||''}`;
+  if(n===2 && selectedService) {
     document.getElementById('selSvcName').textContent = selectedService.name;
-    document.getElementById('selSvcDesc').textContent = selectedService.desc;
-    // Show location picker for apparel decoration services
-    const showLoc = selectedService.category === 'apparel_decoration';
-    document.getElementById('locationSection').style.display = showLoc ? 'block' : 'none';
+    document.getElementById('locationSection').style.display = selectedService.category==='apparel_decoration'?'block':'none';
   }
-
+  if(n===4) {
+    const d = designs[selectedDesignIdx]||{};
+    const src = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl||'');
+    document.getElementById('finalDesignImg').src = src;
+  }
   document.querySelector('.content').scrollTop = 0;
 }
 
-// Generate designs via backend
+// Generate
 async function generateDesigns() {
   const name = document.getElementById('userName').value.trim();
   const email = document.getElementById('userEmail').value.trim();
-  if (!name || !email) {
-    alert('Please enter your name and email.');
-    return;
-  }
+  if(!name||!email) { alert('Please enter your name and email.'); return; }
+  if(!selectedStyles.length) { alert('Please select at least one design style.'); return; }
 
   goStep(3);
   document.getElementById('loadingState').style.display = 'block';
   document.getElementById('designResults').style.display = 'none';
 
-  const formData = {
-    name: name,
-    email: email,
-    business: document.getElementById('userBusiness').value.trim(),
-    text: document.getElementById('designText').value.trim(),
-    desc: document.getElementById('designDesc').value.trim(),
-    service: selectedService?.id || '',
-    decoration: selectedService?.name || '',
-    style: selectedStyle,
-    locations: selectedLocations,
-    referenceImage: uploadedFileUrl
-  };
-
   try {
     const res = await fetch(`${API_BASE}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, email,
+        business: document.getElementById('userBusiness').value.trim(),
+        text: document.getElementById('designText').value.trim(),
+        desc: document.getElementById('designDesc').value.trim(),
+        service: selectedService?.id||'',
+        decoration: selectedService?.name||'',
+        style: selectedStyles[0],
+        styles: selectedStyles,
+        locations: selectedLocations,
+        referenceImage: uploadedFileUrl
+      })
     });
     const data = await res.json();
     designs = data.designs || [];
     showDesignResults();
-  } catch (err) {
-    console.error('Generate error:', err);
-    document.getElementById('loadingState').innerHTML = `
-      <p style="color:#c00;font-size:12px">Something went wrong. Please try again.</p>
-      <button class="btn btn-back" onclick="goStep(2)" style="margin-top:10px">Go Back</button>
-    `;
+  } catch(err) {
+    document.getElementById('loadingState').innerHTML = `<p style="color:#c00;font-size:11px">Something went wrong.</p><button class="btn btn-back" onclick="goStep(2)" style="margin-top:8px">Go Back</button>`;
   }
 }
 
@@ -479,147 +458,96 @@ function showDesignResults() {
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('designResults').style.display = 'block';
   selectedDesignIdx = null;
-
   const grid = document.getElementById('designsGrid');
-  grid.innerHTML = designs.map((d, i) => {
-    if (d.error) {
-      return `<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8">
-        <span style="font-size:10px;color:#888;padding:8px;text-align:center">Generation failed</span>
-      </div>`;
-    }
-    const imgSrc = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl || '');
-    return `<div class="design-card" onclick="selectDesign(${i})" id="dcard-${i}">
-      <img src="${imgSrc}" alt="Design ${i+1}">
-      <div class="watermark">PREVIEW</div>
-    </div>`;
+  grid.innerHTML = designs.map((d,i) => {
+    if(d.error) return `<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8"><span style="font-size:9px;color:#888;padding:6px;text-align:center">Failed</span></div>`;
+    const src = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl||'');
+    return `<div class="design-card" onclick="selectDesign(${i})" id="dcard-${i}"><img src="${src}" alt="Design ${i+1}"><div class="watermark">PREVIEW</div></div>`;
   }).join('');
-
   document.getElementById('continueBtn').disabled = true;
 }
 
 function selectDesign(idx) {
-  if (designs[idx]?.error) return;
+  if(designs[idx]?.error) return;
   selectedDesignIdx = idx;
-  document.querySelectorAll('.design-card').forEach((c, i) => {
-    c.classList.toggle('selected', i === idx);
-  });
+  document.querySelectorAll('.design-card').forEach((c,i) => c.classList.toggle('selected', i===idx));
   document.getElementById('continueBtn').disabled = false;
 
-  // Update summary
-  const d = designs[idx];
-  const locSummary = Object.keys(selectedLocations).length > 0
+  const styleNames = selectedStyles.map(sid => {
+    const s = (config?.styles||[]).find(x => x.id===sid);
+    return s?.name || sid;
+  }).join(', ');
+
+  const locNames = Object.keys(selectedLocations).length > 0
     ? Object.keys(selectedLocations).map(k => {
-        const loc = (config?.locations || DEFAULT_LOCATIONS).find(l => l.id === k);
-        return loc?.name || k;
+        const l = (config?.locations||DEFAULT_LOCATIONS).find(x => x.id===k);
+        return l?.name||k;
       }).join(', ')
     : 'N/A';
 
   document.getElementById('designSummary').innerHTML = `
-    <h3>Design Summary</h3>
-    <div class="summary-row"><span class="label">Service</span><span class="val">${selectedService?.name || '-'}</span></div>
-    <div class="summary-row"><span class="label">Style</span><span class="val">${STYLE_NAMES[selectedStyle] || selectedStyle}</span></div>
-    <div class="summary-row"><span class="label">Locations</span><span class="val">${locSummary}</span></div>
-    <div class="summary-row"><span class="label">Variation</span><span class="val">${idx + 1} of ${designs.length}</span></div>
+    <h3>Summary</h3>
+    <div class="summary-row"><span class="label">Service</span><span class="val">${selectedService?.name||'-'}</span></div>
+    <div class="summary-row"><span class="label">Styles</span><span class="val">${styleNames}</span></div>
+    <div class="summary-row"><span class="label">Locations</span><span class="val">${locNames}</span></div>
   `;
 }
 
-function regenerate() {
-  generateDesigns();
-}
+function regenerate() { generateDesigns(); }
 
-// Step 4 - Show selected design
-function goToStep4() {
-  if (selectedDesignIdx === null) return;
-  const d = designs[selectedDesignIdx];
-  const imgSrc = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl || '');
-  document.getElementById('finalDesignImg').src = imgSrc;
-}
-
-// Override goStep for step 4
-const _origGoStep = goStep;
-goStep = function(n) {
-  _origGoStep(n);
-  if (n === 4) goToStep4();
-};
-
-// Purchase vector via Stripe
+// Stripe
 async function purchaseVector() {
   const btn = document.getElementById('vectorBtn');
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
-
-  const d = designs[selectedDesignIdx];
-  const designUrl = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl || '');
-
+  btn.disabled = true; btn.textContent = 'Processing...';
+  const d = designs[selectedDesignIdx]||{};
+  const url = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl||'');
   try {
     const res = await fetch(`${API_BASE}/api/create-checkout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tier: 'detailed',
-        designUrl: designUrl,
-        email: document.getElementById('userEmail').value.trim()
-      })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tier:'detailed', designUrl:url, email:document.getElementById('userEmail').value.trim() })
     });
     const data = await res.json();
-    if (data.url) {
-      window.open(data.url, '_blank');
-    } else {
-      alert(data.error || 'Checkout failed. Call 619-800-0949 for help.');
-    }
-  } catch (err) {
-    alert('Payment error. Please call 619-800-0949.');
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Get Vector File - $25';
+    if(data.url) window.open(data.url,'_blank');
+    else alert(data.error||'Checkout failed. Call 619-800-0949.');
+  } catch(e) { alert('Payment error. Call 619-800-0949.'); }
+  btn.disabled = false; btn.textContent = 'Get Vector File - $25';
 }
 
-// Submit design request
+// Submit
 async function submitDesign() {
   const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
-
-  const d = designs[selectedDesignIdx] || {};
-  const formData = {
-    name: document.getElementById('userName').value.trim(),
-    email: document.getElementById('userEmail').value.trim(),
-    business: document.getElementById('userBusiness').value.trim(),
-    text: document.getElementById('designText').value.trim(),
-    desc: document.getElementById('designDesc').value.trim(),
-    service: selectedService?.id || '',
-    serviceName: selectedService?.name || '',
-    style: selectedStyle,
-    locations: selectedLocations,
-    designUrl: d.url || d.remoteUrl || '',
-    designVariation: selectedDesignIdx
-  };
-
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  const d = designs[selectedDesignIdx]||{};
   try {
-    const res = await fetch(`${API_BASE}/api/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+    await fetch(`${API_BASE}/api/submit`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('userName').value.trim(),
+        email: document.getElementById('userEmail').value.trim(),
+        business: document.getElementById('userBusiness').value.trim(),
+        text: document.getElementById('designText').value.trim(),
+        desc: document.getElementById('designDesc').value.trim(),
+        service: selectedService?.id||'',
+        serviceName: selectedService?.name||'',
+        styles: selectedStyles,
+        locations: selectedLocations,
+        designUrl: d.url||d.remoteUrl||'',
+        designVariation: selectedDesignIdx
+      })
     });
-    const data = await res.json();
-
-    // Show confirmation
     document.getElementById('finalSummary').innerHTML = `
       <h3>Your Request</h3>
-      <div class="summary-row"><span class="label">Name</span><span class="val">${formData.name}</span></div>
-      <div class="summary-row"><span class="label">Service</span><span class="val">${formData.serviceName}</span></div>
-      <div class="summary-row"><span class="label">Style</span><span class="val">${STYLE_NAMES[selectedStyle] || selectedStyle}</span></div>
+      <div class="summary-row"><span class="label">Name</span><span class="val">${document.getElementById('userName').value.trim()}</span></div>
+      <div class="summary-row"><span class="label">Service</span><span class="val">${selectedService?.name||'-'}</span></div>
+      <div class="summary-row"><span class="label">Styles</span><span class="val">${selectedStyles.length} selected</span></div>
     `;
     goStep(5);
-  } catch (err) {
-    alert('Submission error. Please try again or call 619-800-0949.');
-    btn.disabled = false;
-    btn.textContent = 'Submit Design Request (Free)';
+  } catch(e) {
+    alert('Submission error. Try again or call 619-800-0949.');
+    btn.disabled = false; btn.textContent = 'Submit Design Request (Free)';
   }
 }
 
-// Start
 init();
 </script>
 </body>
