@@ -487,7 +487,7 @@ function goStep(n) {
   }
   if(n===4) {
     const d = designs[selectedDesignIdx]||{};
-    document.getElementById('finalDesignImg').src = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl||'');
+    document.getElementById('finalDesignImg').src = d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : '');
   }
   document.querySelector('.content').scrollTop = 0;
 }
@@ -533,8 +533,9 @@ function showDesignResults() {
   selectedDesignIdx = null;
   document.getElementById('designsGrid').innerHTML = designs.map((d,i) => {
     if(d.error) return `<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8"><span style="font-size:12px;color:#888">Failed</span></div>`;
-    const src = d.url ? `${API_BASE}${d.url}` : (d.remoteUrl||'');
-    return `<div class="design-card" onclick="selectDesign(${i})" id="dcard-${i}"><img src="${src}" alt="Design ${i+1}"><div class="watermark">PREVIEW</div></div>`;
+    const src = d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : '');
+    const fallback = d.url ? `${API_BASE}${d.url}` : '';
+    return `<div class="design-card" onclick="selectDesign(${i})" id="dcard-${i}"><img src="${src}" alt="Design ${i+1}" onerror="if(this.src!=='${fallback}')this.src='${fallback}'"><div class="watermark">PREVIEW</div></div>`;
   }).join('');
   document.getElementById('continueBtn').disabled = true;
 }
@@ -572,7 +573,7 @@ async function purchaseVector() {
   try {
     const res = await fetch(`${API_BASE}/api/create-checkout`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ tier:'detailed', designUrl: d.url?`${API_BASE}${d.url}`:(d.remoteUrl||''), email:document.getElementById('userEmail').value.trim() })
+      body: JSON.stringify({ tier:'detailed', designUrl: d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : ''), email:document.getElementById('userEmail').value.trim() })
     });
     const data = await res.json();
     if(data.url) window.open(data.url,'_blank');
@@ -599,7 +600,7 @@ async function submitDesign() {
         serviceName: selectedService?.name||'',
         styles: selectedStyles,
         locations: selectedLocations,
-        designUrl: d.url||d.remoteUrl||'',
+        designUrl: d.remoteUrl||d.url||'',
         designVariation: selectedDesignIdx
       })
     });
