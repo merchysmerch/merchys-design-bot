@@ -242,7 +242,7 @@ Special Instructions: ${formData.notes || 'None'}`;
 const RECRAFT_API_KEY = process.env.RECRAFT_API_KEY;
 const RECRAFT_BASE = 'https://external.api.recraft.ai/v1';
 
-// Merchy's design rules baked into every prompt
+// Merchy's design rules — production-first, sellable, print-ready
 function buildDesignPrompt(formData, variation) {
   const decorationType = formData.decoration || 'DTF';
   const style = formData.style || 'badge';
@@ -250,61 +250,68 @@ function buildDesignPrompt(formData, variation) {
   const desc = formData.desc || '';
   const business = formData.business || '';
 
-  const baseRules = [
-    'Black and white only, no color.',
-    'Bold outlines, solid fills, clean separations.',
-    'Centered and balanced composition.',
-    'No gradients, no soft shading, no fine detail, no textures.',
-    'Strong silhouette - recognizable at a glance.',
-    'Typography integrated into the design, not placed on top.',
-    `Print-ready for ${decorationType} production.`,
-    'Vector-friendly with clean edges.',
-    'Professional custom merchandise design.'
+  // Core production rules from Merchy's standards
+  const merchyRules = [
+    'STRICT: Black and white ONLY. No color, no gray tones, no halftones.',
+    'Vector-first: bold outlines, solid fills, clean separations between every element.',
+    'No gradients, no soft shading, no fine hairline detail, no messy textures, no watercolor effects.',
+    'Strong silhouette that is instantly recognizable from 20 feet away.',
+    'Centered and balanced composition with clear visual hierarchy: focal point > supporting elements > text.',
+    'Typography must be INTEGRATED into the design structure using arches, banners, ribbons, or embedded layouts. Text is never floating or slapped on top.',
+    'Every element must serve a purpose. Remove anything unnecessary. Simplicity over complexity.',
+    'Bold consistent outer strokes. No inconsistent stroke weights. No thin lines that will not print.',
+    `Built for real ${decorationType} production: must screen print clean, embroider well, and scale from 3 inches to 14 inches without losing detail.`,
+    'This must look like something people would actually wear. Sellable, wearable, professional merchandise.'
   ].join(' ');
 
   const styleMap = {
-    badge: 'Circular, shield, or emblem-style crest with top arc text, center icon, and bottom text. Official and versatile.',
-    icon_logo: 'Clean minimal scalable icon/logo mark. Single strong symbol, minimal or no text. Works at any size.',
-    typography: 'Bold dominant lettering, stacked or arched text with minimal graphics. Text is the hero element.',
-    mascot: 'Illustrated character or mascot as the hero with supporting text around it. Memorable and builds identity.',
-    scene: 'Full scene illustration with foreground, background, and integrated text. Storytelling and premium feel.',
-    badge_scene: 'Scene contained inside a circular badge frame with text wrapping around. Combines structure with storytelling.',
-    diagram: 'Technical/structured layout like butcher cuts or blueprints with labeled sections and segmented areas.',
-    vintage_script: 'Retro travel postcard style with script headline and supporting scene or icon. Nostalgic and wearable.',
-    streetwear: 'Aggressive modern high-contrast bold graphic with minimal text. Trend-driven and eye-catching.',
-    trade_tools: 'Crossed tools or industrial icons as centerpiece with supporting text. Communicates trade or industry instantly.',
-    corporate_seal: 'Professional structured minimal emblem/seal with clean icon and balanced text. Trust and professionalism.',
-    pattern: 'Repeating icons or shapes in a grid or scattered pattern layout. Scalable and modern.',
-    monogram: 'Bold numbers, initials, or monogram as the dominant central element with minimal extras.',
-    collage: 'Multiple elements combined in a layered controlled-chaos composition. High energy creative feel.',
-    product_focus: 'Illustration of the product itself centered with supporting text. Clear and literal.',
-    humor: 'Funny concept-driven visual with a punchline. Shareable and memorable.',
-    heritage: 'Old-school established feel with dates, classic typography, and simple icon. Builds credibility.',
-    line_art: 'Super clean thin controlled outlines with lots of negative space. Premium high-end aesthetic.',
-    patch_first: 'Thick simplified bold-edge shapes designed for embroidery and stitching. Built for patches and hats.',
-    event_series: 'Template-based scalable layout with consistent structure and swappable text. Perfect for annual events.'
+    badge: 'Classic circular shield or emblem crest. Top arc text crowns the design, bold center icon as focal point, bottom text anchors. The most versatile merchandise layout.',
+    icon_logo: 'Single powerful scalable icon or logo mark. One strong symbol that works alone. Minimal or no text. Must be recognizable at thumbnail size on a hat or chest logo.',
+    typography: 'Typography-driven design where bold stacked or arched lettering IS the design. Minimal supporting graphics. Text hierarchy creates the visual structure.',
+    mascot: 'Custom illustrated character or mascot as the hero element. Bold outlines, simple shapes, expressive but clean. Character drives the identity with supporting text around it.',
+    scene: 'Full illustrated scene with foreground action, background environment, and text woven into the composition. Simplified for print: no tiny details, strong contrast between elements.',
+    badge_scene: 'Illustrated scene contained inside a circular or shield badge frame. Text wraps the outer edge. Combines the structure of a badge with the storytelling of a scene.',
+    diagram: 'Technical structured layout like butcher cut charts, mechanical blueprints, or labeled anatomy diagrams. Main object in center with clean segmented sections and precise labels.',
+    vintage_script: 'Retro travel postcard or vintage greeting card style. Flowing script headline with a supporting scene or simple icon. Nostalgic feel that reads as premium and wearable.',
+    streetwear: 'Bold aggressive high-contrast graphic. Modern street style with oversized central element and minimal text. Trend-forward, graphic-heavy, designed for the front or back of a tee.',
+    trade_tools: 'Crossed tools, industrial icons, or trade symbols as the centerpiece. Wrench, hammer, saw, or industry-specific equipment arranged symmetrically with supporting trade text.',
+    corporate_seal: 'Professional polished corporate emblem. Clean geometric icon centered with balanced serif or sans-serif text. Structured, trustworthy, suitable for polos and business uniforms.',
+    pattern: 'Repeating icons or shapes arranged in a structured grid or all-over scattered pattern. Each element is simple and bold. Designed for fashion prints, packaging, or branded wrapping.',
+    monogram: 'Bold oversized initials, numbers, or monogram letters as the dominant visual. Thick block or serif letterforms. Minimal supporting elements. Team jersey or varsity style.',
+    collage: 'Multiple bold elements composed together in a controlled layered arrangement. Organized visual energy with clear boundaries between each element. High impact but not chaotic.',
+    product_focus: 'Clean illustration of the actual product or item centered as the hero. Bold outline rendering with supporting text below or around. Literal and clear about what is being sold.',
+    humor: 'Concept-driven funny visual with a clear punchline built into the design. Simple clean illustration that delivers the joke at a glance. Must still be production-printable.',
+    heritage: 'Established legacy feel with founding dates, classic serif typography, and a simple timeless icon. Feels like the brand has been around for decades. Clean and dignified.',
+    line_art: 'Controlled continuous line art with intentional negative space. Every line is deliberate with consistent medium-weight strokes. Premium minimalist aesthetic that still prints bold.',
+    patch_first: 'Designed specifically for embroidered patches: thick simplified shapes, bold merrowed border edge, limited detail inside, maximum 5-6 distinct areas. Built for stitching on hats and jackets.',
+    event_series: 'Template-based layout designed to be reused annually. Consistent frame structure with designated swap zones for year, date, or event-specific text. Systematic and brandable.'
   };
 
   // Support multiple styles (up to 3) - combine their descriptions
   const styles = Array.isArray(formData.styles) ? formData.styles : [style];
   const styleDescs = styles.map(s => styleMap[s]).filter(Boolean);
-  const styleDesc = styleDescs.length > 0 ? styleDescs.join(' Also incorporate: ') : styleMap.badge;
+  const styleDesc = styleDescs.length > 0 ? styleDescs.join(' ALSO BLEND IN: ') : styleMap.badge;
 
+  // Each variation targets a different composition approach
   const variations = [
-    'Variation A: Classic centered composition with the primary style as the dominant layout.',
-    'Variation B: Alternative composition emphasizing typography and text placement.',
-    'Variation C: Creative interpretation with the icon or illustration as the focal point.'
+    'LAYOUT A: Classic centered symmetrical composition. The icon or main visual sits dead center with text arching above and below. Most traditional merchandise layout.',
+    'LAYOUT B: Typography-forward composition. The text and lettering drive the visual weight. Supporting icon or graphic is secondary, integrated into or behind the text structure.',
+    'LAYOUT C: Illustration-forward composition. The graphic, character, or scene is the dominant element taking up 60-70% of the design. Text is compact and positioned below or integrated.'
   ];
 
-  const prompt = `Design a ${styleDesc} ${baseRules}
+  const prompt = `Create a production-ready custom merchandise design.
 
-The design is for: ${desc || business || 'custom merchandise'}
-${text ? `Text to include (EXACT SPELLING): ${text}` : ''}
-${business ? `Business/brand: ${business}` : ''}
+STYLE: ${styleDesc}
+
+PRODUCTION RULES: ${merchyRules}
+
+${desc ? `CONCEPT: ${desc}` : ''}
+${text ? `TEXT TO INCLUDE (spell exactly): ${text}` : ''}
+${business ? `BRAND: ${business}` : ''}
 
 ${variations[variation] || variations[0]}
 
-This must look like a professional custom merchandise design ready for production printing.`;
+FINAL CHECK: Would someone buy a shirt with this on it? Is it readable from across the room? Can it be screen printed in one color with zero issues? If yes to all three, this design is correct.`;
 
   return prompt;
 }
