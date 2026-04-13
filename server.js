@@ -263,22 +263,37 @@ function buildDesignPrompt(formData, variation) {
   ].join(' ');
 
   const styleMap = {
-    vintage: 'Vintage Americana style with retro feel, classic badge/emblem layout.',
-    badge: 'Shield or circular crest/badge/emblem layout with arched text.',
-    bold_type: 'Typography-driven design with bold impactful lettering as the main element.',
-    illustration: 'Custom illustration with bold line art, simple iconic shapes.',
-    minimal: 'Minimal clean design with simple icon and clean typography.',
-    rubber_hose: '1920s rubber hose cartoon style with thick outlines, pie-cut eyes, simple shapes.',
-    retro_sport: 'Retro athletic varsity sports style with block letters and classic elements.',
-    hand_lettered: 'Hand-lettered script typography with crafted flowing letterforms.'
+    badge: 'Circular, shield, or emblem-style crest with top arc text, center icon, and bottom text. Official and versatile.',
+    icon_logo: 'Clean minimal scalable icon/logo mark. Single strong symbol, minimal or no text. Works at any size.',
+    typography: 'Bold dominant lettering, stacked or arched text with minimal graphics. Text is the hero element.',
+    mascot: 'Illustrated character or mascot as the hero with supporting text around it. Memorable and builds identity.',
+    scene: 'Full scene illustration with foreground, background, and integrated text. Storytelling and premium feel.',
+    badge_scene: 'Scene contained inside a circular badge frame with text wrapping around. Combines structure with storytelling.',
+    diagram: 'Technical/structured layout like butcher cuts or blueprints with labeled sections and segmented areas.',
+    vintage_script: 'Retro travel postcard style with script headline and supporting scene or icon. Nostalgic and wearable.',
+    streetwear: 'Aggressive modern high-contrast bold graphic with minimal text. Trend-driven and eye-catching.',
+    trade_tools: 'Crossed tools or industrial icons as centerpiece with supporting text. Communicates trade or industry instantly.',
+    corporate_seal: 'Professional structured minimal emblem/seal with clean icon and balanced text. Trust and professionalism.',
+    pattern: 'Repeating icons or shapes in a grid or scattered pattern layout. Scalable and modern.',
+    monogram: 'Bold numbers, initials, or monogram as the dominant central element with minimal extras.',
+    collage: 'Multiple elements combined in a layered controlled-chaos composition. High energy creative feel.',
+    product_focus: 'Illustration of the product itself centered with supporting text. Clear and literal.',
+    humor: 'Funny concept-driven visual with a punchline. Shareable and memorable.',
+    heritage: 'Old-school established feel with dates, classic typography, and simple icon. Builds credibility.',
+    line_art: 'Super clean thin controlled outlines with lots of negative space. Premium high-end aesthetic.',
+    patch_first: 'Thick simplified bold-edge shapes designed for embroidery and stitching. Built for patches and hats.',
+    event_series: 'Template-based scalable layout with consistent structure and swappable text. Perfect for annual events.'
   };
 
-  const styleDesc = styleMap[style] || styleMap.badge;
+  // Support multiple styles (up to 3) - combine their descriptions
+  const styles = Array.isArray(formData.styles) ? formData.styles : [style];
+  const styleDescs = styles.map(s => styleMap[s]).filter(Boolean);
+  const styleDesc = styleDescs.length > 0 ? styleDescs.join(' Also incorporate: ') : styleMap.badge;
 
   const variations = [
-    'Variation A: Classic centered emblem/badge composition with text arched around a central icon.',
-    'Variation B: Bold typography-forward design with the main text as the dominant element.',
-    'Variation C: Illustrative approach with a custom icon/character as the focal point and text integrated below.'
+    'Variation A: Classic centered composition with the primary style as the dominant layout.',
+    'Variation B: Alternative composition emphasizing typography and text placement.',
+    'Variation C: Creative interpretation with the icon or illustration as the focal point.'
   ];
 
   const prompt = `Design a ${styleDesc} ${baseRules}
@@ -682,7 +697,28 @@ app.get('/api/widget-config', (req, res) => {
   res.json({
     services: SERVICES_CATALOG,
     categories: SERVICE_CATEGORIES,
-    styles: ['vintage', 'badge', 'bold_type', 'illustration', 'minimal', 'rubber_hose', 'retro_sport', 'hand_lettered'],
+    styles: [
+      { id: 'badge', name: 'Badge / Crest', icon: 'shield', desc: 'Circular emblem with arc text and center icon' },
+      { id: 'icon_logo', name: 'Icon / Logo Mark', icon: 'target', desc: 'Clean minimal scalable symbol' },
+      { id: 'typography', name: 'Typography', icon: 'type', desc: 'Bold dominant lettering as the hero' },
+      { id: 'mascot', name: 'Mascot / Character', icon: 'smile', desc: 'Illustrated character or mascot' },
+      { id: 'scene', name: 'Scene / Environment', icon: 'image', desc: 'Full illustration with story elements' },
+      { id: 'badge_scene', name: 'Badge + Scene', icon: 'globe', desc: 'Scene contained inside a badge frame' },
+      { id: 'diagram', name: 'Diagram / Technical', icon: 'grid', desc: 'Labeled blueprints or butcher-cut style' },
+      { id: 'vintage_script', name: 'Vintage Script', icon: 'feather', desc: 'Retro postcard style with script text' },
+      { id: 'streetwear', name: 'Bold Streetwear', icon: 'zap', desc: 'Aggressive modern high-contrast graphic' },
+      { id: 'trade_tools', name: 'Trade / Tools', icon: 'tool', desc: 'Crossed tools or industry symbols' },
+      { id: 'corporate_seal', name: 'Corporate Seal', icon: 'award', desc: 'Professional structured minimal emblem' },
+      { id: 'pattern', name: 'Pattern / Repeat', icon: 'layers', desc: 'Repeating icons or shapes grid' },
+      { id: 'monogram', name: 'Monogram / Number', icon: 'hash', desc: 'Bold initials or numbers centered' },
+      { id: 'collage', name: 'Mashup / Collage', icon: 'layout', desc: 'Multiple elements in controlled chaos' },
+      { id: 'product_focus', name: 'Product-Focused', icon: 'box', desc: 'Illustration of the product itself' },
+      { id: 'humor', name: 'Humor / Novelty', icon: 'smile', desc: 'Funny concept-driven visual' },
+      { id: 'heritage', name: 'Heritage / Legacy', icon: 'bookmark', desc: 'Old-school established classic feel' },
+      { id: 'line_art', name: 'Minimal Line Art', icon: 'pen-tool', desc: 'Clean thin outlines, negative space' },
+      { id: 'patch_first', name: 'Patch / Embroidery', icon: 'hexagon', desc: 'Bold shapes built for stitching' },
+      { id: 'event_series', name: 'Event Series', icon: 'calendar', desc: 'Template-based scalable layout' }
+    ],
     locations: [
       { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
       { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
