@@ -334,8 +334,6 @@ async function generateDesigns(formData) {
           model: 'recraftv4',
           size: '1024x1024',
           response_format: 'url',
-          style_id: null,
-          substyle: 'none',
           controls: {
             colors: [{ rgb: [0, 0, 0] }, { rgb: [255, 255, 255] }]
           }
