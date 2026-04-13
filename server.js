@@ -594,41 +594,79 @@ app.post('/api/submit', async (req, res) => {
 
 
 // ================================================================
-// SERVICES CATALOG (31 services from Merchy's graphic design page)
+// SERVICES CATALOG (65 services across 6 categories)
 // ================================================================
 
+const SERVICE_CATEGORIES = [
+  { id: 'apparel_decoration', name: 'Apparel Decoration', icon: 'shirt' },
+  { id: 'signs_banners', name: 'Signs & Banners', icon: 'sign' },
+  { id: 'business_print', name: 'Business Printing', icon: 'file' },
+  { id: 'promo_products', name: 'Promo Products', icon: 'gift' },
+  { id: 'specialty', name: 'Specialty', icon: 'star' },
+  { id: 'design_services', name: 'Design Services', icon: 'palette' }
+];
+
 const SERVICES_CATALOG = [
-  { id: 'banner-design', name: 'Banner Design', priceRange: '$25-$100', category: 'print_design', desc: 'Custom designs for large-format banners suitable for events and promotions.' },
-  { id: 'business-cards', name: 'Business Cards', priceRange: '$25-$75', category: 'brand_identity', desc: 'Professional and memorable business card designs to represent your brand.' },
-  { id: 'digitizing', name: 'Digitizing', priceRange: '$30', category: 'apparel', desc: 'Converting existing graphics into digital formats for embroidery and other applications.' },
-  { id: 'event-posters', name: 'Event Posters', priceRange: '$50-$125', category: 'print_design', desc: 'Eye-catching designs for concerts, festivals, and events.' },
-  { id: 'flyer-design', name: 'Flyer Design', priceRange: '$25-$125', category: 'print_design', desc: 'Creative flyers to promote events, services, or products.' },
-  { id: 'logo-design', name: 'Logo Design', priceRange: '$50-$100', category: 'brand_identity', desc: 'Creating unique and impactful logos to establish a strong brand identity.' },
-  { id: 'menus', name: 'Menus', priceRange: '$100-$200', category: 'print_design', desc: 'Visually appealing and easy-to-read menus for restaurants, cafes, and events.' },
-  { id: 'mockups', name: 'Mockups', priceRange: '$10 / Free with Purchase', category: 'digital', desc: 'High-quality mock-ups for apparel, packaging, and promotional materials.' },
-  { id: 'product-labels', name: 'Product Labels', priceRange: '$100-$200', category: 'specialty', desc: 'Custom product label designs that attract consumer attention.' },
-  { id: 'shirt-design', name: 'Shirt Design', priceRange: '$25-$200', category: 'apparel', desc: 'Custom t-shirt designs for corporate wear, events, and promotional campaigns.' },
-  { id: 'signage', name: 'Signage', priceRange: '$50-$125', category: 'print_design', desc: 'Indoor and outdoor sign designs for businesses, events, and promotions.' },
-  { id: 'social-media', name: 'Social Media Graphics', priceRange: '$25-$250', category: 'digital', desc: 'Engaging graphics for your social media platforms.' },
-  { id: 'vehicle-wraps', name: 'Vehicle Wraps', priceRange: '$200-$300', category: 'specialty', desc: 'Creative and durable vehicle wrap designs for cars, trucks, and vans.' },
-  { id: 'vectorizing', name: 'Vectorizing', priceRange: '$10-$50', category: 'specialty', desc: 'Transforming images into vector graphics for print and digital uses.' },
-  { id: 'patch-design', name: 'Patch Design', priceRange: '$25-$75', category: 'apparel', desc: 'Custom patch artwork for embroidered, woven, and PVC patches.' },
-  { id: 'packaging-design', name: 'Packaging Design', priceRange: '$75-$250', category: 'specialty', desc: 'Custom boxes, poly mailers, tissue paper, and branded packaging.' },
-  { id: 'brand-identity', name: 'Brand Identity Packages', priceRange: '$200-$500', category: 'brand_identity', desc: 'Full brand kit: logo, business cards, social templates, and brand guidelines.' },
-  { id: 'promo-item-design', name: 'Promotional Item Design', priceRange: '$25-$100', category: 'apparel', desc: 'Designs for koozies, tote bags, pens, lanyards, and all your swag needs.' },
-  { id: 'embroidery-design', name: 'Embroidery Design', priceRange: '$25-$100', category: 'apparel', desc: 'Custom artwork created specifically for embroidery applications.' },
-  { id: 'sticker-design', name: 'Sticker / Decal Design', priceRange: '$15-$50', category: 'specialty', desc: 'Die-cut stickers, vinyl decals, and bumper stickers for brands and events.' },
-  { id: 'qr-code-design', name: 'QR Code Design', priceRange: '$10-$25', category: 'digital', desc: 'Branded and stylized QR codes for menus, cards, and marketing materials.' },
-  { id: 'screen-print-seps', name: 'Screen Print Separations', priceRange: '$25-$50', category: 'apparel', desc: 'Color separations for screen printing: spot colors, simulated process, CMYK.' },
-  { id: 'photo-editing', name: 'Photo Editing', priceRange: '$15-$75/hr', category: 'digital', desc: 'Background removal, retouching, product photography cleanup, and composites.' },
-  { id: 'illustration', name: 'Illustration', priceRange: '$75-$300', category: 'specialty', desc: 'Custom hand-drawn and digital illustrations: mascots, characters, detailed artwork.' },
-  { id: 'catalog-design', name: 'Catalog / Lookbook', priceRange: '$150-$400', category: 'print_design', desc: 'Multi-page product catalogs and lookbooks for brands with full product lines.' },
-  { id: 'uniform-design', name: 'Uniform Program Design', priceRange: '$100-$300', category: 'apparel', desc: 'Full corporate uniform layouts: logo placements across polos, jackets, and hats.' },
-  { id: 'certificate-design', name: 'Certificate / Award Design', priceRange: '$25-$75', category: 'print_design', desc: 'Professional certificates and awards for schools, sports leagues, and organizations.' },
-  { id: 'invitation-design', name: 'Invitation / Event Stationery', priceRange: '$25-$100', category: 'print_design', desc: 'Wedding invitations, birthday, quinceañera, graduation, and event stationery.' },
-  { id: 'infographic-design', name: 'Infographic Design', priceRange: '$50-$150', category: 'digital', desc: 'Visual infographics for marketing, training, social media, and presentations.' },
-  { id: 'favicon-design', name: 'Favicon / App Icon', priceRange: '$15-$35', category: 'digital', desc: 'Browser favicons and app icons: perfect add-on with any logo project.' },
-  { id: 'lettering-design', name: 'Lettering / Custom Typography', priceRange: '$50-$200', category: 'specialty', desc: 'Hand-lettered designs for merch, signage, and streetwear brands.' }
+  // ---- Apparel Decoration ----
+  { id: 'dtf-printing', name: 'DTF Printing', priceRange: '$8-$15/piece', category: 'apparel_decoration', desc: 'Full-color transfers on any fabric. No minimums, 5 business day turnaround.' },
+  { id: 'screen-printing', name: 'Screen Printing', priceRange: '$5-$12/piece', category: 'apparel_decoration', desc: 'Up to 13 colors, best for 48+ pieces. 10 business day turnaround.' },
+  { id: 'embroidery', name: 'Embroidery', priceRange: '$8-$20/piece', category: 'apparel_decoration', desc: 'Stitched logos on polos, jackets, and hats. Professional and durable.' },
+  { id: 'dtg-printing', name: 'DTG Printing', priceRange: '$10-$18/piece', category: 'apparel_decoration', desc: 'Direct-to-garment for detailed photo prints. Great for small runs.' },
+  { id: 'heat-transfer', name: 'Heat Transfer', priceRange: '$6-$12/piece', category: 'apparel_decoration', desc: 'Vinyl and heat-applied graphics for names, numbers, and logos.' },
+  { id: 'sublimation-apparel', name: 'Sublimation (Apparel)', priceRange: '$12-$25/piece', category: 'apparel_decoration', desc: 'All-over prints on polyester garments. Vibrant edge-to-edge color.' },
+  // ---- Signs & Banners ----
+  { id: 'vinyl-banners', name: 'Vinyl Banners', priceRange: '$3-$8/sqft', category: 'signs_banners', desc: 'Indoor and outdoor banners for events, storefronts, and promotions.' },
+  { id: 'retractable-banners', name: 'Retractable Banners', priceRange: '$75-$200', category: 'signs_banners', desc: 'Portable pull-up displays for trade shows and events.' },
+  { id: 'yard-signs', name: 'Yard Signs', priceRange: '$8-$20/each', category: 'signs_banners', desc: 'Corrugated plastic signs for real estate, elections, and events.' },
+  { id: 'window-graphics', name: 'Window Graphics', priceRange: '$5-$15/sqft', category: 'signs_banners', desc: 'Vinyl lettering, perforated film, and frosted glass for storefronts.' },
+  { id: 'wall-wraps', name: 'Wall Wraps & Murals', priceRange: '$10-$25/sqft', category: 'signs_banners', desc: 'Large format wall graphics for offices, restaurants, and retail.' },
+  { id: 'car-wraps', name: 'Vehicle Wraps', priceRange: '$200-$500+', category: 'signs_banners', desc: 'Partial and full vehicle wraps for cars, trucks, and vans.' },
+  { id: 'a-frame-signs', name: 'A-Frame Signs', priceRange: '$40-$100', category: 'signs_banners', desc: 'Sidewalk signs for restaurants, salons, and retail storefronts.' },
+  { id: 'acrylic-signs', name: 'Acrylic & Metal Signs', priceRange: '$50-$300', category: 'signs_banners', desc: 'Premium lobby signs, wayfinding, and office signage.' },
+  // ---- Business Printing ----
+  { id: 'business-cards', name: 'Business Cards', priceRange: '$25-$75', category: 'business_print', desc: 'Standard, premium, and specialty finishes. Multiple paper stocks.' },
+  { id: 'flyers', name: 'Flyers & Handouts', priceRange: '$0.10-$0.50/each', category: 'business_print', desc: 'Single and double-sided flyers for promotions and events.' },
+  { id: 'brochures', name: 'Brochures', priceRange: '$0.25-$1.00/each', category: 'business_print', desc: 'Bi-fold and tri-fold brochures for services and product lines.' },
+  { id: 'postcards', name: 'Postcards & Mailers', priceRange: '$0.15-$0.75/each', category: 'business_print', desc: 'Direct mail postcards for marketing campaigns.' },
+  { id: 'menus', name: 'Menus', priceRange: '$2-$10/each', category: 'business_print', desc: 'Restaurant, cafe, and event menus. Laminated or cardstock.' },
+  { id: 'ncr-forms', name: 'NCR Forms', priceRange: '$0.50-$2.00/each', category: 'business_print', desc: 'Carbonless copy forms for invoices, receipts, and work orders.' },
+  { id: 'booklets', name: 'Booklets & Catalogs', priceRange: '$3-$15/each', category: 'business_print', desc: 'Saddle-stitched and perfect-bound booklets for product lines.' },
+  { id: 'letterhead', name: 'Letterhead & Envelopes', priceRange: '$0.15-$0.50/each', category: 'business_print', desc: 'Professional branded stationery for your business.' },
+  { id: 'door-hangers', name: 'Door Hangers', priceRange: '$0.20-$0.75/each', category: 'business_print', desc: 'Die-cut door hangers for local marketing and promotions.' },
+  // ---- Promo Products ----
+  { id: 'drinkware', name: 'Drinkware', priceRange: '$5-$25/each', category: 'promo_products', desc: 'Custom mugs, tumblers, water bottles, and koozies.' },
+  { id: 'tote-bags', name: 'Tote Bags', priceRange: '$3-$15/each', category: 'promo_products', desc: 'Canvas and non-woven bags with your logo for events and retail.' },
+  { id: 'pens', name: 'Pens & Writing', priceRange: '$1-$5/each', category: 'promo_products', desc: 'Branded pens, pencils, and highlighters for offices and events.' },
+  { id: 'tech-accessories', name: 'Tech Accessories', priceRange: '$5-$30/each', category: 'promo_products', desc: 'Phone cases, chargers, USB drives, and earbuds with your brand.' },
+  { id: 'trade-show-displays', name: 'Trade Show Displays', priceRange: '$100-$500+', category: 'promo_products', desc: 'Tablecloths, backdrops, tents, and booth setups.' },
+  { id: 'lanyards', name: 'Lanyards & Badges', priceRange: '$2-$8/each', category: 'promo_products', desc: 'Custom lanyards, badge holders, and event credentials.' },
+  { id: 'stickers-labels', name: 'Stickers & Labels', priceRange: '$0.25-$3/each', category: 'promo_products', desc: 'Die-cut stickers, vinyl decals, product labels, and bumper stickers.' },
+  { id: 'keychains', name: 'Keychains & Accessories', priceRange: '$2-$10/each', category: 'promo_products', desc: 'Custom keychains, pins, magnets, and small branded items.' },
+  { id: 'packaging', name: 'Custom Packaging', priceRange: '$1-$10/each', category: 'promo_products', desc: 'Branded boxes, poly mailers, tissue paper, and tape.' },
+  { id: 'food-wellness', name: 'Food & Wellness Items', priceRange: '$3-$15/each', category: 'promo_products', desc: 'Branded snacks, mints, lip balm, hand sanitizer, and wellness kits.' },
+  { id: 'outdoor-leisure', name: 'Outdoor & Leisure', priceRange: '$5-$50/each', category: 'promo_products', desc: 'Umbrellas, coolers, blankets, and sports equipment with your logo.' },
+  { id: 'awards', name: 'Awards & Recognition', priceRange: '$10-$75/each', category: 'promo_products', desc: 'Trophies, plaques, medals, and crystal awards for achievements.' },
+  { id: 'pet-supplies', name: 'Pet Supplies', priceRange: '$5-$20/each', category: 'promo_products', desc: 'Custom pet bowls, bandanas, leashes, and toys for pet brands.' },
+  { id: 'auto-accessories', name: 'Auto Accessories', priceRange: '$5-$25/each', category: 'promo_products', desc: 'Car air fresheners, license plate frames, and seat covers.' },
+  // ---- Specialty ----
+  { id: 'uv-printing', name: 'UV Printing', priceRange: '$5-$50/piece', category: 'specialty', desc: 'Print directly on rigid surfaces: wood, metal, glass, acrylic, and more.' },
+  { id: 'sublimation', name: 'Sublimation (Products)', priceRange: '$8-$30/piece', category: 'specialty', desc: 'Vibrant full-color prints on mugs, mousepads, phone cases, and more.' },
+  { id: 'laser-engraving', name: 'Laser Engraving', priceRange: '$5-$40/piece', category: 'specialty', desc: 'Precision engraving on wood, metal, leather, glass, and acrylic.' },
+  { id: 'patches', name: 'Patches', priceRange: '$3-$15/each', category: 'specialty', desc: 'Embroidered, woven, PVC, and chenille patches for uniforms and merch.' },
+  { id: 'embroidered-patches', name: 'Embroidered Patches', priceRange: '$3-$10/each', category: 'specialty', desc: 'Classic thread patches with merrowed borders for hats and jackets.' },
+  { id: 'pvc-patches', name: 'PVC Patches', priceRange: '$3-$12/each', category: 'specialty', desc: 'Durable rubber patches for tactical, outdoor, and streetwear.' },
+  { id: 'chenille-patches', name: 'Chenille Patches', priceRange: '$5-$15/each', category: 'specialty', desc: 'Varsity-style fuzzy patches for letterman jackets and retro designs.' },
+  // ---- Design Services ----
+  { id: 'logo-design', name: 'Logo Design', priceRange: '$50-$200', category: 'design_services', desc: 'Custom logo creation with multiple concepts and revisions.' },
+  { id: 'vectorizing', name: 'Vectorizing', priceRange: '$10-$50', category: 'design_services', desc: 'Convert any image to a scalable vector file for production.' },
+  { id: 'mockups', name: 'Mockups', priceRange: '$10/Free with order', category: 'design_services', desc: 'See your design on the actual product before production.' },
+  { id: 'brand-identity', name: 'Brand Identity Package', priceRange: '$200-$500', category: 'design_services', desc: 'Full brand kit: logo, colors, fonts, business cards, and social templates.' },
+  { id: 'social-media-graphics', name: 'Social Media Graphics', priceRange: '$25-$100', category: 'design_services', desc: 'Custom graphics for Instagram, Facebook, TikTok, and more.' },
+  { id: 'illustration', name: 'Custom Illustration', priceRange: '$75-$300', category: 'design_services', desc: 'Hand-drawn and digital illustrations, mascots, and characters.' },
+  { id: 'photo-editing', name: 'Photo Editing', priceRange: '$15-$75', category: 'design_services', desc: 'Background removal, retouching, and product photo cleanup.' },
+  { id: 'shirt-design', name: 'Shirt & Apparel Design', priceRange: '$25-$200', category: 'design_services', desc: 'Custom artwork created specifically for t-shirts and apparel.' },
+  { id: 'packaging-design', name: 'Packaging Design', priceRange: '$75-$250', category: 'design_services', desc: 'Custom box, bag, and packaging artwork for your products.' },
+  { id: 'digitizing', name: 'Digitizing (DST)', priceRange: '$30-$75', category: 'design_services', desc: 'Convert artwork to embroidery-ready DST files for production.' }
 ];
 
 // Services catalog route
@@ -643,7 +681,16 @@ app.get('/api/services', (req, res) => {
 app.get('/api/widget-config', (req, res) => {
   res.json({
     services: SERVICES_CATALOG,
+    categories: SERVICE_CATEGORIES,
     styles: ['vintage', 'badge', 'bold_type', 'illustration', 'minimal', 'rubber_hose', 'retro_sport', 'hand_lettered'],
+    locations: [
+      { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
+      { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
+      { id: 'left-sleeve', name: 'Left Sleeve' },
+      { id: 'right-sleeve', name: 'Right Sleeve' },
+      { id: 'neck-label', name: 'Neck Label' },
+      { id: 'hat', name: 'Hat' }
+    ],
     company: { name: "Merchy's Merch", phone: '619-800-0949', email: 'start@merchysmerch.com' },
     stripeEnabled: !!stripe,
     recraftEnabled: !!RECRAFT_API_KEY
