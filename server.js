@@ -4,6 +4,13 @@
 // ================================================================
 
 require('dotenv').config();
+
+// Treat empty values and .env.example placeholders ("your_xxx_here") as unset,
+// so a copied-but-unfilled .env does not make the app think a service is live.
+for (const [k, v] of Object.entries(process.env)) {
+  if (typeof v === 'string' && (/^your_.*_here$/i.test(v.trim()) || v.trim() === '')) delete process.env[k];
+}
+
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -129,15 +136,15 @@ async function createPresaleTask(formData) {
     `/workspaces/${ASANA_WORKSPACE}/typeahead?resource_type=project&query=Presale&opt_fields=name,gid&count=5`
   );
 
-  let presaleProjectGid = null;
-  if (searchResult.data) {
+  let presaleProjectGid = process.env.ASANA_PRESALE_PROJECT_GID || null;
+  if (!presaleProjectGid && searchResult.data) {
     const presaleProject = searchResult.data.find(p =>
       p.name.toLowerCase().includes('presale') || p.name.toLowerCase().includes('pre-sale')
     );
     if (presaleProject) presaleProjectGid = presaleProject.gid;
   }
 
-  const taskName = `${formData.name} | ${formData.business || 'New Client'} | Design Request - ${formData.serviceType || 'Custom Design'}`;
+  const taskName = `${formData.name || 'Unknown'} | ${formData.business || 'New Client'} | ${serviceLabel(formData)} ${actionLabel(formData)}`;
 
   const taskData = {
     data: {
@@ -156,82 +163,118 @@ async function createPresaleTask(formData) {
   return result;
 }
 
-// Build formatted design notes HTML for Asana comment
-function buildDesignNotesHTML(formData) {
-  const products = (formData.products || []).join(', ');
-  const placements = Object.entries(formData.placements || {})
-    .map(([prod, locs]) => `${prod}: ${(locs || []).join(', ')}`)
-    .join('\n');
+// ---- Submission formatting helpers ----
+// The widget sends: name, email, business, text, desc, service, serviceName,
+// styles[], locations{ id: {position, instructions} }, designUrls[], selectedDesigns[],
+// action ('save_for_later' | 'add_to_product' | 'vector_request'), productType, saveEmail.
+// Older fields (serviceType, products, placements, pins, qty, deadline) are still read if present.
 
-  const pins = (formData.pins || [])
-    .filter(p => p.note || p.n)
-    .map((p, i) => `Pin ${i + 1} (${p.region || p.r}): ${p.note || p.n}`)
-    .join('\n');
-
-  const clarifyAnswers = Object.entries(formData.clarifyAnswers || {})
-    .map(([q, a]) => `Q: ${q}\nA: ${a}`)
-    .join('\n\n');
-
-  return `<body>
-<strong>AI DESIGN BOT SUBMISSION</strong>
-
-<strong>Client:</strong> ${formData.name || 'N/A'}
-<strong>Business:</strong> ${formData.business || 'N/A'}
-<strong>Email:</strong> ${formData.email || 'N/A'}
-<strong>Phone:</strong> ${formData.phone || 'N/A'}
-
-<strong>Service:</strong> ${formData.serviceType || 'N/A'}
-<strong>Decoration:</strong> ${formData.decoration || 'N/A'}
-<strong>Products:</strong> ${products || 'N/A'}
-<strong>Style:</strong> ${formData.style || 'N/A'}
-<strong>Quantity:</strong> ${formData.qty || 'N/A'}
-<strong>Deadline:</strong> ${formData.deadline || 'N/A'}
-
-<strong>Placements:</strong>
-${placements || 'N/A'}
-
-<strong>Design Text (Spell-Checked):</strong>
-${formData.text || 'N/A'}
-
-<strong>Design Description:</strong>
-${formData.desc || 'N/A'}
-
-<strong>Garment Colors:</strong> ${formData.gcol || 'N/A'}
-<strong>Design Colors:</strong> ${formData.dcol || 'B&W first'}
-
-<strong>Selected Option:</strong> ${formData.selectedOption || 'N/A'}
-
-${pins ? `<strong>Client Annotation Notes:</strong>\n${pins}` : ''}
-
-${clarifyAnswers ? `<strong>Clarifying Q&A:</strong>\n${clarifyAnswers}` : ''}
-
-<strong>Special Instructions:</strong>
-${formData.notes || 'None'}
-
-Submitted via AI Design Bot on ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
-</body>`;
+function serviceLabel(f) {
+  return f.serviceName || f.serviceType || f.decoration || 'Custom Design';
 }
 
-function buildPlainTextNotes(formData) {
-  const products = (formData.products || []).join(', ');
-  return `AI DESIGN BOT SUBMISSION
+function actionLabel(f) {
+  const map = {
+    save_for_later: '(Saved Designs)',
+    add_to_product: `(Add to Product: ${f.productType || 'TBD'})`,
+    vector_request: '(Vector File Request)'
+  };
+  return map[f.action] || '(Design Request)';
+}
 
-Client: ${formData.name || 'N/A'}
-Business: ${formData.business || 'N/A'}
-Email: ${formData.email || 'N/A'}
-Phone: ${formData.phone || 'N/A'}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+}
 
-Service: ${formData.serviceType || 'N/A'}
-Decoration: ${formData.decoration || 'N/A'}
-Products: ${products || 'N/A'}
-Style: ${formData.style || 'N/A'}
-Quantity: ${formData.qty || 'N/A'}
-Deadline: ${formData.deadline || 'N/A'}
+function locationLines(f) {
+  const locs = f.locations && typeof f.locations === 'object' && !Array.isArray(f.locations) ? f.locations : {};
+  const lines = Object.entries(locs).map(([id, v]) => {
+    const name = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const parts = [v?.position, v?.instructions].filter(Boolean).join(' - ');
+    return `${name}${parts ? ': ' + parts : ''}`;
+  });
+  // legacy placements: { product: [locs] }
+  Object.entries(f.placements || {}).forEach(([prod, l]) => lines.push(`${prod}: ${(l || []).join(', ')}`));
+  return lines;
+}
 
-Design Text: ${formData.text || 'N/A'}
-Description: ${formData.desc || 'N/A'}
+function designLines(f) {
+  return (f.designUrls || []).filter(Boolean).map((u, i) => `Design ${i + 1}: ${u}`);
+}
 
-Special Instructions: ${formData.notes || 'None'}`;
+// Fields for both the Asana comment and the plain text task description.
+function submissionFields(f) {
+  const styles = Array.isArray(f.styles) && f.styles.length ? f.styles.join(', ') : (f.style || 'N/A');
+  const products = Array.isArray(f.products) && f.products.length ? f.products.join(', ') : null;
+  return [
+    ['Client', f.name],
+    ['Business', f.business],
+    ['Email', f.email],
+    ['Phone', f.phone],
+    ['Service', serviceLabel(f)],
+    ['Request type', actionLabel(f).replace(/[()]/g, '')],
+    ['Product type', f.productType],
+    ['Products', products],
+    ['Styles', styles],
+    ['Quantity', f.qty],
+    ['Deadline', f.deadline],
+    ['Garment colors', f.gcol],
+    ['Design colors', f.dcol || 'B&W first'],
+    ['Account email', f.saveEmail]
+  ].filter(([, v]) => v !== undefined && v !== null && v !== '');
+}
+
+// Build design notes for an Asana comment (html_text). Plain labels, no bold, per house rules.
+function buildDesignNotesHTML(f) {
+  const fields = submissionFields(f).map(([k, v]) => `${k}: ${escapeHtml(v)}`).join('\n');
+  const locs = locationLines(f).map(escapeHtml).join('\n');
+  const designs = designLines(f).map(l => {
+    const [lbl, url] = l.split(': ');
+    return `${lbl}: <a href="${escapeHtml(url)}">${escapeHtml(url)}</a>`;
+  }).join('\n');
+  const pins = (f.pins || []).filter(p => p.note || p.n).map((p, i) => `Pin ${i + 1} (${p.region || p.r}): ${p.note || p.n}`).join('\n');
+
+  return `<body>AI Design Studio submission
+
+${fields}
+
+Placements:
+${locs || 'N/A'}
+
+Design text (spell exactly):
+${escapeHtml(f.text) || 'N/A'}
+
+Design description:
+${escapeHtml(f.desc) || 'N/A'}
+
+Selected designs:
+${designs || 'None selected'}
+${f.referenceImage ? `\nReference image: <a href="${escapeHtml(f.referenceImage)}">${escapeHtml(f.referenceImage)}</a>` : ''}
+${pins ? `\nClient annotation notes:\n${escapeHtml(pins)}` : ''}
+Special instructions:
+${escapeHtml(f.notes) || 'None'}
+
+Submitted via AI Design Studio on ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT</body>`;
+}
+
+function buildPlainTextNotes(f) {
+  const fields = submissionFields(f).map(([k, v]) => `${k}: ${v}`).join('\n');
+  return `AI Design Studio submission
+
+${fields}
+
+Placements:
+${locationLines(f).join('\n') || 'N/A'}
+
+Design text: ${f.text || 'N/A'}
+Description: ${f.desc || 'N/A'}
+
+Selected designs:
+${designLines(f).join('\n') || 'None selected'}
+${f.referenceImage ? `\nReference image: ${f.referenceImage}` : ''}
+Special instructions: ${f.notes || 'None'}
+
+Submitted via AI Design Studio on ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT`;
 }
 
 
@@ -319,76 +362,192 @@ FINAL CHECK: Would someone buy a shirt with this on it? Is it readable from acro
   return prompt;
 }
 
-// Generate designs via Recraft API
-async function generateDesigns(formData) {
-  if (!RECRAFT_API_KEY) {
-    console.log('No Recraft API key - returning placeholder designs');
-    return { designs: null, error: 'No API key configured. Using placeholder designs.' };
-  }
+const DESIGN_COUNT = 6;
+const RECRAFT_MODEL = process.env.RECRAFT_MODEL || 'recraftv3';
+const RECRAFT_STYLE = process.env.RECRAFT_STYLE || 'vector_illustration';
+const RECRAFT_TIMEOUT_MS = 90000;
 
-  const designs = [];
+// Generate one design via Recraft. Throws on failure.
+async function generateOneDesign(formData, i) {
+  const prompt = buildDesignPrompt(formData, i);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RECRAFT_TIMEOUT_MS);
 
-  for (let i = 0; i < 6; i++) {
-    try {
-      const prompt = buildDesignPrompt(formData, i);
+  try {
+    const response = await fetch(`${RECRAFT_BASE}/images/generations`, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${RECRAFT_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+        model: RECRAFT_MODEL,
+        style: RECRAFT_STYLE,
+        size: '1024x1024',
+        n: 1,
+        response_format: 'url',
+        controls: {
+          colors: [{ rgb: [0, 0, 0] }, { rgb: [255, 255, 255] }],
+          background_color: { rgb: [255, 255, 255] }
+        }
+      })
+    });
 
-      const response = await fetch(`${RECRAFT_BASE}/images/generations`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RECRAFT_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt: prompt,
-          style: 'vector_illustration',
-          model: 'recraftv4',
-          size: '1024x1024',
-          response_format: 'url',
-          controls: {
-            colors: [{ rgb: [0, 0, 0] }, { rgb: [255, 255, 255] }]
-          }
-        })
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error(`Recraft generation ${i} failed:`, errText);
-        designs.push({ error: `Generation failed: ${response.status}` });
-        continue;
-      }
-
-      const data = await response.json();
-      const imageUrl = data.data?.[0]?.url;
-
-      if (imageUrl) {
-        // Download and save the image locally
-        const imgResponse = await fetch(imageUrl);
-        const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
-        const filename = `design-${Date.now()}-${i}.png`;
-        const filepath = path.join(uploadsDir, filename);
-        fs.writeFileSync(filepath, imgBuffer);
-
-        designs.push({
-          url: `/uploads/${filename}`,
-          remoteUrl: imageUrl,
-          variation: i,
-          prompt: prompt
-        });
-      } else {
-        designs.push({ error: 'No image URL in response' });
-      }
-    } catch (err) {
-      console.error(`Recraft generation ${i} error:`, err.message);
-      designs.push({ error: err.message });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Recraft ${response.status}: ${errText.slice(0, 200)}`);
     }
-  }
 
-  return { designs };
+    const data = await response.json();
+    const imageUrl = data.data?.[0]?.url;
+    if (!imageUrl) throw new Error('No image URL in Recraft response');
+
+    // Download and save locally (Recraft URLs expire after ~24h)
+    const imgResponse = await fetch(imageUrl, { signal: controller.signal });
+    if (!imgResponse.ok) throw new Error(`Image download failed: ${imgResponse.status}`);
+    const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+    const filename = `design-${Date.now()}-${i}.png`;
+    fs.writeFileSync(path.join(uploadsDir, filename), imgBuffer);
+
+    return { url: `/uploads/${filename}`, remoteUrl: imageUrl, variation: i, prompt, source: 'recraft' };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
-// Try to vectorize using Recraft's vectorize endpoint
+// Generate all designs. Runs in parallel. Falls back to local demo designs
+// when Recraft is not configured or every generation fails, so the client
+// flow always completes end to end.
+async function generateDesigns(formData) {
+  if (!RECRAFT_API_KEY) {
+    console.log('No Recraft API key - serving demo designs');
+    return { designs: buildDemoDesigns(formData), demo: true, notice: 'Preview mode: AI generation is not connected yet. These are layout previews.' };
+  }
+
+  const settled = await Promise.allSettled(
+    Array.from({ length: DESIGN_COUNT }, (_, i) => generateOneDesign(formData, i))
+  );
+
+  const designs = settled.map((r, i) => {
+    if (r.status === 'fulfilled') return r.value;
+    console.error(`Recraft generation ${i} failed:`, r.reason?.message || r.reason);
+    return { error: r.reason?.message || 'Generation failed', variation: i };
+  });
+
+  const okCount = designs.filter(d => !d.error).length;
+  if (okCount === 0) {
+    const firstErr = designs[0]?.error || 'unknown error';
+    console.error('All Recraft generations failed, serving demo designs. First error:', firstErr);
+    return { designs: buildDemoDesigns(formData), demo: true, notice: 'Preview mode: AI generation is temporarily unavailable. These are layout previews.', error: firstErr };
+  }
+
+  // Backfill any individual failures with demo layouts so the grid is always full
+  const demo = buildDemoDesigns(formData);
+  const finalDesigns = designs.map((d, i) => d.error ? { ...demo[i], fallback: true } : d);
+  return { designs: finalDesigns, demo: false, partial: okCount < DESIGN_COUNT };
+}
+
+// ---- Local demo designs (no API needed) ----
+// Produces 6 black and white SVG layout previews using the client's own text,
+// written to /uploads so they behave exactly like generated PNGs downstream.
+function escapeXml(s) {
+  return String(s || '').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
+}
+
+function splitWords(text, maxPerLine) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    if ((cur + ' ' + w).trim().length > maxPerLine && cur) { lines.push(cur); cur = w; }
+    else cur = (cur + ' ' + w).trim();
+  }
+  if (cur) lines.push(cur);
+  return lines.slice(0, 3);
+}
+
+// Shrink a font size so `text` fits within maxWidth px (approx. 0.7em per char for heavy sans)
+function fitSize(text, maxWidth, base, charW = 0.7) {
+  const len = Math.max(1, String(text || '').length);
+  return Math.max(28, Math.min(base, Math.floor(maxWidth / (len * charW))));
+}
+
+function buildDemoDesigns(formData) {
+  const business = (formData.business || formData.name || "MERCHY'S").toUpperCase();
+  const rawText = (formData.text || '').replace(/^(front|back|sleeve|hat)\s*:/gim, '').trim();
+  const line = (rawText || formData.desc || 'CUSTOM DONE RIGHT').toUpperCase();
+  const words = splitWords(line, 16);
+  const styleName = (formData.styles && formData.styles[0]) || formData.style || 'badge';
+  const B = escapeXml(business);
+  const L1 = escapeXml(words[0] || '');
+  const L2 = escapeXml(words[1] || '');
+  const year = new Date().getFullYear();
+
+  const font = `font-family="Arial Black, Impact, Helvetica, sans-serif" font-weight="900"`;
+  const defs = `<defs><path id="arcTop" d="M 112 512 A 400 400 0 0 1 912 512"/><path id="arcBot" d="M 132 512 A 380 380 0 0 0 892 512"/></defs>`;
+  const bg = `<rect width="1024" height="1024" fill="#fff"/>`;
+  const label = (n) => `<text x="992" y="1004" text-anchor="end" font-family="Arial, sans-serif" font-size="22" fill="#999">LAYOUT ${n} PREVIEW</text>`;
+
+  // Simple generic center marks per layout (bold shapes that print in one color)
+  const starMark = `<path d="M512 330 L556 440 L674 448 L582 522 L616 638 L512 572 L408 638 L442 522 L350 448 L468 440 Z" fill="#000"/>`;
+  const boltMark = `<path d="M560 300 L420 540 L510 540 L470 740 L620 470 L530 470 Z" fill="#000"/>`;
+  const shieldMark = `<path d="M512 300 L660 350 L640 560 Q600 660 512 720 Q424 660 384 560 L364 350 Z" fill="none" stroke="#000" stroke-width="28"/><path d="M460 520 L500 560 L580 460" fill="none" stroke="#000" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const toolsMark = `<g stroke="#000" stroke-width="40" stroke-linecap="round"><line x1="380" y1="360" x2="644" y2="624"/><line x1="644" y1="360" x2="380" y2="624"/></g><circle cx="512" cy="492" r="70" fill="#fff" stroke="#000" stroke-width="28"/>`;
+  const mountMark = `<path d="M300 660 L440 420 L520 540 L580 450 L724 660 Z" fill="#000"/><circle cx="660" cy="380" r="40" fill="#000"/>`;
+  const monoMark = `<text x="512" y="600" text-anchor="middle" ${font} font-size="360" fill="#000">${escapeXml(business.charAt(0) || 'M')}</text>`;
+
+  const layouts = [
+    // A: classic badge, arc text
+    `${defs}${bg}<circle cx="512" cy="512" r="440" fill="none" stroke="#000" stroke-width="30"/><circle cx="512" cy="512" r="380" fill="none" stroke="#000" stroke-width="8"/>
+     <text ${font} font-size="76" fill="#000" letter-spacing="6"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">${B}</textPath></text>
+     ${starMark}
+     <text ${font} font-size="58" fill="#000" letter-spacing="4"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">${L1 || 'EST. ' + year}</textPath></text>${label('A')}`,
+    // B: typography-forward stacked block
+    `${bg}<rect x="92" y="92" width="840" height="840" fill="none" stroke="#000" stroke-width="22"/>
+     <text x="512" y="380" text-anchor="middle" ${font} font-size="${fitSize(business.split(' ')[0] || 'MERCH', 760, 150)}" fill="#000">${escapeXml(business.split(' ')[0] || 'MERCH')}</text>
+     <rect x="160" y="420" width="704" height="110" fill="#000"/>
+     <text x="512" y="500" text-anchor="middle" ${font} font-size="${fitSize(words[0] || business, 640, 68)}" fill="#fff" letter-spacing="4">${L1 || B}</text>
+     <text x="512" y="660" text-anchor="middle" ${font} font-size="${fitSize(words[1] || business.split(' ').slice(1).join(' ') || 'EST. 2000', 760, 64)}" fill="#000" letter-spacing="4">${L2 || escapeXml(business.split(' ').slice(1).join(' ') || 'EST. ' + year)}</text>
+     <text x="512" y="800" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" fill="#000" letter-spacing="12">${escapeXml((formData.decoration || 'CUSTOM').toUpperCase())}</text>${label('B')}`,
+    // C: illustration-forward with compact text
+    `${bg}${mountMark}<rect x="200" y="700" width="624" height="16" fill="#000"/>
+     <text x="512" y="800" text-anchor="middle" ${font} font-size="${fitSize(business, 860, 84)}" fill="#000" letter-spacing="4">${B}</text>
+     <text x="512" y="880" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="42" fill="#000" letter-spacing="10">${L1 || 'EST. ' + year}</text>${label('C')}`,
+    // D: horizontal banner (back of shirt)
+    `${bg}<rect x="60" y="380" width="904" height="264" fill="#000"/>
+     <text x="512" y="490" text-anchor="middle" ${font} font-size="${fitSize(business, 840, 110)}" fill="#fff" letter-spacing="2">${B}</text>
+     <text x="512" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${fitSize(words[0] || 'CUSTOM DONE RIGHT', 820, 54, 0.75)}" fill="#fff" letter-spacing="6">${L1 || 'CUSTOM DONE RIGHT'}</text>
+     <g transform="translate(0,-220) scale(0.55) translate(420,180)">${boltMark}</g>
+     <g transform="translate(0,370) scale(0.55) translate(420,180)">${boltMark}</g>${label('D')}`,
+    // E: stacked vertical column
+    `${bg}<g transform="translate(0,-150)">${shieldMark}</g>
+     <text x="512" y="700" text-anchor="middle" ${font} font-size="${fitSize(business, 880, 96)}" fill="#000" letter-spacing="2">${B}</text>
+     <line x1="300" y1="740" x2="724" y2="740" stroke="#000" stroke-width="10"/>
+     <text x="512" y="820" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="46" fill="#000" letter-spacing="8">${L1 || 'EST. ' + year}</text>
+     <text x="512" y="890" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" fill="#000" letter-spacing="6">${L2 || escapeXml('SAN DIEGO, CA')}</text>${label('E')}`,
+    // F: asymmetric bold
+    `${bg}<g transform="translate(-290,-20) scale(0.95) translate(0,40)">${styleName === 'trade_tools' ? toolsMark : monoMark}</g>
+     <text x="560" y="420" ${font} font-size="${fitSize(business.split(' ')[0] || 'MERCH', 420, 100)}" fill="#000">${escapeXml(business.split(' ')[0] || 'MERCH')}</text>
+     <text x="560" y="520" ${font} font-size="${fitSize(business.split(' ').slice(1).join(' ') || 'MERCH', 420, 100)}" fill="#000">${escapeXml(business.split(' ').slice(1).join(' ') || 'MERCH')}</text>
+     <rect x="560" y="560" width="380" height="14" fill="#000"/>
+     <text x="560" y="640" font-family="Arial, sans-serif" font-weight="700" font-size="${fitSize(words[0] || 'EST. 2000', 400, 44, 0.75)}" fill="#000" letter-spacing="4">${L1 || 'EST. ' + year}</text>${label('F')}`
+  ];
+
+  const stamp = Date.now();
+  return layouts.map((inner, i) => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${inner}</svg>`;
+    const filename = `demo-${stamp}-${i}.svg`;
+    fs.writeFileSync(path.join(uploadsDir, filename), svg);
+    return { url: `/uploads/${filename}`, variation: i, source: 'demo', prompt: buildDesignPrompt(formData, i) };
+  });
+}
+
+// Vectorize using Recraft's vectorize endpoint
 async function vectorizeDesign(imageUrl) {
-  if (!RECRAFT_API_KEY) return { error: 'No API key' };
+  if (!RECRAFT_API_KEY) return { error: 'Vectorizing is not connected yet. Call 619-800-0949 and we will send your vector file.' };
+  if (!imageUrl || !/^https?:\/\//i.test(imageUrl)) return { error: 'A public image URL is required to vectorize.' };
 
   try {
     const response = await fetch(`${RECRAFT_BASE}/images/vectorize`, {
@@ -397,12 +556,17 @@ async function vectorizeDesign(imageUrl) {
         'Authorization': `Bearer ${RECRAFT_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ file: imageUrl })
+      body: JSON.stringify({ image_url: imageUrl, response_format: 'url' })
     });
 
-    if (!response.ok) return { error: `Vectorize failed: ${response.status}` };
+    if (!response.ok) {
+      const errText = await response.text();
+      return { error: `Vectorize failed: ${response.status} ${errText.slice(0, 120)}` };
+    }
     const data = await response.json();
-    return { svg_url: data.data?.[0]?.url };
+    const svgUrl = data.image?.url || data.data?.[0]?.url;
+    if (!svgUrl) return { error: 'No SVG URL in vectorize response' };
+    return { svg_url: svgUrl };
   } catch (err) {
     return { error: err.message };
   }
@@ -417,6 +581,7 @@ async function vectorizeDesign(imageUrl) {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
+    demoMode: !RECRAFT_API_KEY,
     asana: !!ASANA_TOKEN,
     recraft: !!RECRAFT_API_KEY,
     email: !!emailTransporter,
@@ -469,7 +634,14 @@ app.post('/api/vectorize', async (req, res) => {
 
 // Submit final design request (routes to Asana)
 app.post('/api/submit', async (req, res) => {
-  const formData = req.body;
+  const formData = req.body || {};
+  if (!formData.name && !formData.email) return res.status(400).json({ success: false, error: 'Name or email is required' });
+
+  // Make relative /uploads paths absolute so Asana and email links work
+  const base = (process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const abs = (u) => (u && u.startsWith('/')) ? base + u : u;
+  formData.designUrls = (formData.designUrls || []).map(abs).filter(Boolean);
+  formData.referenceImage = abs(formData.referenceImage);
   console.log('=== DESIGN SUBMISSION ===');
   console.log('Client:', formData.name, '|', formData.business);
   console.log('PO:', formData.poNumber || 'None');
@@ -563,7 +735,8 @@ app.post('/api/submit', async (req, res) => {
   // ---- Send email confirmation ----
   if (emailTransporter && formData.email) {
     try {
-      const products = (formData.products || []).join(', ');
+      const designImgs = (formData.designUrls || []).map(u => `<img src="${escapeHtml(u)}" style="width:120px;height:120px;object-fit:cover;border:1px solid #ddd;border-radius:6px;margin:4px">`).join('');
+      const requestType = actionLabel(formData).replace(/[()]/g, '');
       await emailTransporter.sendMail({
         from: process.env.EMAIL_FROM || 'Merchy\'s Design Studio <start@merchysmerch.com>',
         to: formData.email,
@@ -580,12 +753,13 @@ app.post('/api/submit', async (req, res) => {
                 Our team is reviewing your request and will follow up within 24 hours.
               </p>
               <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 4px 0; font-size: 14px;"><strong>Service:</strong> ${formData.serviceType || 'Custom Design'}</p>
-                <p style="margin: 4px 0; font-size: 14px;"><strong>Decoration:</strong> ${formData.decoration || 'TBD'}</p>
-                <p style="margin: 4px 0; font-size: 14px;"><strong>Products:</strong> ${products || 'TBD'}</p>
-                <p style="margin: 4px 0; font-size: 14px;"><strong>Selected Option:</strong> ${formData.selectedOption || 'TBD'}</p>
-                ${formData.poNumber ? `<p style="margin: 4px 0; font-size: 14px;"><strong>PO #:</strong> ${formData.poNumber}</p>` : ''}
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Service:</strong> ${escapeHtml(serviceLabel(formData))}</p>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Request:</strong> ${escapeHtml(requestType)}</p>
+                ${formData.productType ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Product:</strong> ${escapeHtml(formData.productType)}</p>` : ''}
+                ${formData.text ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Design text:</strong> ${escapeHtml(formData.text)}</p>` : ''}
+                ${formData.poNumber ? `<p style="margin: 4px 0; font-size: 14px;"><strong>PO #:</strong> ${escapeHtml(formData.poNumber)}</p>` : ''}
               </div>
+              ${designImgs ? `<p style="color: #555; font-size: 14px; margin-bottom: 4px;">Your selected designs:</p><div>${designImgs}</div>` : ''}
               <p style="color: #555; line-height: 1.6;">
                 If you have any questions, reply to this email or text us at 619-800-0949.
               </p>
@@ -737,7 +911,8 @@ app.get('/api/widget-config', (req, res) => {
     ],
     company: { name: "Merchy's Merch", phone: '619-800-0949', email: 'start@merchysmerch.com' },
     stripeEnabled: !!stripe,
-    recraftEnabled: !!RECRAFT_API_KEY
+    recraftEnabled: !!RECRAFT_API_KEY,
+    demoMode: !RECRAFT_API_KEY
   });
 });
 
@@ -800,929 +975,9 @@ app.get('/api/vectorize-success', async (req, res) => {
 });
 
 
-// ---- Serve frontend (all inline, no /public folder needed) ----
-
-const WIDGET_HTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Merchy's Design Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Poppins',sans-serif;background:#fff;color:#111;overflow-x:hidden}
-
-/* Header */
-.header{background:#111;color:#d4a017;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;position:sticky;top:0;z-index:100}
-.header h1{font-size:18px;font-weight:700;letter-spacing:1px}
-.header .steps{font-size:13px;color:#999;margin-top:2px}
-.close-btn{background:none;border:none;color:#999;font-size:22px;cursor:pointer;padding:6px}
-.close-btn:hover{color:#fff}
-
-/* Content */
-.content{padding:20px 24px;overflow-y:auto;height:calc(100vh - 64px)}
-.step{display:none}
-.step.active{display:block;animation:fadeUp .2s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-
-/* Category Tabs */
-.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
-.cat-tabs::-webkit-scrollbar{height:0}
-.cat-tab{padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;border:2px solid #e5e5e5;background:#fff;transition:all .15s;flex-shrink:0}
-.cat-tab:hover{border-color:#d4a017}
-.cat-tab.active{background:#111;color:#d4a017;border-color:#111}
-
-/* Search */
-.search-bar{width:100%;padding:12px 16px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:15px;margin-bottom:14px;outline:none;transition:border .15s}
-.search-bar:focus{border-color:#d4a017}
-
-/* Service tiles - 6 wide grid */
-.svc-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
-.svc-tile{background:#fff;border:2px solid #eee;border-radius:10px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center}
-.svc-tile:hover{border-color:#d4a017;box-shadow:0 4px 16px rgba(212,160,23,.1);transform:translateY(-2px)}
-.svc-tile.selected{border-color:#d4a017;background:#111;color:#d4a017}
-.svc-tile .tile-icon{width:48px;height:48px;margin-bottom:8px;display:flex;align-items:center;justify-content:center}
-.svc-tile .tile-icon svg{width:40px;height:40px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.svc-tile.selected .tile-icon svg{stroke:#d4a017}
-.svc-tile .tile-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:4px}
-.svc-tile .tile-desc{font-size:11px;color:#999;line-height:1.3}
-.svc-tile.selected .tile-desc{color:#888}
-.no-results{text-align:center;color:#888;font-size:14px;padding:24px 0}
-
-/* Responsive: fewer columns on smaller screens */
-@media(max-width:900px){.svc-grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:600px){.svc-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:400px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
-
-/* Form layout - side by side */
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
-.form-row.full{grid-template-columns:1fr}
-label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#444;text-transform:uppercase;letter-spacing:.5px}
-input[type="text"],input[type="email"],textarea,select{width:100%;padding:11px 14px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:15px;outline:none;transition:border .15s;margin-bottom:14px}
-input:focus,textarea:focus,select:focus{border-color:#d4a017}
-textarea{resize:vertical;min-height:70px}
-
-/* Multi-location picker */
-.loc-section{margin-bottom:14px}
-.loc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.loc-btn{padding:10px 6px;border:2px solid #eee;border-radius:8px;cursor:pointer;text-align:center;font-size:14px;font-weight:600;transition:all .15s;background:#fff}
-.loc-btn:hover{border-color:#d4a017}
-.loc-btn.active{background:#111;color:#d4a017;border-color:#111}
-.loc-detail{background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:8px;display:none;animation:fadeUp .15s ease}
-.loc-detail.visible{display:block}
-.loc-detail h4{font-size:14px;font-weight:700;margin-bottom:6px;color:#111}
-.loc-detail textarea{min-height:50px;margin-bottom:6px}
-
-/* Upload area - compact inline */
-.upload-area{border:2px dashed #ddd;border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px;display:flex;align-items:center;gap:10px;justify-content:center}
-.upload-area:hover{border-color:#d4a017;background:#fffdf5}
-.upload-area.has-file{border-color:#d4a017;background:#f0f7e6}
-.upload-area p{font-size:14px;color:#888}
-.upload-area .plus{font-size:22px;color:#ccc;font-weight:700}
-.upload-preview{max-width:48px;max-height:40px;border-radius:4px}
-
-/* Style picker - 20 styles, 5-wide grid with SVG icons */
-.style-section{margin-bottom:16px}
-.style-counter{font-size:13px;color:#888;margin-bottom:8px;text-align:right}
-.style-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-@media(max-width:700px){.style-grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:500px){.style-grid{grid-template-columns:repeat(3,1fr)}}
-.style-card{padding:12px 6px 8px;border:2px solid #eee;border-radius:10px;cursor:pointer;text-align:center;transition:all .15s;background:#fff}
-.style-card:hover{border-color:#d4a017;background:#fffdf5;transform:translateY(-1px)}
-.style-card.active{background:#111;color:#d4a017;border-color:#d4a017}
-.style-card.disabled{opacity:.3;cursor:not-allowed;transform:none}
-.style-card .s-icon{width:44px;height:44px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center}
-.style-card .s-icon svg{width:36px;height:36px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.style-card .s-name{font-size:12px;font-weight:700;line-height:1.2}
-.style-card .s-hint{font-size:10px;color:#aaa;line-height:1.2;margin-top:2px}
-.style-card.active .s-hint{color:#999}
-
-/* Selected service pill */
-.sel-pill{display:inline-flex;align-items:center;gap:8px;background:#f8f8f8;border-radius:8px;padding:8px 14px;margin-bottom:16px;font-size:15px;font-weight:600}
-.sel-pill .dot{width:10px;height:10px;border-radius:50%;background:#d4a017}
-
-/* Buttons */
-.btn{width:100%;padding:14px;border:none;border-radius:8px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.5px}
-.btn-primary{background:#d4a017;color:#111}
-.btn-primary:hover{background:#e8b420}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-back{background:none;border:2px solid #eee;color:#555;margin-bottom:8px;font-size:14px;padding:10px}
-.btn-back:hover{border-color:#111;color:#111}
-
-/* Design results - 6 designs in 3x2 grid, multi-select */
-.designs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.design-card{border:2px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
-.design-card:hover{border-color:#d4a017}
-.design-card.selected{border-color:#d4a017;box-shadow:0 0 0 3px #d4a017}
-.design-card .check-badge{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#d4a017;color:#111;font-size:14px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
-.design-card.selected .check-badge{display:flex}
-.design-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.design-card .watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(0,0,0,.12);pointer-events:none;transform:rotate(-30deg);letter-spacing:2px}
-.sel-count{font-size:13px;color:#888;margin-bottom:8px;text-align:right}
-
-/* Loading */
-.loading{text-align:center;padding:30px}
-.spinner{width:36px;height:36px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading p{font-size:14px;color:#888}
-
-/* Summary */
-.summary-box{background:#f8f8f8;border-radius:8px;padding:14px;margin-bottom:14px}
-.summary-box h3{font-size:15px;font-weight:700;margin-bottom:8px}
-.summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
-.summary-row .label{color:#888}
-.summary-row .val{font-weight:600}
-
-/* Step 4: Three path cards */
-.path-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
-.path-card{border:2px solid #eee;border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px}
-.path-card:hover{border-color:#d4a017;background:#fffdf5;transform:translateY(-1px)}
-.path-card .p-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.path-card .p-icon svg{width:28px;height:28px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.path-card .p-icon.gold{background:#111}
-.path-card .p-icon.dark{background:#f5f5f5}
-.path-card .p-info h3{font-size:16px;font-weight:700;margin-bottom:2px;color:#111}
-.path-card .p-info p{font-size:13px;color:#888;line-height:1.3}
-.path-card .p-arrow{margin-left:auto;font-size:20px;color:#ccc}
-
-/* Sub-pages (vector, save, product) */
-.sub-page{display:none;animation:fadeUp .2s ease}
-.sub-page.active{display:block}
-.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.product-card{border:2px solid #eee;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .15s}
-.product-card:hover{border-color:#d4a017}
-.product-card.selected{border-color:#d4a017;background:#111;color:#d4a017}
-.product-card .pc-icon{font-size:28px;margin-bottom:6px}
-.product-card .pc-name{font-size:14px;font-weight:700}
-.product-card .pc-desc{font-size:11px;color:#999;margin-top:2px}
-</style>
-</head>
-<body>
-
-<div class="header">
-  <div>
-    <h1>DESIGN STUDIO</h1>
-    <div class="steps" id="stepLabel">Step 1 of 4 - Choose Service</div>
-  </div>
-  <button class="close-btn" onclick="window.parent?.postMessage({type:'close-widget'},'*')">&times;</button>
-</div>
-
-<div class="content" id="content">
-
-  <!-- STEP 1: Service Tiles -->
-  <div class="step active" id="step1">
-    <div class="cat-tabs" id="catTabs"></div>
-    <input type="text" class="search-bar" placeholder="Search services..." id="searchBar" oninput="filterServices()">
-    <div id="serviceGrid" class="svc-grid"></div>
-    <div id="noResults" class="no-results" style="display:none">No services found.</div>
-  </div>
-
-  <!-- STEP 2: Design Details -->
-  <div class="step" id="step2">
-    <button class="btn btn-back" onclick="goStep(1)">Back</button>
-    <div class="sel-pill" id="selPill"><span class="dot"></span><span id="selSvcName"></span></div>
-
-    <div class="form-row">
-      <div><label>Name</label><input type="text" id="userName" placeholder="John Smith"></div>
-      <div><label>Email</label><input type="email" id="userEmail" placeholder="john@company.com"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Business / Brand</label><input type="text" id="userBusiness" placeholder="Your Company Name"></div>
-      <div><label>Text for Design</label><input type="text" id="designText" placeholder="Brand Name, Est. 2024"></div>
-    </div>
-    <div class="form-row full">
-      <div><label>Describe What You Want</label><textarea id="designDesc" placeholder="A bold logo with a mountain icon for an outdoor adventure company"></textarea></div>
-    </div>
-
-    <!-- Print Location Picker (apparel only) -->
-    <div class="loc-section" id="locationSection" style="display:none">
-      <label>Print Locations (select all that apply)</label>
-      <div class="loc-grid" id="locGrid"></div>
-      <div id="locDetails"></div>
-    </div>
-
-    <!-- Upload -->
-    <label>Reference Image (optional)</label>
-    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-      <span class="plus">+</span>
-      <p>Upload a reference image</p>
-    </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleUpload(this)">
-
-    <!-- Style Picker -->
-    <div class="style-section">
-      <label>Design Style <span style="font-weight:400;color:#aaa;text-transform:none">(pick up to 3)</span></label>
-      <div class="style-counter" id="styleCounter">0 of 3 selected</div>
-      <div class="style-grid" id="styleGrid"></div>
-    </div>
-
-    <button class="btn btn-primary" onclick="generateDesigns()" id="generateBtn">Generate 6 AI Designs</button>
-  </div>
-
-  <!-- STEP 3: Review Designs (6 designs, multi-select) -->
-  <div class="step" id="step3">
-    <button class="btn btn-back" onclick="goStep(2)">Back to Details</button>
-    <div class="loading" id="loadingState">
-      <div class="spinner"></div>
-      <p>Creating your designs...</p>
-      <p style="font-size:12px;color:#aaa;margin-top:4px">This may take 30-60 seconds</p>
-    </div>
-    <div id="designResults" style="display:none">
-      <p style="font-size:15px;font-weight:600;margin-bottom:4px">Select your favorites:</p>
-      <div class="sel-count" id="designSelCount">0 selected</div>
-      <div class="designs-grid" id="designsGrid"></div>
-      <button class="btn btn-primary" onclick="goStep(4)" id="continueBtn" disabled>Continue with Selected Designs</button>
-      <button class="btn btn-back" onclick="regenerate()" style="margin-top:6px">Regenerate All</button>
-    </div>
-  </div>
-
-  <!-- STEP 4: Choose Your Path -->
-  <div class="step" id="step4">
-    <button class="btn btn-back" onclick="goStep(3)">Back to Designs</button>
-
-    <!-- Selected designs preview -->
-    <div id="selectedPreview" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center"></div>
-
-    <!-- Main path selection -->
-    <div id="pathSelection">
-      <p style="font-size:16px;font-weight:700;margin-bottom:12px;text-align:center">What would you like to do?</p>
-      <div class="path-cards">
-        <div class="path-card" onclick="showSubPage('vector')">
-          <div class="p-icon gold"><svg viewBox="0 0 24 24"><path d="M12 2L2 7L12 12L22 7L12 2Z"/><path d="M2 17L12 22L22 17"/><path d="M2 12L12 17L22 12"/></svg></div>
-          <div class="p-info">
-            <h3>Get Vector File - \$25</h3>
-            <p>Production-ready SVG vector. Scalable to any size. Instant download after payment.</p>
-          </div>
-          <span class="p-arrow">&#8250;</span>
-        </div>
-        <div class="path-card" onclick="showSubPage('save')">
-          <div class="p-icon dark"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
-          <div class="p-info">
-            <h3>Save for Later</h3>
-            <p>Log in to save your designs to your account. Come back anytime to continue.</p>
-          </div>
-          <span class="p-arrow">&#8250;</span>
-        </div>
-        <div class="path-card" onclick="showSubPage('product')">
-          <div class="p-icon dark"><svg viewBox="0 0 24 24"><path d="M14 2L20 6L20 10L14 14L8 10L8 6Z"/><path d="M4 10L10 14L10 22L4 18Z"/><path d="M20 10L14 14L14 22L20 18Z"/></svg></div>
-          <div class="p-info">
-            <h3>Add to Product</h3>
-            <p>Put your design on apparel, hats, bags, or any product. Pick your item and order.</p>
-          </div>
-          <span class="p-arrow">&#8250;</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUB-PAGE: Vector Purchase -->
-    <div class="sub-page" id="subVector">
-      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
-      <div style="text-align:center;margin-bottom:16px">
-        <div id="vectorPreviewImgs" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"></div>
-      </div>
-      <div style="background:#f8f8f8;border-radius:12px;padding:20px;text-align:center">
-        <p style="font-size:18px;font-weight:700;margin-bottom:4px">Production-Ready Vector File</p>
-        <p style="font-size:14px;color:#666;margin-bottom:16px">Scalable SVG format. Clean paths. Ready for screen print, embroidery, or any production method.</p>
-        <p style="font-size:28px;font-weight:700;color:#d4a017;margin-bottom:16px">\$25</p>
-        <button class="btn btn-primary" onclick="purchaseVector()" id="vectorBtn">Pay & Download Vector</button>
-        <p style="font-size:11px;color:#aaa;margin-top:8px">Secure payment via Stripe. Instant delivery.</p>
-      </div>
-    </div>
-
-    <!-- SUB-PAGE: Save for Later (login required) -->
-    <div class="sub-page" id="subSave">
-      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
-      <div style="background:#f8f8f8;border-radius:12px;padding:24px;text-align:center">
-        <div style="font-size:36px;margin-bottom:10px">&#128274;</div>
-        <p style="font-size:18px;font-weight:700;margin-bottom:6px">Log In to Save Your Designs</p>
-        <p style="font-size:14px;color:#666;margin-bottom:20px">Create an account or log in to save your designs and come back to them anytime.</p>
-        <div style="text-align:left;max-width:300px;margin:0 auto">
-          <label>Email</label>
-          <input type="email" id="saveEmail" placeholder="your@email.com">
-          <label>Password</label>
-          <input type="text" id="savePassword" placeholder="Password" style="-webkit-text-security:disc">
-        </div>
-        <button class="btn btn-primary" onclick="handleSaveLogin()" id="saveLoginBtn" style="max-width:300px;margin:0 auto">Log In & Save</button>
-        <p style="font-size:12px;color:#888;margin-top:10px">Don't have an account? <a href="https://merchysmarket.com/register" target="_blank" style="color:#d4a017;font-weight:600">Sign up at merchysmarket.com</a></p>
-      </div>
-    </div>
-
-    <!-- SUB-PAGE: Add to Product -->
-    <div class="sub-page" id="subProduct">
-      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
-      <p style="font-size:16px;font-weight:700;margin-bottom:12px">What type of product?</p>
-      <div class="product-grid" id="productTypeGrid">
-        <div class="product-card" onclick="selectProductType('tshirts')">
-          <div class="pc-icon">&#128085;</div>
-          <div class="pc-name">T-Shirts</div>
-          <div class="pc-desc">Crew neck, V-neck, long sleeve</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('hoodies')">
-          <div class="pc-icon">&#129509;</div>
-          <div class="pc-name">Hoodies & Sweats</div>
-          <div class="pc-desc">Pullover, zip-up, crewneck</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('polos')">
-          <div class="pc-icon">&#128084;</div>
-          <div class="pc-name">Polos & Uniforms</div>
-          <div class="pc-desc">Polos, button-downs, work wear</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('hats')">
-          <div class="pc-icon">&#129506;</div>
-          <div class="pc-name">Hats & Caps</div>
-          <div class="pc-desc">Snapback, dad hat, beanie, fitted</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('bags')">
-          <div class="pc-icon">&#128092;</div>
-          <div class="pc-name">Bags & Totes</div>
-          <div class="pc-desc">Canvas totes, backpacks, duffels</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('jackets')">
-          <div class="pc-icon">&#129509;</div>
-          <div class="pc-name">Jackets & Outerwear</div>
-          <div class="pc-desc">Coach, bomber, windbreaker</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('accessories')">
-          <div class="pc-icon">&#127991;</div>
-          <div class="pc-name">Accessories</div>
-          <div class="pc-desc">Patches, pins, stickers, koozies</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('other')">
-          <div class="pc-icon">&#128230;</div>
-          <div class="pc-name">Other Products</div>
-          <div class="pc-desc">Signs, mugs, drinkware, promo</div>
-        </div>
-      </div>
-      <div id="productRedirect" style="display:none;text-align:center;padding:20px">
-        <div class="spinner"></div>
-        <p style="font-size:14px;color:#888">Taking you to our product catalog...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 5: Confirmation -->
-  <div class="step" id="step5">
-    <div style="text-align:center;padding:24px 0">
-      <div style="font-size:40px;margin-bottom:10px;color:#d4a017">&#10003;</div>
-      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px" id="confirmTitle">Design Submitted!</h2>
-      <p style="font-size:15px;color:#666;margin-bottom:16px" id="confirmMsg">Our team will get back to you within 1 business day.</p>
-      <div class="summary-box" id="finalSummary"></div>
-      <p style="font-size:13px;color:#888;margin-top:14px">619-800-0949 | start@merchysmerch.com</p>
-    </div>
-  </div>
-</div>
-
-<script>
-const API_BASE = window.location.origin;
-let config = null;
-let selectedService = null;
-let selectedCategory = 'all';
-let selectedLocations = {};
-let selectedStyles = ['badge'];
-let uploadedFileUrl = null;
-let designs = [];
-let selectedDesignIdxs = [];
-
-const DEFAULT_LOCATIONS = [
-  { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
-  { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
-  { id: 'left-sleeve', name: 'Left Sleeve' },
-  { id: 'right-sleeve', name: 'Right Sleeve' },
-  { id: 'neck-label', name: 'Neck Label' },
-  { id: 'hat', name: 'Hat' }
-];
-
-// SVG icons for service categories
-const CATEGORY_ICONS = {
-  'dtf-printing': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><rect x="20" y="22" width="8" height="10" rx="1"/></svg>',
-  'screen-printing': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="12" rx="2"/><line x1="12" y1="14" x2="36" y2="14"/><path d="M14 20V40H34V20"/><rect x="18" y="26" width="12" height="8" rx="1"/></svg>',
-  'embroidery': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="14"/><path d="M18 18L24 30L30 18"/><path d="M16 24H32" stroke-dasharray="3 2"/></svg>',
-  'dtg-printing': '<svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="32" rx="3"/><rect x="16" y="16" width="16" height="16" rx="2"/><circle cx="24" cy="24" r="4"/></svg>',
-  'heat-transfer': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><path d="M20 28L24 20L28 28" stroke-dasharray="3 2"/></svg>',
-  'sublimation-apparel': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><path d="M16 22H32"/><path d="M16 28H32"/><path d="M16 34H32"/></svg>',
-  'vinyl-banners': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="22" rx="2"/><line x1="12" y1="18" x2="36" y2="18"/><line x1="12" y1="24" x2="30" y2="24"/><line x1="6" y1="10" x2="6" y2="6"/><line x1="42" y1="10" x2="42" y2="6"/></svg>',
-  'retractable-banners': '<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="32" rx="1"/><line x1="18" y1="14" x2="30" y2="14"/><line x1="18" y1="20" x2="28" y2="20"/><rect x="16" y="38" width="16" height="4" rx="1"/></svg>',
-  'yard-signs': '<svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="18" rx="2"/><line x1="18" y1="14" x2="34" y2="14"/><line x1="18" y1="20" x2="28" y2="20"/><line x1="20" y1="26" x2="20" y2="42"/><line x1="28" y1="26" x2="28" y2="42"/></svg>',
-  'window-graphics': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="2"/><line x1="24" y1="8" x2="24" y2="40"/><line x1="8" y1="24" x2="40" y2="24"/><circle cx="16" cy="16" r="3"/></svg>',
-  'wall-wraps': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="2"/><path d="M12 24L20 18L28 26L36 20"/><circle cx="14" cy="16" r="2"/></svg>',
-  'car-wraps': '<svg viewBox="0 0 48 48"><path d="M8 28L12 20H36L40 28"/><rect x="6" y="28" width="36" height="10" rx="3"/><circle cx="14" cy="38" r="3"/><circle cx="34" cy="38" r="3"/></svg>',
-  'a-frame-signs': '<svg viewBox="0 0 48 48"><path d="M12 40L24 8L36 40"/><line x1="16" y1="28" x2="32" y2="28"/><line x1="18" y1="20" x2="30" y2="20"/></svg>',
-  'acrylic-signs': '<svg viewBox="0 0 48 48"><rect x="8" y="12" width="32" height="20" rx="3"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="26" x2="28" y2="26"/><line x1="24" y1="32" x2="24" y2="40"/><line x1="18" y1="40" x2="30" y2="40"/></svg>',
-  'business-cards': '<svg viewBox="0 0 48 48"><rect x="6" y="14" width="36" height="22" rx="2"/><line x1="14" y1="22" x2="28" y2="22"/><line x1="14" y1="28" x2="22" y2="28"/><circle cx="36" cy="28" r="3"/></svg>',
-  'flyers': '<svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="2"/><line x1="16" y1="14" x2="32" y2="14"/><line x1="16" y1="20" x2="32" y2="20"/><line x1="16" y1="26" x2="24" y2="26"/></svg>',
-  'brochures': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="2"/><line x1="20" y1="10" x2="20" y2="38"/><line x1="34" y1="10" x2="34" y2="38"/><line x1="9" y1="18" x2="17" y2="18"/><line x1="23" y1="18" x2="31" y2="18"/></svg>',
-  'postcards': '<svg viewBox="0 0 48 48"><rect x="6" y="12" width="36" height="24" rx="2"/><line x1="26" y1="12" x2="26" y2="36"/><line x1="30" y1="20" x2="38" y2="20"/><line x1="30" y1="26" x2="38" y2="26"/><rect x="10" y="16" width="12" height="8" rx="1"/></svg>',
-  'menus': '<svg viewBox="0 0 48 48"><rect x="8" y="6" width="32" height="36" rx="2"/><line x1="14" y1="14" x2="34" y2="14"/><line x1="14" y1="20" x2="30" y2="20"/><line x1="14" y1="26" x2="28" y2="26"/><line x1="14" y1="32" x2="32" y2="32"/></svg>',
-  'ncr-forms': '<svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="34" rx="2"/><rect x="13" y="10" width="28" height="34" rx="2"/><line x1="19" y1="20" x2="35" y2="20"/><line x1="19" y1="26" x2="31" y2="26"/></svg>',
-  'booklets': '<svg viewBox="0 0 48 48"><path d="M8 8V40L24 36L40 40V8L24 12Z"/><line x1="24" y1="12" x2="24" y2="36"/></svg>',
-  'letterhead': '<svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="2"/><circle cx="24" cy="14" r="4"/><line x1="16" y1="24" x2="32" y2="24"/><line x1="16" y1="30" x2="32" y2="30"/><line x1="16" y1="36" x2="24" y2="36"/></svg>',
-  'door-hangers': '<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="36" rx="3"/><circle cx="24" cy="14" r="4"/><line x1="18" y1="24" x2="30" y2="24"/><line x1="18" y1="30" x2="28" y2="30"/></svg>',
-  'drinkware': '<svg viewBox="0 0 48 48"><path d="M14 10H34L32 40H16Z"/><path d="M34 16H40V24H34"/><line x1="20" y1="22" x2="28" y2="22"/></svg>',
-  'tote-bags': '<svg viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="24" rx="2"/><path d="M18 18V12A6 6 0 0 1 30 12V18"/><rect x="18" y="26" width="12" height="8" rx="1"/></svg>',
-  'pens': '<svg viewBox="0 0 48 48"><path d="M32 8L40 16L18 38L10 40L12 32Z"/><line x1="28" y1="12" x2="36" y2="20"/></svg>',
-  'tech-accessories': '<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="36" rx="4"/><line x1="14" y1="12" x2="34" y2="12"/><line x1="14" y1="36" x2="34" y2="36"/><circle cx="24" cy="40" r="1.5"/></svg>',
-  'trade-show-displays': '<svg viewBox="0 0 48 48"><rect x="6" y="6" width="36" height="28" rx="2"/><line x1="6" y1="34" x2="42" y2="34"/><line x1="12" y1="34" x2="12" y2="42"/><line x1="36" y1="34" x2="36" y2="42"/></svg>',
-  'lanyards': '<svg viewBox="0 0 48 48"><path d="M18 6V28H30V6"/><rect x="16" y="28" width="16" height="12" rx="2"/><line x1="20" y1="34" x2="28" y2="34"/></svg>',
-  'stickers-labels': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M24 8A16 16 0 0 1 40 24L24 24Z" fill="none"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="18" y1="28" x2="26" y2="28"/></svg>',
-  'keychains': '<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="10"/><circle cx="24" cy="18" r="4"/><path d="M24 28V42"/><line x1="24" y1="34" x2="30" y2="34"/><line x1="24" y1="38" x2="28" y2="38"/></svg>',
-  'packaging': '<svg viewBox="0 0 48 48"><path d="M8 16L24 8L40 16V36L24 44L8 36Z"/><line x1="24" y1="8" x2="24" y2="44"/><line x1="8" y1="16" x2="40" y2="16"/></svg>',
-  'food-wellness': '<svg viewBox="0 0 48 48"><circle cx="24" cy="28" r="14"/><path d="M24 14V8"/><path d="M20 10C20 10 24 6 28 10"/></svg>',
-  'outdoor-leisure': '<svg viewBox="0 0 48 48"><path d="M24 6L40 38H8Z"/><path d="M16 28L24 16L32 28"/><circle cx="34" cy="14" r="4"/></svg>',
-  'awards': '<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="12"/><path d="M18 28L16 40H32L30 28"/><line x1="24" y1="12" x2="24" y2="24"/><line x1="18" y1="18" x2="30" y2="18"/></svg>',
-  'pet-supplies': '<svg viewBox="0 0 48 48"><circle cx="24" cy="28" r="8"/><circle cx="16" cy="16" r="4"/><circle cx="32" cy="16" r="4"/><circle cx="12" cy="24" r="3"/><circle cx="36" cy="24" r="3"/></svg>',
-  'auto-accessories': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><line x1="24" y1="8" x2="24" y2="16"/><line x1="24" y1="32" x2="24" y2="40"/><line x1="8" y1="24" x2="16" y2="24"/><line x1="32" y1="24" x2="40" y2="24"/></svg>',
-  'uv-printing': '<svg viewBox="0 0 48 48"><circle cx="24" cy="16" r="8"/><path d="M14 28H34V40H14Z" rx="2"/><line x1="24" y1="24" x2="24" y2="28"/><path d="M18 20L10 26"/><path d="M30 20L38 26"/></svg>',
-  'sublimation': '<svg viewBox="0 0 48 48"><path d="M14 10H34L32 40H16Z"/><circle cx="24" cy="24" r="6"/><path d="M20 18H28"/></svg>',
-  'laser-engraving': '<svg viewBox="0 0 48 48"><rect x="10" y="16" width="28" height="24" rx="2"/><path d="M24 6L24 16"/><path d="M20 6L28 6"/><line x1="16" y1="24" x2="32" y2="24"/><line x1="16" y1="30" x2="28" y2="30"/></svg>',
-  'patches': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="12" stroke-dasharray="4 2"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>',
-  'embroidered-patches': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M16 20L24 14L32 20" stroke-dasharray="3 2"/><line x1="16" y1="28" x2="32" y2="28" stroke-dasharray="3 2"/></svg>',
-  'pvc-patches': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="6"/><rect x="14" y="14" width="20" height="20" rx="3"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>',
-  'chenille-patches': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M18 22C18 22 21 18 24 22C27 26 30 22 30 22"/><line x1="16" y1="30" x2="32" y2="30"/></svg>',
-  'logo-design': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M18 30L24 16L30 30"/><line x1="20" y1="26" x2="28" y2="26"/></svg>',
-  'vectorizing': '<svg viewBox="0 0 48 48"><path d="M12 36L24 12L36 36"/><line x1="16" y1="28" x2="32" y2="28"/><circle cx="24" cy="12" r="3"/><circle cx="12" cy="36" r="3"/><circle cx="36" cy="36" r="3"/></svg>',
-  'mockups': '<svg viewBox="0 0 48 48"><rect x="8" y="10" width="20" height="28" rx="2"/><rect x="20" y="14" width="20" height="20" rx="2"/></svg>',
-  'brand-identity': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><circle cx="24" cy="20" r="6"/><line x1="14" y1="30" x2="34" y2="30"/><line x1="18" y1="36" x2="30" y2="36"/></svg>',
-  'social-media-graphics': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><circle cx="24" cy="24" r="8"/><circle cx="34" cy="14" r="2"/></svg>',
-  'illustration': '<svg viewBox="0 0 48 48"><path d="M12 40L14 28L32 10L40 18L22 36Z"/><line x1="28" y1="14" x2="36" y2="22"/></svg>',
-  'photo-editing': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="2"/><circle cx="16" cy="20" r="4"/><path d="M6 34L18 24L28 32L36 26L42 32"/></svg>',
-  'shirt-design': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><circle cx="24" cy="26" r="6"/></svg>',
-  'packaging-design': '<svg viewBox="0 0 48 48"><path d="M8 16L24 8L40 16V36L24 44L8 36Z"/><line x1="24" y1="8" x2="24" y2="44"/><line x1="8" y1="16" x2="24" y2="24"/><line x1="40" y1="16" x2="24" y2="24"/></svg>',
-  'digitizing': '<svg viewBox="0 0 48 48"><path d="M12 36L24 12L36 36"/><line x1="16" y1="28" x2="32" y2="28"/><path d="M8 40H40" stroke-dasharray="4 2"/></svg>'
-};
-
-// SVG icons for 20 design styles
-const STYLE_ICONS = {
-  badge: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M14 14L24 8L34 14" fill="none"/><line x1="16" y1="28" x2="32" y2="28"/></svg>',
-  icon_logo: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="18" stroke-dasharray="6 4"/></svg>',
-  typography: '<svg viewBox="0 0 48 48"><path d="M10 12H38"/><path d="M24 12V38"/><path d="M16 38H32"/><path d="M14 12V18"/><path d="M34 12V18"/></svg>',
-  mascot: '<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="12"/><circle cx="20" cy="16" r="2" fill="#d4a017"/><circle cx="28" cy="16" r="2" fill="#d4a017"/><path d="M20 22C20 22 24 26 28 22"/><path d="M16 30C16 30 24 40 32 30"/></svg>',
-  scene: '<svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="32" rx="2"/><path d="M6 32L18 22L28 30L38 22L42 28"/><circle cx="14" cy="16" r="3"/></svg>',
-  badge_scene: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M12 30L20 22L28 28L36 22"/><circle cx="16" cy="18" r="2"/><path d="M14 12L24 8L34 12"/></svg>',
-  diagram: '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="2"/><line x1="8" y1="20" x2="40" y2="20"/><line x1="8" y1="32" x2="40" y2="32"/><line x1="24" y1="8" x2="24" y2="40"/></svg>',
-  vintage_script: '<svg viewBox="0 0 48 48"><path d="M10 28C10 28 16 16 24 24C32 32 38 20 38 20"/><line x1="8" y1="36" x2="40" y2="36"/><circle cx="24" cy="12" r="3"/></svg>',
-  streetwear: '<svg viewBox="0 0 48 48"><path d="M10 38L24 8L38 38"/><line x1="14" y1="30" x2="34" y2="30"/><rect x="18" y="18" width="12" height="8" rx="1"/></svg>',
-  trade_tools: '<svg viewBox="0 0 48 48"><path d="M14 8L34 40"/><path d="M34 8L14 40"/><circle cx="24" cy="24" r="6"/></svg>',
-  corporate_seal: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>',
-  pattern: '<svg viewBox="0 0 48 48"><circle cx="12" cy="12" r="4"/><circle cx="24" cy="12" r="4"/><circle cx="36" cy="12" r="4"/><circle cx="12" cy="24" r="4"/><circle cx="24" cy="24" r="4"/><circle cx="36" cy="24" r="4"/><circle cx="12" cy="36" r="4"/><circle cx="24" cy="36" r="4"/><circle cx="36" cy="36" r="4"/></svg>',
-  monogram: '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><text x="24" y="32" text-anchor="middle" font-size="24" font-weight="700" fill="none" stroke="#d4a017" stroke-width="1.5">M</text></svg>',
-  collage: '<svg viewBox="0 0 48 48"><rect x="6" y="6" width="16" height="16" rx="2"/><rect x="26" y="6" width="16" height="10" rx="2"/><rect x="26" y="20" width="16" height="22" rx="2"/><rect x="6" y="26" width="16" height="16" rx="2"/></svg>',
-  product_focus: '<svg viewBox="0 0 48 48"><path d="M14 38V18L24 10L34 18V38Z"/><rect x="20" y="28" width="8" height="10"/><circle cx="24" cy="22" r="3"/></svg>',
-  humor: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="18" cy="20" r="2" fill="#d4a017"/><circle cx="30" cy="20" r="2" fill="#d4a017"/><path d="M16 30C16 30 20 36 24 36C28 36 32 30 32 30"/></svg>',
-  heritage: '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="2"/><line x1="14" y1="16" x2="34" y2="16"/><text x="24" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="none" stroke="#d4a017" stroke-width="1">1985</text><line x1="14" y1="36" x2="34" y2="36"/></svg>',
-  line_art: '<svg viewBox="0 0 48 48"><path d="M24 8C14 8 8 16 8 24C8 32 14 40 24 40C34 40 40 32 40 24" fill="none"/><path d="M32 12L36 8L40 12"/><line x1="24" y1="20" x2="24" y2="32"/><line x1="18" y1="26" x2="30" y2="26"/></svg>',
-  patch_first: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-width="3"/><circle cx="24" cy="24" r="14" stroke-dasharray="5 3"/><path d="M18 22L24 16L30 22"/><line x1="16" y1="28" x2="32" y2="28" stroke-width="2"/></svg>',
-  event_series: '<svg viewBox="0 0 48 48"><rect x="8" y="10" width="24" height="28" rx="2"/><rect x="16" y="14" width="24" height="28" rx="2"/><line x1="22" y1="22" x2="34" y2="22"/><line x1="22" y1="28" x2="32" y2="28"/><line x1="22" y1="34" x2="30" y2="34"/></svg>'
-};
-
-async function init() {
-  try {
-    const res = await fetch(\`\${API_BASE}/api/widget-config\`);
-    config = await res.json();
-  } catch(e) {
-    config = { services: [], categories: [], styles: [], locations: DEFAULT_LOCATIONS };
-  }
-  renderCategoryTabs();
-  renderServices();
-  renderStylePicker();
-  renderLocationPicker();
-}
-
-// Category tabs
-function renderCategoryTabs() {
-  const cats = config.categories || [];
-  let html = '<div class="cat-tab active" onclick="selectCategory(\\'all\\',this)">All</div>';
-  cats.forEach(c => { html += \`<div class="cat-tab" onclick="selectCategory('\${c.id}',this)">\${c.name}</div>\`; });
-  document.getElementById('catTabs').innerHTML = html;
-}
-
-function selectCategory(id, el) {
-  selectedCategory = id;
-  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  renderServices();
-}
-
-// Service tiles - 6 wide grid with SVG icons
-function renderServices() {
-  const search = (document.getElementById('searchBar').value || '').toLowerCase();
-  let svcs = config?.services || [];
-  if(selectedCategory !== 'all') svcs = svcs.filter(s => s.category === selectedCategory);
-  if(search) svcs = svcs.filter(s => s.name.toLowerCase().includes(search) || s.desc.toLowerCase().includes(search));
-
-  const grid = document.getElementById('serviceGrid');
-  const noRes = document.getElementById('noResults');
-  if(!svcs.length) { grid.innerHTML=''; noRes.style.display='block'; return; }
-  noRes.style.display='none';
-
-  grid.innerHTML = svcs.map(s => {
-    const icon = CATEGORY_ICONS[s.id] || '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>';
-    return \`<div class="svc-tile \${selectedService?.id===s.id?'selected':''}" onclick="selectService('\${s.id}')">
-      <div class="tile-icon">\${icon}</div>
-      <div class="tile-name">\${s.name}</div>
-      <div class="tile-desc">\${s.desc}</div>
-    </div>\`;
-  }).join('');
-}
-
-function filterServices() { renderServices(); }
-
-function selectService(id) {
-  selectedService = (config?.services||[]).find(s => s.id === id);
-  renderServices();
-  if(selectedService) setTimeout(() => goStep(2), 150);
-}
-
-// Location picker
-function renderLocationPicker() {
-  const locs = config?.locations || DEFAULT_LOCATIONS;
-  document.getElementById('locGrid').innerHTML = locs.map(l =>
-    \`<div class="loc-btn" id="loc-\${l.id}" onclick="toggleLocation('\${l.id}')">\${l.name}</div>\`
-  ).join('');
-}
-
-function toggleLocation(id) {
-  const btn = document.getElementById(\`loc-\${id}\`);
-  if(selectedLocations[id]) { delete selectedLocations[id]; btn.classList.remove('active'); }
-  else { selectedLocations[id] = { instructions:'', position:'' }; btn.classList.add('active'); }
-  renderLocationDetails();
-}
-
-function renderLocationDetails() {
-  const locs = config?.locations || DEFAULT_LOCATIONS;
-  let html = '';
-  Object.keys(selectedLocations).forEach(id => {
-    const loc = locs.find(l => l.id === id);
-    if(!loc) return;
-    const hasPos = loc.positions?.length > 0;
-    html += \`<div class="loc-detail visible">
-      <h4>\${loc.name}</h4>
-      \${hasPos ? \`<select onchange="selectedLocations['\${id}'].position=this.value">
-        <option value="">Select position...</option>
-        \${loc.positions.map(p => \`<option value="\${p}">\${p}</option>\`).join('')}
-      </select>\` : ''}
-      <textarea placeholder="Instructions for \${loc.name} (e.g. logo centered, 4 inches wide)" oninput="selectedLocations['\${id}'].instructions=this.value"></textarea>
-    </div>\`;
-  });
-  document.getElementById('locDetails').innerHTML = html;
-}
-
-// Style picker with SVG icons - multi-select up to 3
-function renderStylePicker() {
-  const styles = config?.styles || [];
-  const grid = document.getElementById('styleGrid');
-  const isObj = styles.length > 0 && typeof styles[0] === 'object';
-
-  grid.innerHTML = (isObj ? styles : []).map(s => {
-    const isActive = selectedStyles.includes(s.id);
-    const atMax = selectedStyles.length >= 3 && !isActive;
-    const icon = STYLE_ICONS[s.id] || '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/></svg>';
-    return \`<div class="style-card \${isActive?'active':''} \${atMax?'disabled':''}" onclick="toggleStyle('\${s.id}')">
-      <div class="s-icon">\${icon}</div>
-      <div class="s-name">\${s.name}</div>
-      <div class="s-hint">\${s.desc}</div>
-    </div>\`;
-  }).join('');
-
-  document.getElementById('styleCounter').textContent = \`\${selectedStyles.length} of 3 selected\`;
-}
-
-function toggleStyle(id) {
-  const idx = selectedStyles.indexOf(id);
-  if(idx > -1) { selectedStyles.splice(idx, 1); }
-  else { if(selectedStyles.length >= 3) return; selectedStyles.push(id); }
-  renderStylePicker();
-}
-
-// Upload
-function handleUpload(input) {
-  const file = input.files[0];
-  if(!file) return;
-  const area = document.getElementById('uploadArea');
-  const fd = new FormData();
-  fd.append('files', file);
-  fetch(\`\${API_BASE}/api/upload\`, { method:'POST', body:fd })
-    .then(r => r.json())
-    .then(d => { if(d.files?.length) uploadedFileUrl = d.files[0].url; })
-    .catch(console.error);
-  const reader = new FileReader();
-  reader.onload = e => {
-    area.innerHTML = \`<img class="upload-preview" src="\${e.target.result}"><p style="font-size:13px;color:#888">\${file.name}</p>\`;
-    area.classList.add('has-file');
-  };
-  reader.readAsDataURL(file);
-}
-
-// Navigation
-function goStep(n) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById(\`step\${n}\`).classList.add('active');
-  const labels = ['Choose Service','Design Details','Review Designs','Get Your File','Confirmation'];
-  document.getElementById('stepLabel').textContent = \`Step \${n} of 4 - \${labels[n-1]||''}\`;
-  if(n===2 && selectedService) {
-    document.getElementById('selSvcName').textContent = selectedService.name;
-    document.getElementById('locationSection').style.display = selectedService.category==='apparel_decoration'?'block':'none';
-  }
-  if(n===4) {
-    hideSubPages();
-    document.getElementById('pathSelection').style.display = 'block';
-    // Show selected design thumbnails
-    document.getElementById('selectedPreview').innerHTML = selectedDesignIdxs.map(i => {
-      const d = designs[i]||{};
-      const src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
-      return \`<img src="\${src}" style="width:80px;height:80px;border-radius:8px;border:2px solid #d4a017;object-fit:cover">\`;
-    }).join('');
-  }
-  document.querySelector('.content').scrollTop = 0;
-}
-
-// Generate designs via backend
-async function generateDesigns() {
-  const name = document.getElementById('userName').value.trim();
-  const email = document.getElementById('userEmail').value.trim();
-  if(!name||!email) { alert('Please enter your name and email.'); return; }
-  if(!selectedStyles.length) { alert('Please select at least one design style.'); return; }
-
-  goStep(3);
-  document.getElementById('loadingState').style.display = 'block';
-  document.getElementById('designResults').style.display = 'none';
-
-  try {
-    const res = await fetch(\`\${API_BASE}/api/generate\`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name, email,
-        business: document.getElementById('userBusiness').value.trim(),
-        text: document.getElementById('designText').value.trim(),
-        desc: document.getElementById('designDesc').value.trim(),
-        service: selectedService?.id||'',
-        decoration: selectedService?.name||'',
-        style: selectedStyles[0],
-        styles: selectedStyles,
-        locations: selectedLocations,
-        referenceImage: uploadedFileUrl
-      })
-    });
-    const data = await res.json();
-    designs = data.designs || [];
-    showDesignResults();
-  } catch(err) {
-    document.getElementById('loadingState').innerHTML = \`<p style="color:#c00;font-size:14px">Something went wrong.</p><button class="btn btn-back" onclick="goStep(2)" style="margin-top:10px">Go Back</button>\`;
-  }
-}
-
-function showDesignResults() {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('designResults').style.display = 'block';
-  selectedDesignIdxs = [];
-  document.getElementById('designsGrid').innerHTML = designs.map((d,i) => {
-    if(d.error) return \`<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8"><span style="font-size:12px;color:#888">Failed</span></div>\`;
-    const src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
-    const fallback = d.url ? \`\${API_BASE}\${d.url}\` : '';
-    return \`<div class="design-card" onclick="toggleDesign(\${i})" id="dcard-\${i}"><div class="check-badge">&#10003;</div><img src="\${src}" alt="Design \${i+1}" onerror="if(this.src!=='\${fallback}')this.src='\${fallback}'"><div class="watermark">PREVIEW</div></div>\`;
-  }).join('');
-  updateDesignSelection();
-}
-
-function toggleDesign(idx) {
-  if(designs[idx]?.error) return;
-  const pos = selectedDesignIdxs.indexOf(idx);
-  if(pos > -1) selectedDesignIdxs.splice(pos, 1);
-  else selectedDesignIdxs.push(idx);
-  updateDesignSelection();
-}
-
-function updateDesignSelection() {
-  document.querySelectorAll('.design-card').forEach((c,i) => c.classList.toggle('selected', selectedDesignIdxs.includes(i)));
-  document.getElementById('designSelCount').textContent = selectedDesignIdxs.length > 0 ? selectedDesignIdxs.length + ' selected' : '0 selected';
-  document.getElementById('continueBtn').disabled = selectedDesignIdxs.length === 0;
-  document.getElementById('continueBtn').textContent = selectedDesignIdxs.length === 1 ? 'Continue with Selected Design' : \`Continue with \${selectedDesignIdxs.length} Designs\`;
-}
-
-function regenerate() { generateDesigns(); }
-
-// Sub-page navigation
-function showSubPage(page) {
-  document.getElementById('pathSelection').style.display = 'none';
-  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById('sub' + page.charAt(0).toUpperCase() + page.slice(1));
-  if(el) el.classList.add('active');
-  if(page === 'vector') {
-    document.getElementById('vectorPreviewImgs').innerHTML = selectedDesignIdxs.map(i => {
-      const d = designs[i]||{};
-      const src = d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : '');
-      return \`<img src="\${src}" style="width:100px;height:100px;border-radius:8px;border:2px solid #eee;object-fit:cover">\`;
-    }).join('');
-  }
-}
-
-function hideSubPages() {
-  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('pathSelection').style.display = 'block';
-}
-
-// PATH 1: Vector purchase via Stripe
-async function purchaseVector() {
-  const btn = document.getElementById('vectorBtn');
-  btn.disabled=true; btn.textContent='Processing...';
-  const d = designs[selectedDesignIdxs[0]]||{};
-  try {
-    const res = await fetch(\`\${API_BASE}/api/create-checkout\`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ tier:'detailed', designUrl: d.remoteUrl || (d.url ? \`\${API_BASE}\${d.url}\` : ''), email:document.getElementById('userEmail').value.trim() })
-    });
-    const data = await res.json();
-    if(data.url) window.open(data.url,'_blank');
-    else alert(data.error||'Checkout failed. Call 619-800-0949.');
-  } catch(e) { alert('Payment error. Call 619-800-0949.'); }
-  btn.disabled=false; btn.textContent='Pay & Download Vector';
-}
-
-// PATH 2: Save for Later (login required)
-async function handleSaveLogin() {
-  const btn = document.getElementById('saveLoginBtn');
-  const email = document.getElementById('saveEmail').value.trim();
-  const pass = document.getElementById('savePassword').value;
-  if(!email||!pass) { alert('Please enter your email and password.'); return; }
-  btn.disabled=true; btn.textContent='Saving...';
-  try {
-    const designUrls = selectedDesignIdxs.map(i => designs[i]?.remoteUrl || designs[i]?.url || '');
-    await fetch(\`\${API_BASE}/api/submit\`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name: document.getElementById('userName').value.trim(),
-        email: document.getElementById('userEmail').value.trim(),
-        business: document.getElementById('userBusiness').value.trim(),
-        text: document.getElementById('designText').value.trim(),
-        desc: document.getElementById('designDesc').value.trim(),
-        service: selectedService?.id||'',
-        serviceName: selectedService?.name||'',
-        styles: selectedStyles,
-        locations: selectedLocations,
-        designUrls: designUrls,
-        selectedDesigns: selectedDesignIdxs,
-        action: 'save_for_later',
-        saveEmail: email
-      })
-    });
-    document.getElementById('confirmTitle').textContent = 'Designs Saved!';
-    document.getElementById('confirmMsg').textContent = 'Your designs have been saved to your account. Log in at merchysmarket.com to access them anytime.';
-    document.getElementById('finalSummary').innerHTML = \`
-      <h3>Saved Designs</h3>
-      <div class="summary-row"><span class="label">Designs saved</span><span class="val">\${selectedDesignIdxs.length}</span></div>
-      <div class="summary-row"><span class="label">Account</span><span class="val">\${email}</span></div>
-      <div class="summary-row"><span class="label">Service</span><span class="val">\${selectedService?.name||'-'}</span></div>
-    \`;
-    goStep(5);
-  } catch(e) {
-    alert('Save failed. Try again or call 619-800-0949.');
-    btn.disabled=false; btn.textContent='Log In & Save';
-  }
-}
-
-// PATH 3: Add to Product
-function selectProductType(type) {
-  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  // Submit design request with product type, then redirect to product page
-  const designUrls = selectedDesignIdxs.map(i => designs[i]?.remoteUrl || designs[i]?.url || '');
-  fetch(\`\${API_BASE}/api/submit\`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      name: document.getElementById('userName').value.trim(),
-      email: document.getElementById('userEmail').value.trim(),
-      business: document.getElementById('userBusiness').value.trim(),
-      text: document.getElementById('designText').value.trim(),
-      desc: document.getElementById('designDesc').value.trim(),
-      service: selectedService?.id||'',
-      serviceName: selectedService?.name||'',
-      styles: selectedStyles,
-      locations: selectedLocations,
-      designUrls: designUrls,
-      selectedDesigns: selectedDesignIdxs,
-      action: 'add_to_product',
-      productType: type
-    })
-  }).catch(console.error);
-
-  // Show redirect state then go to product page
-  document.getElementById('productTypeGrid').style.display = 'none';
-  document.getElementById('productRedirect').style.display = 'block';
-  const productUrls = {
-    tshirts: 'https://merchysmarket.com/collections/t-shirts',
-    hoodies: 'https://merchysmarket.com/collections/hoodies-sweatshirts',
-    polos: 'https://merchysmarket.com/collections/polos-uniforms',
-    hats: 'https://merchysmarket.com/collections/hats-caps',
-    bags: 'https://merchysmarket.com/collections/bags-totes',
-    jackets: 'https://merchysmarket.com/collections/jackets-outerwear',
-    accessories: 'https://merchysmarket.com/collections/accessories',
-    other: 'https://merchysmarket.com/collections/all'
-  };
-  setTimeout(() => {
-    window.open(productUrls[type] || productUrls.other, '_blank');
-    document.getElementById('productTypeGrid').style.display = 'grid';
-    document.getElementById('productRedirect').style.display = 'none';
-    document.getElementById('confirmTitle').textContent = 'Design Request Sent!';
-    document.getElementById('confirmMsg').textContent = 'Browse products in the new tab. Our team will match your design to your selected product.';
-    document.getElementById('finalSummary').innerHTML = \`
-      <h3>Your Request</h3>
-      <div class="summary-row"><span class="label">Product type</span><span class="val">\${type}</span></div>
-      <div class="summary-row"><span class="label">Designs selected</span><span class="val">\${selectedDesignIdxs.length}</span></div>
-      <div class="summary-row"><span class="label">Service</span><span class="val">\${selectedService?.name||'-'}</span></div>
-    \`;
-    goStep(5);
-  }, 1500);
-}
-
-init();
-</script>
-</body>
-</html>
-`;
-
-const WIDGET_JS = `// ================================================================
-// MERCHY'S AI DESIGN BOT — Embeddable Widget Loader
-// Usage: <script src="https://your-domain.com/widget.js"></script>
-// Optional: window.MERCHY_API_URL = 'https://your-api.com';
-// ================================================================
-(function() {
-  if (document.getElementById('merchys-widget-root')) return;
-
-  var API = window.MERCHY_API_URL || (function() {
-    var scripts = document.getElementsByTagName('script');
-    for (var i = 0; i < scripts.length; i++) {
-      if (scripts[i].src && scripts[i].src.indexOf('widget.js') !== -1) {
-        return scripts[i].src.replace(/\\/widget\\.js.*\$/, '');
-      }
-    }
-    return '';
-  })();
-
-  // Load Poppins font
-  var fontLink = document.createElement('link');
-  fontLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
-  fontLink.rel = 'stylesheet';
-  document.head.appendChild(fontLink);
-
-  // Floating button
-  var btn = document.createElement('div');
-  btn.id = 'merchys-widget-btn';
-  btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg><span>Design Studio</span>';
-  btn.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;align-items:center;gap:8px;padding:14px 22px;background:#111;color:#d4a017;font-family:Poppins,sans-serif;font-size:14px;font-weight:600;border:2px solid #d4a017;border-radius:50px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:all 0.3s ease;';
-  btn.onmouseover = function() { this.style.background = '#d4a017'; this.style.color = '#111'; };
-  btn.onmouseout = function() { this.style.background = '#111'; this.style.color = '#d4a017'; };
-
-  // Widget panel
-  var panel = document.createElement('div');
-  panel.id = 'merchys-widget-root';
-  panel.style.cssText = 'position:fixed;bottom:90px;right:24px;width:400px;height:580px;z-index:99999;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25);display:none;font-family:Poppins,sans-serif;';
-
-  var iframe = document.createElement('iframe');
-  iframe.src = API + '/widget.html';
-  iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:16px;';
-  iframe.allow = 'payment';
-  panel.appendChild(iframe);
-
-  document.body.appendChild(btn);
-  document.body.appendChild(panel);
-
-  var open = false;
-  btn.onclick = function() {
-    open = !open;
-    panel.style.display = open ? 'block' : 'none';
-    btn.querySelector('span').textContent = open ? 'Close' : 'Design Studio';
-  };
-
-  // Mobile: full screen
-  function checkMobile() {
-    if (window.innerWidth <= 520) {
-      panel.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:99999;border-radius:0;overflow:hidden;box-shadow:none;display:' + (open ? 'block' : 'none') + ';font-family:Poppins,sans-serif;';
-      iframe.style.borderRadius = '0';
-    } else {
-      panel.style.cssText = 'position:fixed;bottom:90px;right:24px;width:400px;height:580px;z-index:99999;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25);display:' + (open ? 'block' : 'none') + ';font-family:Poppins,sans-serif;';
-      iframe.style.borderRadius = '16px';
-    }
-  }
-  window.addEventListener('resize', checkMobile);
-
-  // Listen for close messages from iframe
-  window.addEventListener('message', function(e) {
-    if (e.data === 'merchys-close') { open = false; panel.style.display = 'none'; btn.querySelector('span').textContent = 'Design Studio'; }
-  });
-})();
-`;
-
-app.get('/', (req, res) => {
-  res.type('html').send(WIDGET_HTML);
-});
-
-app.get('/widget.html', (req, res) => {
-  res.type('html').send(WIDGET_HTML);
-});
-
-app.get('/widget.js', (req, res) => {
-  res.type('application/javascript').send(WIDGET_JS);
-});
+// ---- Serve frontend from /public ----
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'widget.html')));
 
 // ---- Start server ----
 app.listen(PORT, () => {

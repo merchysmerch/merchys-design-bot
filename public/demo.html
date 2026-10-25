@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merchy's Market - Widget Embed Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,sans-serif;background:#fafafa;color:#111}
+header{background:#111;color:#fff;padding:18px 40px;display:flex;align-items:center;justify-content:space-between}
+header b{color:#d4a017;letter-spacing:2px}
+nav a{color:#bbb;margin-left:22px;font-size:14px;text-decoration:none}
+.hero{padding:70px 40px;max-width:900px;margin:0 auto;text-align:center}
+.hero h1{font-size:38px;line-height:1.15;margin-bottom:14px}
+.hero p{color:#666;font-size:16px;margin-bottom:26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;max-width:1000px;margin:0 auto 80px;padding:0 40px}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:18px;text-align:center}
+.card .ph{height:150px;background:#f1f1f1;border-radius:8px;margin-bottom:12px}
+.card h3{font-size:15px}.card span{color:#888;font-size:13px}
+.note{position:fixed;left:24px;bottom:24px;background:#fffdf5;border:1px solid #f0d78a;border-radius:10px;padding:12px 16px;font-size:13px;max-width:320px;color:#6a5200}
+</style>
+</head>
+<body>
+<header><b>MERCHY'S MARKET</b><nav><a href="#">Shop</a><a href="#">Services</a><a href="#">About</a></nav></header>
+<section class="hero">
+  <h1>Custom merch, done right.</h1>
+  <p>This page stands in for merchysmarket.com. The Design Studio button in the bottom right corner is the embedded widget, loaded by a single script tag.</p>
+</section>
+<div class="grid">
+  <div class="card"><div class="ph"></div><h3>Heavyweight Tee</h3><span>from $14.50</span></div>
+  <div class="card"><div class="ph"></div><h3>Pullover Hoodie</h3><span>from $32.00</span></div>
+  <div class="card"><div class="ph"></div><h3>Dad Hat</h3><span>from $18.00</span></div>
+  <div class="card"><div class="ph"></div><h3>Work Polo</h3><span>from $24.00</span></div>
+</div>
+<div class="note">Embed on any site with:<br><code>&lt;script src="https://YOUR-HOST/widget.js"&gt;&lt;/script&gt;</code></div>
+<script src="/widget.js"></script>
+</body>
+</html>

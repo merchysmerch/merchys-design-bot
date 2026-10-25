@@ -65,6 +65,6 @@
 
   // Listen for close messages from iframe
   window.addEventListener('message', function(e) {
-    if (e.data === 'merchys-close') { open = false; panel.style.display = 'none'; btn.querySelector('span').textContent = 'Design Studio'; }
+    if (e.data === 'merchys-close' || (e.data && e.data.type === 'close-widget')) { open = false; panel.style.display = 'none'; btn.querySelector('span').textContent = 'Design Studio'; }
   });
 })();
