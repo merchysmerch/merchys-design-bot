@@ -49,3 +49,11 @@ public/demo.html   Storefront embed demo
 uploads/           Generated designs and reference uploads (gitignored)
 submissions/       JSON backup of every submission (gitignored)
 ```
+
+## Shareable static demo (no server)
+
+```bash
+node scripts/build-static-demo.js   # writes dist/index.html
+```
+
+`dist/index.html` is a storefront page with the full widget running entirely in the browser: the catalog is embedded, the 6 concepts are the same layout previews as demo mode, and submissions are acknowledged on the page. Host it anywhere static (or publish as a Claude artifact) and send the link.

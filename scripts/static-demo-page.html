@@ -1,0 +1,106 @@
+<title>Merchy's Design Studio Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Archivo+Black&display=swap">
+<style>
+/* Layout: a plain storefront stand-in; the widget is the subject, so the page stays quiet.
+   Gold-on-ink is the brand; neutrals carry a slight warm bias to match. */
+:root{
+  --bg:#f6f4ef; --surface:#ffffff; --ink:#15130f; --muted:#6e6758; --line:#e4dfd3;
+  --gold:#d4a017; --gold-ink:#15130f; --ph:#ece8df;
+  --display:'Archivo Black','Arial Black',Impact,sans-serif;
+  --body:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#17150f; --surface:#1f1c15; --ink:#f3efe6; --muted:#a79e8a; --line:#312c21; --ph:#2a261c; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#17150f; --surface:#1f1c15; --ink:#f3efe6; --muted:#a79e8a; --line:#312c21; --ph:#2a261c; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#15130f}
+.bar{background:#15130f;color:#f3efe6;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar b{font-family:var(--display);font-weight:400;letter-spacing:2px;color:var(--gold);font-size:17px}
+.bar nav{display:flex;gap:18px;font-size:13px;color:#b9b2a2}
+.wrap{max-width:1040px;margin:0 auto;padding-block:40px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center;margin-bottom:40px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,50px);line-height:1.05;margin:0 0 12px;text-wrap:balance}
+.hero p{color:var(--muted);margin:0 0 18px;max-width:52ch}
+.cta{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--gold-ink);border:0;border-radius:999px;padding:12px 22px;font:600 14px var(--body);cursor:pointer}
+.cta:focus-visible,.fab:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.howto{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.howto h2{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+.howto ol{margin:0;padding-left:18px;font-size:14px;display:grid;gap:6px}
+.howto small{display:block;margin-top:12px;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card .ph{aspect-ratio:1;max-width:100%;background:var(--ph);border-radius:8px;margin-bottom:10px;display:grid;place-items:center;color:var(--muted);font-size:11px;letter-spacing:1px}
+.card h3{font-size:14px;margin:0;font-weight:600}
+.card span{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.fab{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:50;
+  display:flex;align-items:center;gap:8px;padding:14px 22px;background:#15130f;color:var(--gold);border:2px solid var(--gold);border-radius:999px;
+  font:600 14px var(--body);cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.fab:hover{background:var(--gold);color:#15130f}
+.panel{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));width:420px;max-width:calc(100vw - 40px);height:640px;max-height:calc(100vh - 120px);
+  z-index:50;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.3);background:#fff}
+.panel iframe{width:100%;height:100%;border:0;display:block}
+@media (max-width:560px){
+  .hero{grid-template-columns:1fr}
+  .panel{inset:0;width:100%;max-width:none;height:100%;max-height:none;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .bar nav{display:none}
+}
+@media (prefers-reduced-motion:no-preference){ .fab,.cta{transition:background .2s,color .2s} }
+</style>
+
+<header class="bar"><b>MERCHY'S MARKET</b><nav><span>Shop</span><span>Services</span><span>Design Studio</span><span>About</span></nav></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1>Design it here. We print it right.</h1>
+      <p>This page stands in for merchysmarket.com. The Design Studio in the corner is the real widget: pick a service, describe your design, review 6 one-color concepts, then request a vector file, save, or send it to a product.</p>
+      <button class="cta" id="openCta" type="button">Open Design Studio</button>
+    </div>
+    <aside class="howto">
+      <h2>Try the flow</h2>
+      <ol>
+        <li>Choose a service (DTF Printing is a good start).</li>
+        <li>Enter a name, email, and your business or event. Pick up to 3 styles.</li>
+        <li>Review the 6 concepts and select your favorites.</li>
+        <li>Choose Vector File, Save for Later, or Add to Product.</li>
+      </ol>
+      <small>Demo build: concepts are layout previews built from your text, and requests stay on this page. The live version generates AI concepts and routes every request to the Merchy's team.</small>
+    </aside>
+  </section>
+  <div class="grid">
+    <div class="card"><div class="ph">TEE</div><h3>Heavyweight Tee</h3><span>from $14.50</span></div>
+    <div class="card"><div class="ph">HOODIE</div><h3>Pullover Hoodie</h3><span>from $32.00</span></div>
+    <div class="card"><div class="ph">HAT</div><h3>Dad Hat</h3><span>from $18.00</span></div>
+    <div class="card"><div class="ph">POLO</div><h3>Work Polo</h3><span>from $24.00</span></div>
+    <div class="card"><div class="ph">PATCH</div><h3>Embroidered Patch</h3><span>from $3.00</span></div>
+  </div>
+</main>
+
+<button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="panel">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+  <span id="fabLabel">Design Studio</span>
+</button>
+<div class="panel" id="panel" hidden><iframe id="widgetFrame" title="Merchy's Design Studio"></iframe></div>
+
+<template id="widgetTpl">
+<!--WIDGET_TEMPLATE-->
+</template>
+
+<script>
+(function(){
+  var panel=document.getElementById('panel'), fab=document.getElementById('fab'), label=document.getElementById('fabLabel');
+  var frame=document.getElementById('widgetFrame'), loaded=false, open=false;
+  function load(){ if(loaded) return; loaded=true; frame.srcdoc=document.getElementById('widgetTpl').innerHTML; }
+  function setOpen(v){ open=v; panel.hidden=!v; fab.setAttribute('aria-expanded',String(v)); label.textContent=v?'Close':'Design Studio'; if(v) load(); }
+  fab.addEventListener('click',function(){ setOpen(!open); });
+  document.getElementById('openCta').addEventListener('click',function(){ setOpen(true); });
+  window.addEventListener('message',function(e){ if(e.data==='merchys-close'||(e.data&&e.data.type==='close-widget')) setOpen(false); });
+  // Open on first visit so the demo is visible without hunting for the button
+  setTimeout(function(){ setOpen(true); }, 400);
+})();
+</script>
