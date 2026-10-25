@@ -2,92 +2,82 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Archivo+Black&display=swap">
 <style>
-/* Layout: a plain storefront stand-in; the widget is the subject, so the page stays quiet.
-   Gold-on-ink is the brand; neutrals carry a slight warm bias to match. */
+/* Layout: a quiet storefront stand-in with four entry points; the studio pop-up is the subject. */
 :root{
   --bg:#f6f4ef; --surface:#ffffff; --ink:#15130f; --muted:#6e6758; --line:#e4dfd3;
-  --gold:#d4a017; --gold-ink:#15130f; --ph:#ece8df;
+  --gold:#d4a017; --gold-ink:#15130f;
   --display:'Archivo Black','Arial Black',Impact,sans-serif;
   --body:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#17150f; --surface:#1f1c15; --ink:#f3efe6; --muted:#a79e8a; --line:#312c21; --ph:#2a261c; color-scheme:dark } }
-:root[data-theme="dark"]{ --bg:#17150f; --surface:#1f1c15; --ink:#f3efe6; --muted:#a79e8a; --line:#312c21; --ph:#2a261c; color-scheme:dark }
-
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17150f; --surface:#1f1c15; --ink:#f3efe6; --muted:#a79e8a; --line:#312c21; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#17150f; --surface:#1f1c15; --ink:#f3efe6; --muted:#a79e8a; --line:#312c21; color-scheme:dark }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#15130f}
-.bar{background:#15130f;color:#f3efe6;display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{background:#15130f;color:#f3efe6;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .bar b{font-family:var(--display);font-weight:400;letter-spacing:2px;color:var(--gold);font-size:17px}
 .bar nav{display:flex;gap:18px;font-size:13px;color:#b9b2a2}
-.wrap{max-width:1040px;margin:0 auto;padding-block:40px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center;margin-bottom:40px}
-.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,50px);line-height:1.05;margin:0 0 12px;text-wrap:balance}
-.hero p{color:var(--muted);margin:0 0 18px;max-width:52ch}
-.cta{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--gold-ink);border:0;border-radius:999px;padding:12px 22px;font:600 14px var(--body);cursor:pointer}
-.cta:focus-visible,.fab:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.howto{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
-.howto h2{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
-.howto ol{margin:0;padding-left:18px;font-size:14px;display:grid;gap:6px}
-.howto small{display:block;margin-top:12px;color:var(--muted);font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
-.card .ph{aspect-ratio:1;max-width:100%;background:var(--ph);border-radius:8px;margin-bottom:10px;display:grid;place-items:center;color:var(--muted);font-size:11px;letter-spacing:1px}
-.card h3{font-size:14px;margin:0;font-weight:600}
-.card span{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
-.fab{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:50;
-  display:flex;align-items:center;gap:8px;padding:14px 22px;background:#15130f;color:var(--gold);border:2px solid var(--gold);border-radius:999px;
-  font:600 14px var(--body);cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.3)}
-.fab:hover{background:var(--gold);color:#15130f}
-.panel{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));width:420px;max-width:calc(100vw - 40px);height:640px;max-height:calc(100vh - 120px);
-  z-index:50;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.3);background:#fff}
-.panel iframe{width:100%;height:100%;border:0;display:block}
-@media (max-width:560px){
-  .hero{grid-template-columns:1fr}
-  .panel{inset:0;width:100%;max-width:none;height:100%;max-height:none;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-  .bar nav{display:none}
-}
-@media (prefers-reduced-motion:no-preference){ .fab,.cta{transition:background .2s,color .2s} }
+.wrap{max-width:1040px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,4.5vw,44px);line-height:1.1;margin:0 0 10px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 26px;max-width:62ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.sc h3{font-size:15px;margin:0;font-weight:600}
+.sc p{font-size:13px;color:var(--muted);margin:0 0 6px;line-height:1.45;flex:1}
+.sc .tag{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:600}
+.open{align-self:flex-start;background:#15130f;color:var(--gold);border:2px solid var(--gold);border-radius:999px;padding:10px 18px;font:600 13px var(--body);cursor:pointer}
+.open:hover{background:var(--gold);color:#15130f}
+.open:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.how{margin-top:34px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.how h2{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+.how ol{margin:0;padding-left:18px;font-size:14px;display:grid;gap:5px}
+.how small{display:block;margin-top:12px;color:var(--muted);font-size:12px}
+.result{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.result h2{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.result pre{margin:0;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-x:auto;color:var(--ink)}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(10,10,10,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.box{width:min(720px,100%);height:min(820px,100%);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);background:#fff}
+.box iframe{width:100%;height:100%;border:0;display:block}
+@media (max-width:560px){ .bar nav{display:none} .overlay{padding:0} .box{border-radius:0;height:100%;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)} }
+@media (prefers-reduced-motion:no-preference){ .open{transition:background .2s,color .2s} }
 </style>
 
-<header class="bar"><b>MERCHY'S MARKET</b><nav><span>Shop</span><span>Services</span><span>Design Studio</span><span>About</span></nav></header>
+<header class="bar"><b>MERCHY'S MARKET</b><nav><span>Shop</span><span>Customize</span><span>Design</span><span>Account</span></nav></header>
 
 <main class="wrap">
-  <section class="hero">
-    <div>
-      <h1>Design it here. We print it right.</h1>
-      <p>This page stands in for merchysmarket.com. The Design Studio in the corner is the real widget: pick a service, describe your design, review 6 one-color concepts, then request a vector file, save, or send it to a product.</p>
-      <button class="cta" id="openCta" type="button">Open Design Studio</button>
-    </div>
-    <aside class="howto">
-      <h2>Try the flow</h2>
-      <ol>
-        <li>Choose a service (DTF Printing is a good start).</li>
-        <li>Enter a name, email, and your business or event. Pick up to 3 styles.</li>
-        <li>Review the 6 concepts and select your favorites.</li>
-        <li>Choose Vector File, Save for Later, or Add to Product.</li>
-      </ol>
-      <small>Demo build: concepts are layout previews built from your text, and requests stay on this page. The live version generates AI concepts and routes every request to the Merchy's team.</small>
-    </aside>
-  </section>
+  <h1>Design Studio plug-in</h1>
+  <p class="lead">Each card is a spot on merchysmarket.com where the studio pops up: the customization step, a product design page, or an existing order. The site already knows the client, so the studio opens straight on the art director's questions.</p>
   <div class="grid">
-    <div class="card"><div class="ph">TEE</div><h3>Heavyweight Tee</h3><span>from $14.50</span></div>
-    <div class="card"><div class="ph">HOODIE</div><h3>Pullover Hoodie</h3><span>from $32.00</span></div>
-    <div class="card"><div class="ph">HAT</div><h3>Dad Hat</h3><span>from $18.00</span></div>
-    <div class="card"><div class="ph">POLO</div><h3>Work Polo</h3><span>from $24.00</span></div>
-    <div class="card"><div class="ph">PATCH</div><h3>Embroidered Patch</h3><span>from $3.00</span></div>
+    <div class="sc"><span class="tag">Customize step</span><h3>Needs a logo</h3><p>Client has no artwork yet. Logo questions only.</p>
+      <button class="open" type="button" data-client='{"id":"u-1001","name":"Jordan Smith","email":"jordan@example.com","business":"Smith Family BBQ"}' data-context='{"mode":"logo","decoration":"DTF"}'>Open studio</button></div>
+    <div class="sc"><span class="tag">Design page</span><h3>Banner order</h3><p>Banner tree: size, viewing distance, content, hierarchy, environment.</p>
+      <button class="open" type="button" data-client='{"id":"u-1002","name":"Maria Lopez","email":"maria@example.com","business":"Lopez Landscaping"}' data-context='{"mode":"product","product":"6 ft x 3 ft outdoor vinyl banner","decoration":"Large format print"}'>Open studio</button></div>
+    <div class="sc"><span class="tag">Design page</span><h3>Travel mug</h3><p>Drinkware tree: item color, one side or wrap, engraving vs full color.</p>
+      <button class="open" type="button" data-client='{"id":"u-1003","name":"Dev Patel","email":"dev@example.com","business":"North Park Climbing"}' data-context='{"mode":"product","product":"20 oz black stainless travel mug","decoration":"Laser engraving"}'>Open studio</button></div>
+    <div class="sc"><span class="tag">Existing order</span><h3>PO 2924 artwork</h3><p>Embroidered polo. Live version posts results to the project's Graphic Design task.</p>
+      <button class="open" type="button" data-client='{"id":"u-2924","name":"Chris Nguyen","email":"chris@example.com","business":"Bayside Dental","poNumber":"2924"}' data-context='{"mode":"product","product":"embroidered polo, left chest","decoration":"Embroidery"}'>Open studio</button></div>
   </div>
+
+  <section class="how">
+    <h2>What happens inside</h2>
+    <ol>
+      <li>Art director questions, tuned to the product.</li>
+      <li>Pick any number of styles. One concept per style, arriving one at a time.</li>
+      <li>Like the ones that work. For each: a few questions, notes, then 5 refinements run in the background. Skip is allowed.</li>
+      <li>Review board: every style with its original plus 5, numbered. Select, add notes per image, say what you do not want.</li>
+      <li>Book a call with the artist. Approved designs, notes and dislikes go to the design team and the client's logo library.</li>
+    </ol>
+    <small>Demo build: concepts are full-color layout previews built from the client's answers, and nothing leaves the page. The live version generates AI concepts, posts to Asana, emails the brief, and books through Calendly.</small>
+  </section>
+
+  <section class="result" id="result" hidden>
+    <h2>What the host page receives</h2>
+    <pre id="resultOut"></pre>
+  </section>
 </main>
 
-<button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="panel">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-  <span id="fabLabel">Design Studio</span>
-</button>
-<div class="panel" id="panel" hidden><iframe id="widgetFrame" title="Merchy's Design Studio"></iframe></div>
-
-<template id="widgetTpl">
+<template id="studioTpl">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,757 +87,565 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Poppins',sans-serif;background:#fff;color:#111;overflow-x:hidden}
-
-/* Header */
-.header{background:#111;color:#d4a017;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;position:sticky;top:0;z-index:100}
-.header h1{font-size:18px;font-weight:700;letter-spacing:1px}
-.header .steps{font-size:13px;color:#999;margin-top:2px}
-.close-btn{background:none;border:none;color:#999;font-size:22px;cursor:pointer;padding:6px}
+html,body{height:100%}
+body{font-family:'Poppins',sans-serif;background:#fff;color:#111;display:flex;flex-direction:column;overflow:hidden}
+.header{background:#111;color:#d4a017;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;flex-shrink:0}
+.header h1{font-size:16px;font-weight:700;letter-spacing:1px}
+.header .sub{font-size:12px;color:#aaa;margin-top:2px}
+.header .sub b{color:#eee;font-weight:600}
+.close-btn{background:none;border:none;color:#999;font-size:24px;cursor:pointer;padding:4px 8px;line-height:1}
 .close-btn:hover{color:#fff}
-
-/* Content */
-.content{padding:20px 24px;overflow-y:auto;height:calc(100vh - 64px)}
-.step{display:none}
-.step.active{display:block;animation:fadeUp .2s ease}
+.progress{display:flex;gap:4px;padding:10px 20px 0;flex-shrink:0}
+.progress span{flex:1;height:4px;border-radius:2px;background:#eee}
+.progress span.on{background:#d4a017}.progress span.done{background:#111}
+.content{padding:18px 20px 28px;overflow-y:auto;flex:1}
+.stage{display:none}.stage.active{display:block;animation:fadeUp .2s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-
-/* Category Tabs */
-.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
-.cat-tabs::-webkit-scrollbar{height:0}
-.cat-tab{padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;border:2px solid #e5e5e5;background:#fff;transition:all .15s;flex-shrink:0}
-.cat-tab:hover{border-color:#d4a017}
-.cat-tab.active{background:#111;color:#d4a017;border-color:#111}
-
-/* Search */
-.search-bar{width:100%;padding:12px 16px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:15px;margin-bottom:14px;outline:none;transition:border .15s}
-.search-bar:focus{border-color:#d4a017}
-
-/* Service tiles - 6 wide grid */
-.svc-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
-.svc-tile{background:#fff;border:2px solid #eee;border-radius:10px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center}
-.svc-tile:hover{border-color:#d4a017;box-shadow:0 4px 16px rgba(212,160,23,.1);transform:translateY(-2px)}
-.svc-tile.selected{border-color:#d4a017;background:#111;color:#d4a017}
-.svc-tile .tile-icon{width:48px;height:48px;margin-bottom:8px;display:flex;align-items:center;justify-content:center}
-.svc-tile .tile-icon svg{width:40px;height:40px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.svc-tile.selected .tile-icon svg{stroke:#d4a017}
-.svc-tile .tile-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:4px}
-.svc-tile .tile-desc{font-size:11px;color:#999;line-height:1.3}
-.svc-tile.selected .tile-desc{color:#888}
-.no-results{text-align:center;color:#888;font-size:14px;padding:24px 0}
-
-/* Responsive: fewer columns on smaller screens */
-@media(max-width:900px){.svc-grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:600px){.svc-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:400px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
-
-/* Form layout - side by side */
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
-.form-row.full{grid-template-columns:1fr}
-label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#444;text-transform:uppercase;letter-spacing:.5px}
-input[type="text"],input[type="email"],textarea,select{width:100%;padding:11px 14px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:15px;outline:none;transition:border .15s;margin-bottom:14px}
-input:focus,textarea:focus,select:focus{border-color:#d4a017}
-textarea{resize:vertical;min-height:70px}
-
-/* Multi-location picker */
-.loc-section{margin-bottom:14px}
-.loc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.loc-btn{padding:10px 6px;border:2px solid #eee;border-radius:8px;cursor:pointer;text-align:center;font-size:14px;font-weight:600;transition:all .15s;background:#fff}
-.loc-btn:hover{border-color:#d4a017}
-.loc-btn.active{background:#111;color:#d4a017;border-color:#111}
-.loc-detail{background:#f8f8f8;border-radius:8px;padding:12px;margin-bottom:8px;display:none;animation:fadeUp .15s ease}
-.loc-detail.visible{display:block}
-.loc-detail h4{font-size:14px;font-weight:700;margin-bottom:6px;color:#111}
-.loc-detail textarea{min-height:50px;margin-bottom:6px}
-
-/* Upload area - compact inline */
-.upload-area{border:2px dashed #ddd;border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px;display:flex;align-items:center;gap:10px;justify-content:center}
-.upload-area:hover{border-color:#d4a017;background:#fffdf5}
-.upload-area.has-file{border-color:#d4a017;background:#f0f7e6}
-.upload-area p{font-size:14px;color:#888}
-.upload-area .plus{font-size:22px;color:#ccc;font-weight:700}
-.upload-preview{max-width:48px;max-height:40px;border-radius:4px}
-
-/* Style picker - 20 styles, 5-wide grid with SVG icons */
-.style-section{margin-bottom:16px}
-.style-counter{font-size:13px;color:#888;margin-bottom:8px;text-align:right}
-.style-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-@media(max-width:700px){.style-grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:500px){.style-grid{grid-template-columns:repeat(3,1fr)}}
-.style-card{padding:12px 6px 8px;border:2px solid #eee;border-radius:10px;cursor:pointer;text-align:center;transition:all .15s;background:#fff}
-.style-card:hover{border-color:#d4a017;background:#fffdf5;transform:translateY(-1px)}
-.style-card.active{background:#111;color:#d4a017;border-color:#d4a017}
-.style-card.disabled{opacity:.3;cursor:not-allowed;transform:none}
-.style-card .s-icon{width:44px;height:44px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center}
-.style-card .s-icon svg{width:36px;height:36px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.style-card .s-name{font-size:12px;font-weight:700;line-height:1.2}
-.style-card .s-hint{font-size:10px;color:#aaa;line-height:1.2;margin-top:2px}
-.style-card.active .s-hint{color:#999}
-
-/* Selected service pill */
-.sel-pill{display:inline-flex;align-items:center;gap:8px;background:#f8f8f8;border-radius:8px;padding:8px 14px;margin-bottom:16px;font-size:15px;font-weight:600}
-.sel-pill .dot{width:10px;height:10px;border-radius:50%;background:#d4a017}
-
-/* Buttons */
-.btn{width:100%;padding:14px;border:none;border-radius:8px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.5px}
-.btn-primary{background:#d4a017;color:#111}
-.btn-primary:hover{background:#e8b420}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-back{background:none;border:2px solid #eee;color:#555;margin-bottom:8px;font-size:14px;padding:10px}
-.btn-back:hover{border-color:#111;color:#111}
-
-/* Design results - 6 designs in 3x2 grid, multi-select */
-.designs-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.design-card{border:2px solid #eee;border-radius:8px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
-.design-card:hover{border-color:#d4a017}
-.design-card.selected{border-color:#d4a017;box-shadow:0 0 0 3px #d4a017}
-.design-card .check-badge{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#d4a017;color:#111;font-size:14px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
-.design-card.selected .check-badge{display:flex}
-.design-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.design-card .watermark{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(0,0,0,.12);pointer-events:none;transform:rotate(-30deg);letter-spacing:2px}
-.sel-count{font-size:13px;color:#888;margin-bottom:8px;text-align:right}
-
-/* Loading */
-.loading{text-align:center;padding:30px}
-.spinner{width:36px;height:36px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.lead{font-size:13px;color:#777;margin-bottom:16px;line-height:1.5}
+.btn{display:block;width:100%;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;margin-top:10px}
+.btn-primary{background:#d4a017;color:#111}.btn-primary:hover{background:#b8860b}
+.btn-primary:disabled{opacity:.45;cursor:default}
+.btn-dark{background:#111;color:#d4a017}.btn-dark:hover{background:#222}
+.btn-back{background:#fff;color:#111;border:2px solid #e5e5e5}.btn-back:hover{border-color:#d4a017}
+.btn-ghost{background:none;color:#888;font-weight:500;font-size:13px;padding:8px}
+.row{display:flex;gap:10px}.row .btn{margin-top:10px}
+/* questions */
+.q{margin-bottom:18px}
+.q label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;line-height:1.4}
+.q .why{font-size:11px;color:#999;font-weight:400;display:block;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border:2px solid #e5e5e5;border-radius:20px;font-size:13px;cursor:pointer;background:#fff;transition:all .12s;user-select:none}
+.chip:hover{border-color:#d4a017}.chip.on{background:#111;color:#d4a017;border-color:#111}
+textarea,input[type=text]{width:100%;padding:11px 13px;border:2px solid #e5e5e5;border-radius:10px;font-size:14px;font-family:inherit;transition:border .15s;background:#fff}
+textarea{resize:vertical;min-height:64px}
+textarea:focus,input:focus{outline:none;border-color:#d4a017}
+.q textarea{margin-top:8px}
+.brief-box{background:#fffdf5;border:1px solid #f0d78a;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5c00;margin-bottom:14px;line-height:1.5}
+/* style wall */
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
+.style-card{border:2px solid #eee;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .12s;position:relative}
+.style-card:hover{border-color:#d4a017}
+.style-card.on{border-color:#d4a017;background:#fffdf5}
+.style-card.on::after{content:"\2713";position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:50%;background:#d4a017;color:#111;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.style-card svg{width:38px;height:38px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px}
+.style-card .n{font-size:12px;font-weight:600;line-height:1.2}
+.style-card .h{font-size:10px;color:#999;margin-top:3px;line-height:1.2}
+.counter{font-size:12px;color:#888;text-align:right;margin-bottom:6px}
+/* concepts */
+.concepts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.concept{border:2px solid #eee;border-radius:12px;overflow:hidden;cursor:pointer;transition:all .12s;position:relative;background:#fff}
+.concept:hover{border-color:#d4a017}.concept.on{border-color:#d4a017;box-shadow:0 0 0 2px #d4a017}
+.concept .img{aspect-ratio:1;background:#f6f6f6;display:flex;align-items:center;justify-content:center;position:relative}
+.concept img{width:100%;height:100%;object-fit:cover;display:block}
+.concept .t{padding:8px 10px;font-size:12px;font-weight:600;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.concept .t small{color:#aaa;font-weight:400}
+.concept .badge{position:absolute;top:8px;left:8px;background:#111;color:#d4a017;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.5px}
+.concept.on .badge{background:#d4a017;color:#111}
+.concept .num{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid #111;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.concept.on .num{background:#d4a017;border-color:#d4a017}
+.spinner{width:28px;height:28px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading p{font-size:14px;color:#888}
-
-/* Summary */
-.summary-box{background:#f8f8f8;border-radius:8px;padding:14px;margin-bottom:14px}
-.summary-box h3{font-size:15px;font-weight:700;margin-bottom:8px}
-.summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
-.summary-row .label{color:#888}
-.summary-row .val{font-weight:600}
-
-/* Step 4: Three path cards */
-.path-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
-.path-card{border:2px solid #eee;border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px}
-.path-card:hover{border-color:#d4a017;background:#fffdf5;transform:translateY(-1px)}
-.path-card .p-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.path-card .p-icon svg{width:28px;height:28px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.path-card .p-icon.gold{background:#111}
-.path-card .p-icon.dark{background:#f5f5f5}
-.path-card .p-info h3{font-size:16px;font-weight:700;margin-bottom:2px;color:#111}
-.path-card .p-info p{font-size:13px;color:#888;line-height:1.3}
-.path-card .p-arrow{margin-left:auto;font-size:20px;color:#ccc}
-
-/* Sub-pages (vector, save, product) */
-.sub-page{display:none;animation:fadeUp .2s ease}
-.sub-page.active{display:block}
-.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.product-card{border:2px solid #eee;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .15s}
-.product-card:hover{border-color:#d4a017}
-.product-card.selected{border-color:#d4a017;background:#111;color:#d4a017}
-.product-card .pc-icon{font-size:28px;margin-bottom:6px}
-.product-card .pc-name{font-size:14px;font-weight:700}
-.product-card .pc-desc{font-size:11px;color:#999;margin-top:2px}
+.status{font-size:11px;color:#999}
+.fail{font-size:11px;color:#c00;padding:8px;text-align:center}
+/* refine stage */
+.refine-head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.refine-head img{width:110px;height:110px;border-radius:10px;border:2px solid #d4a017;object-fit:cover;flex-shrink:0}
+.refine-head .meta{font-size:13px;color:#666}.refine-head .meta b{display:block;color:#111;font-size:16px}
+.queue{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.queue span{font-size:11px;padding:4px 10px;border-radius:12px;background:#f3f3f3;color:#777}
+.queue span.now{background:#111;color:#d4a017}.queue span.done{background:#e8f5e9;color:#2e7d32}.queue span.skip{text-decoration:line-through}
+/* board */
+.board-section{margin-bottom:22px}
+.board-section h3{font-size:15px;font-weight:700;padding:8px 12px;background:#111;color:#d4a017;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.board-section h3 small{font-size:11px;color:#aaa;font-weight:500}
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.note-card{border:2px solid #d4a017;border-radius:12px;padding:12px;margin:10px 0;background:#fffdf5}
+.note-card .nh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.note-card .nh img{width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid #ddd}
+.note-card .nh b{font-size:13px}
+.note-card .chips{margin-bottom:8px}
+.note-card .chip{font-size:12px;padding:6px 11px}
+.dislike{margin-top:16px;padding:14px;border:2px dashed #e5e5e5;border-radius:12px}
+.dislike label{font-size:14px;font-weight:600;display:block;margin-bottom:6px}
+/* schedule */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.slot{padding:10px;border:2px solid #e5e5e5;border-radius:10px;font-size:12px;text-align:center;cursor:pointer}
+.slot:hover{border-color:#d4a017}.slot.on{background:#111;color:#d4a017;border-color:#111}
+/* done */
+.done-wrap{text-align:center;padding:16px 0}
+.done-wrap .check{width:60px;height:60px;border-radius:50%;background:#d4a017;color:#111;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.summary{background:#f8f8f8;border-radius:12px;padding:14px;text-align:left;margin-top:14px;font-size:13px}
+.summary pre{white-space:pre-wrap;font-family:inherit;font-size:12px;color:#444;line-height:1.5}
+.lib-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.lib-strip img{width:64px;height:64px;border-radius:8px;border:2px solid #d4a017;object-fit:cover}
+.err{color:#c00;font-size:13px;margin-top:8px}
+@media (max-width:480px){.content{padding:14px 14px 24px}.style-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
-
 <div class="header">
-  <div>
-    <h1>DESIGN STUDIO</h1>
-    <div class="steps" id="stepLabel">Step 1 of 4 - Choose Service</div>
-  </div>
-  <button class="close-btn" onclick="window.parent?.postMessage({type:'close-widget'},'*')">&times;</button>
+  <div><h1>DESIGN STUDIO</h1><div class="sub" id="subline">Loading...</div></div>
+  <button class="close-btn" onclick="closeStudio()" title="Close">&times;</button>
 </div>
-
+<div class="progress" id="progress"></div>
 <div class="content" id="content">
 
-  <!-- STEP 1: Service Tiles -->
-  <div class="step active" id="step1">
-    <div class="cat-tabs" id="catTabs"></div>
-    <input type="text" class="search-bar" placeholder="Search services..." id="searchBar" oninput="filterServices()">
-    <div id="serviceGrid" class="svc-grid"></div>
-    <div id="noResults" class="no-results" style="display:none">No services found.</div>
+  <!-- 0: context (only shown when the host did not provide it) -->
+  <div class="stage" id="st0">
+    <h2>What are we designing?</h2>
+    <p class="lead">Normally the website passes this in. Pick one to run the studio directly.</p>
+    <div class="q"><label>Design for</label><div class="chips" id="ctxChips"></div></div>
+    <div class="q" id="ctxProductWrap" style="display:none"><label>Product (be specific: size, color, item)</label><input type="text" id="ctxProduct" placeholder="e.g. 6 ft x 3 ft outdoor banner"></div>
+    <div class="q"><label>Business name</label><input type="text" id="ctxBusiness" placeholder="Business or event name"></div>
+    <button class="btn btn-primary" onclick="startFromContext()">Start</button>
   </div>
 
-  <!-- STEP 2: Design Details -->
-  <div class="step" id="step2">
-    <button class="btn btn-back" onclick="goStep(1)">Back</button>
-    <div class="sel-pill" id="selPill"><span class="dot"></span><span id="selSvcName"></span></div>
-
-    <div class="form-row">
-      <div><label>Name</label><input type="text" id="userName" placeholder="John Smith"></div>
-      <div><label>Email</label><input type="email" id="userEmail" placeholder="john@company.com"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Business / Brand</label><input type="text" id="userBusiness" placeholder="Your Company Name"></div>
-      <div><label>Text for Design</label><input type="text" id="designText" placeholder="Brand Name, Est. 2024"></div>
-    </div>
-    <div class="form-row full">
-      <div><label>Describe What You Want</label><textarea id="designDesc" placeholder="A bold logo with a mountain icon for an outdoor adventure company"></textarea></div>
-    </div>
-
-    <!-- Print Location Picker (apparel only) -->
-    <div class="loc-section" id="locationSection" style="display:none">
-      <label>Print Locations (select all that apply)</label>
-      <div class="loc-grid" id="locGrid"></div>
-      <div id="locDetails"></div>
-    </div>
-
-    <!-- Upload -->
-    <label>Reference Image (optional)</label>
-    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-      <span class="plus">+</span>
-      <p>Upload a reference image</p>
-    </div>
-    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleUpload(this)">
-
-    <!-- Style Picker -->
-    <div class="style-section">
-      <label>Design Style <span style="font-weight:400;color:#aaa;text-transform:none">(pick up to 3)</span></label>
-      <div class="style-counter" id="styleCounter">0 of 3 selected</div>
-      <div class="style-grid" id="styleGrid"></div>
-    </div>
-
-    <button class="btn btn-primary" onclick="generateDesigns()" id="generateBtn">Generate 6 AI Designs</button>
+  <!-- 1: interview -->
+  <div class="stage" id="st1">
+    <h2 id="qTitle">A few quick questions</h2>
+    <p class="lead" id="qLead">Answer what you can. Skip anything that does not apply.</p>
+    <div class="brief-box" id="briefBox" style="display:none"></div>
+    <div id="qList"></div>
+    <button class="btn btn-primary" id="qNext" onclick="submitAnswers()">Continue</button>
+    <button class="btn btn-ghost" onclick="finishBrief()">I have given enough, show me styles</button>
   </div>
 
-  <!-- STEP 3: Review Designs (6 designs, multi-select) -->
-  <div class="step" id="step3">
-    <button class="btn btn-back" onclick="goStep(2)">Back to Details</button>
-    <div class="loading" id="loadingState">
-      <div class="spinner"></div>
-      <p>Creating your designs...</p>
-      <p style="font-size:12px;color:#aaa;margin-top:4px">This may take 30-60 seconds</p>
-    </div>
-    <div id="designResults" style="display:none">
-      <div id="demoNotice" style="display:none;background:#fffdf5;border:1px solid #f0d78a;border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6a00;margin-bottom:10px"></div>
-      <p style="font-size:15px;font-weight:600;margin-bottom:4px">Select your favorites:</p>
-      <div class="sel-count" id="designSelCount">0 selected</div>
-      <div class="designs-grid" id="designsGrid"></div>
-      <button class="btn btn-primary" onclick="goStep(4)" id="continueBtn" disabled>Continue with Selected Designs</button>
-      <button class="btn btn-back" onclick="regenerate()" style="margin-top:6px">Regenerate All</button>
-    </div>
+  <!-- 2: style wall -->
+  <div class="stage" id="st2">
+    <h2>Pick every style you want to see</h2>
+    <p class="lead">We make one concept of your design in each style you choose. Pick as many as you like.</p>
+    <div class="counter" id="styleCounter">0 selected</div>
+    <div class="style-grid" id="styleGrid"></div>
+    <button class="btn btn-primary" id="genBtn" onclick="generateConcepts()" disabled>Generate concepts</button>
+    <button class="btn btn-back" onclick="go(1)">Back to questions</button>
   </div>
 
-  <!-- STEP 4: Choose Your Path -->
-  <div class="step" id="step4">
-    <button class="btn btn-back" onclick="goStep(3)">Back to Designs</button>
+  <!-- 3: concepts -->
+  <div class="stage" id="st3">
+    <h2>Your concepts</h2>
+    <p class="lead" id="conceptLead">Concepts appear one at a time. Tap the ones you like.</p>
+    <div class="concepts" id="conceptGrid"></div>
+    <button class="btn btn-primary" id="likeBtn" onclick="continueToRefine()" disabled>Continue with 0 styles</button>
+    <button class="btn btn-back" onclick="go(2)">Add or remove styles</button>
+  </div>
 
-    <!-- Selected designs preview -->
-    <div id="selectedPreview" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center"></div>
+  <!-- 4: refine loop -->
+  <div class="stage" id="st4">
+    <div class="queue" id="refineQueue"></div>
+    <div class="refine-head"><img id="refImg" alt=""><div class="meta"><b id="refName"></b><span id="refPos"></span><br><span>Answer a few questions and we generate 5 refinements of this one while you move on.</span></div></div>
+    <div id="refQList"><div class="spinner" style="margin:20px auto"></div></div>
+    <div class="q"><label>Notes for this style</label><textarea id="refNotes" placeholder="Anything to keep, change, add, or remove"></textarea></div>
+    <button class="btn btn-primary" onclick="submitRefine(false)">Generate 5 refinements</button>
+    <button class="btn btn-back" onclick="submitRefine(true)">Skip this style</button>
+  </div>
 
-    <!-- Main path selection -->
-    <div id="pathSelection">
-      <p style="font-size:16px;font-weight:700;margin-bottom:12px;text-align:center">What would you like to do?</p>
-      <div class="path-cards">
-        <div class="path-card" onclick="showSubPage('vector')">
-          <div class="p-icon gold"><svg viewBox="0 0 24 24"><path d="M12 2L2 7L12 12L22 7L12 2Z"/><path d="M2 17L12 22L22 17"/><path d="M2 12L12 17L22 12"/></svg></div>
-          <div class="p-info">
-            <h3>Get Vector File - $25</h3>
-            <p>Production-ready SVG vector. Scalable to any size. Instant download after payment.</p>
-          </div>
-          <span class="p-arrow">&#8250;</span>
-        </div>
-        <div class="path-card" onclick="showSubPage('save')">
-          <div class="p-icon dark"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
-          <div class="p-info">
-            <h3>Save for Later</h3>
-            <p>Log in to save your designs to your account. Come back anytime to continue.</p>
-          </div>
-          <span class="p-arrow">&#8250;</span>
-        </div>
-        <div class="path-card" onclick="showSubPage('product')">
-          <div class="p-icon dark"><svg viewBox="0 0 24 24"><path d="M14 2L20 6L20 10L14 14L8 10L8 6Z"/><path d="M4 10L10 14L10 22L4 18Z"/><path d="M20 10L14 14L14 22L20 18Z"/></svg></div>
-          <div class="p-info">
-            <h3>Add to Product</h3>
-            <p>Put your design on apparel, hats, bags, or any product. Pick your item and order.</p>
-          </div>
-          <span class="p-arrow">&#8250;</span>
-        </div>
-      </div>
-    </div>
+  <!-- 5: review board -->
+  <div class="stage" id="st5">
+    <h2>Review board</h2>
+    <p class="lead">Select every design you want the design team to work from. Each selection gets its own notes.</p>
+    <div id="boardWait" class="status" style="margin-bottom:10px"></div>
+    <div id="board"></div>
+    <div class="dislike"><label>What do you NOT want?</label><textarea id="dislikes" placeholder="Colors, symbols, styles, or ideas the team should stay away from"></textarea></div>
+    <button class="btn btn-primary" id="boardBtn" onclick="submitBoard()" disabled>Save selections (0)</button>
+  </div>
 
-    <!-- SUB-PAGE: Vector Purchase -->
-    <div class="sub-page" id="subVector">
-      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
-      <div style="text-align:center;margin-bottom:16px">
-        <div id="vectorPreviewImgs" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"></div>
-      </div>
-      <div style="background:#f8f8f8;border-radius:12px;padding:20px;text-align:center">
-        <p style="font-size:18px;font-weight:700;margin-bottom:4px">Production-Ready Vector File</p>
-        <p style="font-size:14px;color:#666;margin-bottom:16px">Scalable SVG format. Clean paths. Ready for screen print, embroidery, or any production method.</p>
-        <p style="font-size:28px;font-weight:700;color:#d4a017;margin-bottom:16px">$25</p>
-        <button class="btn btn-primary" onclick="purchaseVector()" id="vectorBtn">Pay & Download Vector</button>
-        <p style="font-size:11px;color:#aaa;margin-top:8px" id="vectorNote">Secure payment via Stripe. Instant delivery.</p>
-      </div>
-    </div>
+  <!-- 6: schedule -->
+  <div class="stage" id="st6">
+    <h2>Talk to your artist</h2>
+    <p class="lead">Book a short call with the artist who will finish your designs. They will have your selections and notes in front of them.</p>
+    <div class="q"><label>This call is about</label><div class="chips" id="scopeChips"></div></div>
+    <div id="schedBody"><div class="spinner" style="margin:20px auto"></div></div>
+    <button class="btn btn-ghost" onclick="skipSchedule()">Skip for now, email me instead</button>
+  </div>
 
-    <!-- SUB-PAGE: Save for Later (login required) -->
-    <div class="sub-page" id="subSave">
-      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
-      <div style="background:#f8f8f8;border-radius:12px;padding:24px;text-align:center">
-        <div style="font-size:36px;margin-bottom:10px">&#128274;</div>
-        <p style="font-size:18px;font-weight:700;margin-bottom:6px">Log In to Save Your Designs</p>
-        <p style="font-size:14px;color:#666;margin-bottom:20px">Create an account or log in to save your designs and come back to them anytime.</p>
-        <div style="text-align:left;max-width:300px;margin:0 auto">
-          <label>Email</label>
-          <input type="email" id="saveEmail" placeholder="your@email.com">
-          <label>Password</label>
-          <input type="text" id="savePassword" placeholder="Password" style="-webkit-text-security:disc">
-        </div>
-        <button class="btn btn-primary" onclick="handleSaveLogin()" id="saveLoginBtn" style="max-width:300px;margin:0 auto">Log In & Save</button>
-        <p style="font-size:12px;color:#888;margin-top:10px">Don't have an account? <a href="https://merchysmarket.com/register" target="_blank" style="color:#d4a017;font-weight:600">Sign up at merchysmarket.com</a></p>
-      </div>
-    </div>
-
-    <!-- SUB-PAGE: Add to Product -->
-    <div class="sub-page" id="subProduct">
-      <button class="btn btn-back" onclick="hideSubPages()">Back to Options</button>
-      <p style="font-size:16px;font-weight:700;margin-bottom:12px">What type of product?</p>
-      <div class="product-grid" id="productTypeGrid">
-        <div class="product-card" onclick="selectProductType('tshirts')">
-          <div class="pc-icon">&#128085;</div>
-          <div class="pc-name">T-Shirts</div>
-          <div class="pc-desc">Crew neck, V-neck, long sleeve</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('hoodies')">
-          <div class="pc-icon">&#129509;</div>
-          <div class="pc-name">Hoodies & Sweats</div>
-          <div class="pc-desc">Pullover, zip-up, crewneck</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('polos')">
-          <div class="pc-icon">&#128084;</div>
-          <div class="pc-name">Polos & Uniforms</div>
-          <div class="pc-desc">Polos, button-downs, work wear</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('hats')">
-          <div class="pc-icon">&#129506;</div>
-          <div class="pc-name">Hats & Caps</div>
-          <div class="pc-desc">Snapback, dad hat, beanie, fitted</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('bags')">
-          <div class="pc-icon">&#128092;</div>
-          <div class="pc-name">Bags & Totes</div>
-          <div class="pc-desc">Canvas totes, backpacks, duffels</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('jackets')">
-          <div class="pc-icon">&#129509;</div>
-          <div class="pc-name">Jackets & Outerwear</div>
-          <div class="pc-desc">Coach, bomber, windbreaker</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('accessories')">
-          <div class="pc-icon">&#127991;</div>
-          <div class="pc-name">Accessories</div>
-          <div class="pc-desc">Patches, pins, stickers, koozies</div>
-        </div>
-        <div class="product-card" onclick="selectProductType('other')">
-          <div class="pc-icon">&#128230;</div>
-          <div class="pc-name">Other Products</div>
-          <div class="pc-desc">Signs, mugs, drinkware, promo</div>
-        </div>
-      </div>
-      <div id="productRedirect" style="display:none;text-align:center;padding:20px">
-        <div class="spinner"></div>
-        <p style="font-size:14px;color:#888">Taking you to our product catalog...</p>
-      </div>
+  <!-- 7: done -->
+  <div class="stage" id="st7">
+    <div class="done-wrap">
+      <div class="check">&#10003;</div>
+      <h2>Sent to the design team</h2>
+      <p class="lead" id="doneLead"></p>
+      <div class="lib-strip" id="libStrip"></div>
+      <div class="summary"><pre id="briefOut"></pre></div>
+      <button class="btn btn-dark" onclick="closeStudio()">Done</button>
     </div>
   </div>
 
-  <!-- STEP 5: Confirmation -->
-  <div class="step" id="step5">
-    <div style="text-align:center;padding:24px 0">
-      <div style="font-size:40px;margin-bottom:10px;color:#d4a017">&#10003;</div>
-      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px" id="confirmTitle">Design Submitted!</h2>
-      <p style="font-size:15px;color:#666;margin-bottom:16px" id="confirmMsg">Our team will get back to you within 1 business day.</p>
-      <div class="summary-box" id="finalSummary"></div>
-      <p style="font-size:13px;color:#888;margin-top:14px">619-800-0949 | start@merchysmerch.com</p>
-    </div>
-  </div>
 </div>
 
 <script>
-// ---- STATIC DEMO SHIM: answers /api/* locally ----
+// ---- STATIC DEMO SHIM: answers /api/studio/* in the browser ----
 (function(){
-const SERVICE_CATEGORIES = [
-  { id: 'apparel_decoration', name: 'Apparel Decoration', icon: 'shirt' },
-  { id: 'signs_banners', name: 'Signs & Banners', icon: 'sign' },
-  { id: 'business_print', name: 'Business Printing', icon: 'file' },
-  { id: 'promo_products', name: 'Promo Products', icon: 'gift' },
-  { id: 'specialty', name: 'Specialty', icon: 'star' },
-  { id: 'design_services', name: 'Design Services', icon: 'palette' }
-];
+// ================================================================
+// Question bank and product decision trees.
+// Used directly when no language model is configured, and handed to
+// the art director model as the base it adapts from when one is.
+// Every question: { id, q, type: 'chips' | 'text' | 'chips+text', options?, why }
+// ================================================================
 
-const SERVICES_CATALOG = [
-  // ---- Apparel Decoration ----
-  { id: 'dtf-printing', name: 'DTF Printing', priceRange: '$8-$15/piece', category: 'apparel_decoration', desc: 'Full-color transfers on any fabric. No minimums, 5 business day turnaround.' },
-  { id: 'screen-printing', name: 'Screen Printing', priceRange: '$5-$12/piece', category: 'apparel_decoration', desc: 'Up to 13 colors, best for 48+ pieces. 10 business day turnaround.' },
-  { id: 'embroidery', name: 'Embroidery', priceRange: '$8-$20/piece', category: 'apparel_decoration', desc: 'Stitched logos on polos, jackets, and hats. Professional and durable.' },
-  { id: 'dtg-printing', name: 'DTG Printing', priceRange: '$10-$18/piece', category: 'apparel_decoration', desc: 'Direct-to-garment for detailed photo prints. Great for small runs.' },
-  { id: 'heat-transfer', name: 'Heat Transfer', priceRange: '$6-$12/piece', category: 'apparel_decoration', desc: 'Vinyl and heat-applied graphics for names, numbers, and logos.' },
-  { id: 'sublimation-apparel', name: 'Sublimation (Apparel)', priceRange: '$12-$25/piece', category: 'apparel_decoration', desc: 'All-over prints on polyester garments. Vibrant edge-to-edge color.' },
-  // ---- Signs & Banners ----
-  { id: 'vinyl-banners', name: 'Vinyl Banners', priceRange: '$3-$8/sqft', category: 'signs_banners', desc: 'Indoor and outdoor banners for events, storefronts, and promotions.' },
-  { id: 'retractable-banners', name: 'Retractable Banners', priceRange: '$75-$200', category: 'signs_banners', desc: 'Portable pull-up displays for trade shows and events.' },
-  { id: 'yard-signs', name: 'Yard Signs', priceRange: '$8-$20/each', category: 'signs_banners', desc: 'Corrugated plastic signs for real estate, elections, and events.' },
-  { id: 'window-graphics', name: 'Window Graphics', priceRange: '$5-$15/sqft', category: 'signs_banners', desc: 'Vinyl lettering, perforated film, and frosted glass for storefronts.' },
-  { id: 'wall-wraps', name: 'Wall Wraps & Murals', priceRange: '$10-$25/sqft', category: 'signs_banners', desc: 'Large format wall graphics for offices, restaurants, and retail.' },
-  { id: 'car-wraps', name: 'Vehicle Wraps', priceRange: '$200-$500+', category: 'signs_banners', desc: 'Partial and full vehicle wraps for cars, trucks, and vans.' },
-  { id: 'a-frame-signs', name: 'A-Frame Signs', priceRange: '$40-$100', category: 'signs_banners', desc: 'Sidewalk signs for restaurants, salons, and retail storefronts.' },
-  { id: 'acrylic-signs', name: 'Acrylic & Metal Signs', priceRange: '$50-$300', category: 'signs_banners', desc: 'Premium lobby signs, wayfinding, and office signage.' },
-  // ---- Business Printing ----
-  { id: 'business-cards', name: 'Business Cards', priceRange: '$25-$75', category: 'business_print', desc: 'Standard, premium, and specialty finishes. Multiple paper stocks.' },
-  { id: 'flyers', name: 'Flyers & Handouts', priceRange: '$0.10-$0.50/each', category: 'business_print', desc: 'Single and double-sided flyers for promotions and events.' },
-  { id: 'brochures', name: 'Brochures', priceRange: '$0.25-$1.00/each', category: 'business_print', desc: 'Bi-fold and tri-fold brochures for services and product lines.' },
-  { id: 'postcards', name: 'Postcards & Mailers', priceRange: '$0.15-$0.75/each', category: 'business_print', desc: 'Direct mail postcards for marketing campaigns.' },
-  { id: 'menus', name: 'Menus', priceRange: '$2-$10/each', category: 'business_print', desc: 'Restaurant, cafe, and event menus. Laminated or cardstock.' },
-  { id: 'ncr-forms', name: 'NCR Forms', priceRange: '$0.50-$2.00/each', category: 'business_print', desc: 'Carbonless copy forms for invoices, receipts, and work orders.' },
-  { id: 'booklets', name: 'Booklets & Catalogs', priceRange: '$3-$15/each', category: 'business_print', desc: 'Saddle-stitched and perfect-bound booklets for product lines.' },
-  { id: 'letterhead', name: 'Letterhead & Envelopes', priceRange: '$0.15-$0.50/each', category: 'business_print', desc: 'Professional branded stationery for your business.' },
-  { id: 'door-hangers', name: 'Door Hangers', priceRange: '$0.20-$0.75/each', category: 'business_print', desc: 'Die-cut door hangers for local marketing and promotions.' },
-  // ---- Promo Products ----
-  { id: 'drinkware', name: 'Drinkware', priceRange: '$5-$25/each', category: 'promo_products', desc: 'Custom mugs, tumblers, water bottles, and koozies.' },
-  { id: 'tote-bags', name: 'Tote Bags', priceRange: '$3-$15/each', category: 'promo_products', desc: 'Canvas and non-woven bags with your logo for events and retail.' },
-  { id: 'pens', name: 'Pens & Writing', priceRange: '$1-$5/each', category: 'promo_products', desc: 'Branded pens, pencils, and highlighters for offices and events.' },
-  { id: 'tech-accessories', name: 'Tech Accessories', priceRange: '$5-$30/each', category: 'promo_products', desc: 'Phone cases, chargers, USB drives, and earbuds with your brand.' },
-  { id: 'trade-show-displays', name: 'Trade Show Displays', priceRange: '$100-$500+', category: 'promo_products', desc: 'Tablecloths, backdrops, tents, and booth setups.' },
-  { id: 'lanyards', name: 'Lanyards & Badges', priceRange: '$2-$8/each', category: 'promo_products', desc: 'Custom lanyards, badge holders, and event credentials.' },
-  { id: 'stickers-labels', name: 'Stickers & Labels', priceRange: '$0.25-$3/each', category: 'promo_products', desc: 'Die-cut stickers, vinyl decals, product labels, and bumper stickers.' },
-  { id: 'keychains', name: 'Keychains & Accessories', priceRange: '$2-$10/each', category: 'promo_products', desc: 'Custom keychains, pins, magnets, and small branded items.' },
-  { id: 'packaging', name: 'Custom Packaging', priceRange: '$1-$10/each', category: 'promo_products', desc: 'Branded boxes, poly mailers, tissue paper, and tape.' },
-  { id: 'food-wellness', name: 'Food & Wellness Items', priceRange: '$3-$15/each', category: 'promo_products', desc: 'Branded snacks, mints, lip balm, hand sanitizer, and wellness kits.' },
-  { id: 'outdoor-leisure', name: 'Outdoor & Leisure', priceRange: '$5-$50/each', category: 'promo_products', desc: 'Umbrellas, coolers, blankets, and sports equipment with your logo.' },
-  { id: 'awards', name: 'Awards & Recognition', priceRange: '$10-$75/each', category: 'promo_products', desc: 'Trophies, plaques, medals, and crystal awards for achievements.' },
-  { id: 'pet-supplies', name: 'Pet Supplies', priceRange: '$5-$20/each', category: 'promo_products', desc: 'Custom pet bowls, bandanas, leashes, and toys for pet brands.' },
-  { id: 'auto-accessories', name: 'Auto Accessories', priceRange: '$5-$25/each', category: 'promo_products', desc: 'Car air fresheners, license plate frames, and seat covers.' },
-  // ---- Specialty ----
-  { id: 'uv-printing', name: 'UV Printing', priceRange: '$5-$50/piece', category: 'specialty', desc: 'Print directly on rigid surfaces: wood, metal, glass, acrylic, and more.' },
-  { id: 'sublimation', name: 'Sublimation (Products)', priceRange: '$8-$30/piece', category: 'specialty', desc: 'Vibrant full-color prints on mugs, mousepads, phone cases, and more.' },
-  { id: 'laser-engraving', name: 'Laser Engraving', priceRange: '$5-$40/piece', category: 'specialty', desc: 'Precision engraving on wood, metal, leather, glass, and acrylic.' },
-  { id: 'patches', name: 'Patches', priceRange: '$3-$15/each', category: 'specialty', desc: 'Embroidered, woven, PVC, and chenille patches for uniforms and merch.' },
-  { id: 'embroidered-patches', name: 'Embroidered Patches', priceRange: '$3-$10/each', category: 'specialty', desc: 'Classic thread patches with merrowed borders for hats and jackets.' },
-  { id: 'pvc-patches', name: 'PVC Patches', priceRange: '$3-$12/each', category: 'specialty', desc: 'Durable rubber patches for tactical, outdoor, and streetwear.' },
-  { id: 'chenille-patches', name: 'Chenille Patches', priceRange: '$5-$15/each', category: 'specialty', desc: 'Varsity-style fuzzy patches for letterman jackets and retro designs.' },
-  // ---- Design Services ----
-  { id: 'logo-design', name: 'Logo Design', priceRange: '$50-$200', category: 'design_services', desc: 'Custom logo creation with multiple concepts and revisions.' },
-  { id: 'vectorizing', name: 'Vectorizing', priceRange: '$10-$50', category: 'design_services', desc: 'Convert any image to a scalable vector file for production.' },
-  { id: 'mockups', name: 'Mockups', priceRange: '$10/Free with order', category: 'design_services', desc: 'See your design on the actual product before production.' },
-  { id: 'brand-identity', name: 'Brand Identity Package', priceRange: '$200-$500', category: 'design_services', desc: 'Full brand kit: logo, colors, fonts, business cards, and social templates.' },
-  { id: 'social-media-graphics', name: 'Social Media Graphics', priceRange: '$25-$100', category: 'design_services', desc: 'Custom graphics for Instagram, Facebook, TikTok, and more.' },
-  { id: 'illustration', name: 'Custom Illustration', priceRange: '$75-$300', category: 'design_services', desc: 'Hand-drawn and digital illustrations, mascots, and characters.' },
-  { id: 'photo-editing', name: 'Photo Editing', priceRange: '$15-$75', category: 'design_services', desc: 'Background removal, retouching, and product photo cleanup.' },
-  { id: 'shirt-design', name: 'Shirt & Apparel Design', priceRange: '$25-$200', category: 'design_services', desc: 'Custom artwork created specifically for t-shirts and apparel.' },
-  { id: 'packaging-design', name: 'Packaging Design', priceRange: '$75-$250', category: 'design_services', desc: 'Custom box, bag, and packaging artwork for your products.' },
-  { id: 'digitizing', name: 'Digitizing (DST)', priceRange: '$30-$75', category: 'design_services', desc: 'Convert artwork to embroidery-ready DST files for production.' }
-];
-
-
-const WIDGET_CONFIG = {
-  services: SERVICES_CATALOG,
-  categories: SERVICE_CATEGORIES,
-    styles: [
-      { id: 'badge', name: 'Badge / Crest', icon: 'shield', desc: 'Circular emblem with arc text and center icon' },
-      { id: 'icon_logo', name: 'Icon / Logo Mark', icon: 'target', desc: 'Clean minimal scalable symbol' },
-      { id: 'typography', name: 'Typography', icon: 'type', desc: 'Bold dominant lettering as the hero' },
-      { id: 'mascot', name: 'Mascot / Character', icon: 'smile', desc: 'Illustrated character or mascot' },
-      { id: 'scene', name: 'Scene / Environment', icon: 'image', desc: 'Full illustration with story elements' },
-      { id: 'badge_scene', name: 'Badge + Scene', icon: 'globe', desc: 'Scene contained inside a badge frame' },
-      { id: 'diagram', name: 'Diagram / Technical', icon: 'grid', desc: 'Labeled blueprints or butcher-cut style' },
-      { id: 'vintage_script', name: 'Vintage Script', icon: 'feather', desc: 'Retro postcard style with script text' },
-      { id: 'streetwear', name: 'Bold Streetwear', icon: 'zap', desc: 'Aggressive modern high-contrast graphic' },
-      { id: 'trade_tools', name: 'Trade / Tools', icon: 'tool', desc: 'Crossed tools or industry symbols' },
-      { id: 'corporate_seal', name: 'Corporate Seal', icon: 'award', desc: 'Professional structured minimal emblem' },
-      { id: 'pattern', name: 'Pattern / Repeat', icon: 'layers', desc: 'Repeating icons or shapes grid' },
-      { id: 'monogram', name: 'Monogram / Number', icon: 'hash', desc: 'Bold initials or numbers centered' },
-      { id: 'collage', name: 'Mashup / Collage', icon: 'layout', desc: 'Multiple elements in controlled chaos' },
-      { id: 'product_focus', name: 'Product-Focused', icon: 'box', desc: 'Illustration of the product itself' },
-      { id: 'humor', name: 'Humor / Novelty', icon: 'smile', desc: 'Funny concept-driven visual' },
-      { id: 'heritage', name: 'Heritage / Legacy', icon: 'bookmark', desc: 'Old-school established classic feel' },
-      { id: 'line_art', name: 'Minimal Line Art', icon: 'pen-tool', desc: 'Clean thin outlines, negative space' },
-      { id: 'patch_first', name: 'Patch / Embroidery', icon: 'hexagon', desc: 'Bold shapes built for stitching' },
-      { id: 'event_series', name: 'Event Series', icon: 'calendar', desc: 'Template-based scalable layout' }
-    ],
-    locations: [
-      { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
-      { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
-      { id: 'left-sleeve', name: 'Left Sleeve' },
-      { id: 'right-sleeve', name: 'Right Sleeve' },
-      { id: 'neck-label', name: 'Neck Label' },
-      { id: 'hat', name: 'Hat' }
-    ],
-
-  company: { name: "Merchy's Merch", phone: '619-800-0949', email: 'start@merchysmerch.com' },
-  stripeEnabled: false,
-  recraftEnabled: false,
-  demoMode: true
+const STYLE_NAMES = {
+  badge: 'Badge / Crest', icon_logo: 'Icon / Logo Mark', typography: 'Typography', mascot: 'Mascot / Character',
+  scene: 'Scene / Environment', badge_scene: 'Badge + Scene', diagram: 'Diagram / Technical', vintage_script: 'Vintage Script',
+  streetwear: 'Bold Streetwear', trade_tools: 'Trade / Tools', corporate_seal: 'Corporate Seal', pattern: 'Pattern / Repeat',
+  monogram: 'Monogram / Number', collage: 'Mashup / Collage', product_focus: 'Product-Focused', humor: 'Humor / Novelty',
+  heritage: 'Heritage / Legacy', line_art: 'Minimal Line Art', patch_first: 'Patch / Embroidery', event_series: 'Event Series'
 };
-function buildDesignPrompt(formData, variation) {
-  const decorationType = formData.decoration || 'DTF';
-  const style = formData.style || 'badge';
-  const text = formData.text || '';
-  const desc = formData.desc || '';
-  const business = formData.business || '';
 
-  // Core production rules from Merchy's standards
-  const merchyRules = [
-    'STRICT: Black and white ONLY. No color, no gray tones, no halftones.',
-    'Vector-first: bold outlines, solid fills, clean separations between every element.',
-    'No gradients, no soft shading, no fine hairline detail, no messy textures, no watercolor effects.',
-    'Strong silhouette that is instantly recognizable from 20 feet away.',
-    'Centered and balanced composition with clear visual hierarchy: focal point > supporting elements > text.',
-    'Typography must be INTEGRATED into the design structure using arches, banners, ribbons, or embedded layouts. Text is never floating or slapped on top.',
-    'Every element must serve a purpose. Remove anything unnecessary. Simplicity over complexity.',
-    'Bold consistent outer strokes. No inconsistent stroke weights. No thin lines that will not print.',
-    `Built for real ${decorationType} production: must screen print clean, embroider well, and scale from 3 inches to 14 inches without losing detail.`,
-    'This must look like something people would actually wear. Sellable, wearable, professional merchandise.'
-  ].join(' ');
+// ---- Stage 1: the brief (before any image exists) ----
+const BRIEF_LOGO = [
+  { id: 'exact_text', q: 'What text has to appear in the design? Type it exactly as it should be spelled.', type: 'text', why: 'Spelling and wording go straight into the artwork.' },
+  { id: 'subject', q: 'If the design had one picture in it, what would it be?', type: 'chips+text', options: ['An object from our work', 'An animal', 'A person or character', 'A place or landmark', 'Just letters, no picture', 'Not sure, surprise me'], why: 'Anchors the focal point.' },
+  { id: 'mood', q: 'Pick the words that fit how it should feel.', type: 'chips', multi: true, options: ['Bold', 'Classic', 'Clean', 'Rugged', 'Playful', 'Premium', 'Vintage', 'Modern', 'Friendly', 'Serious'], why: 'Sets weight, type and detail level.' },
+  { id: 'palette', q: 'Colors: do you have brand colors, or should we propose a palette?', type: 'chips+text', options: ['Use my brand colors (type them)', 'Propose a palette', 'Keep it one color', 'Two colors max'], why: 'Flat, limited palettes vectorize and print cleanly.' },
+  { id: 'avoid', q: 'Anything you do NOT want to see? Colors, symbols, styles, cliches.', type: 'text', why: 'Keeps the design team away from dead ends.' },
+  { id: 'references', q: 'Any brands or logos you admire for this? Names are enough.', type: 'text', why: 'Reference points sharpen the direction.' }
+];
 
-  const styleMap = {
-    badge: 'Classic circular shield or emblem crest. Top arc text crowns the design, bold center icon as focal point, bottom text anchors. The most versatile merchandise layout.',
-    icon_logo: 'Single powerful scalable icon or logo mark. One strong symbol that works alone. Minimal or no text. Must be recognizable at thumbnail size on a hat or chest logo.',
-    typography: 'Typography-driven design where bold stacked or arched lettering IS the design. Minimal supporting graphics. Text hierarchy creates the visual structure.',
-    mascot: 'Custom illustrated character or mascot as the hero element. Bold outlines, simple shapes, expressive but clean. Character drives the identity with supporting text around it.',
-    scene: 'Full illustrated scene with foreground action, background environment, and text woven into the composition. Simplified for print: no tiny details, strong contrast between elements.',
-    badge_scene: 'Illustrated scene contained inside a circular or shield badge frame. Text wraps the outer edge. Combines the structure of a badge with the storytelling of a scene.',
-    diagram: 'Technical structured layout like butcher cut charts, mechanical blueprints, or labeled anatomy diagrams. Main object in center with clean segmented sections and precise labels.',
-    vintage_script: 'Retro travel postcard or vintage greeting card style. Flowing script headline with a supporting scene or simple icon. Nostalgic feel that reads as premium and wearable.',
-    streetwear: 'Bold aggressive high-contrast graphic. Modern street style with oversized central element and minimal text. Trend-forward, graphic-heavy, designed for the front or back of a tee.',
-    trade_tools: 'Crossed tools, industrial icons, or trade symbols as the centerpiece. Wrench, hammer, saw, or industry-specific equipment arranged symmetrically with supporting trade text.',
-    corporate_seal: 'Professional polished corporate emblem. Clean geometric icon centered with balanced serif or sans-serif text. Structured, trustworthy, suitable for polos and business uniforms.',
-    pattern: 'Repeating icons or shapes arranged in a structured grid or all-over scattered pattern. Each element is simple and bold. Designed for fashion prints, packaging, or branded wrapping.',
-    monogram: 'Bold oversized initials, numbers, or monogram letters as the dominant visual. Thick block or serif letterforms. Minimal supporting elements. Team jersey or varsity style.',
-    collage: 'Multiple bold elements composed together in a controlled layered arrangement. Organized visual energy with clear boundaries between each element. High impact but not chaotic.',
-    product_focus: 'Clean illustration of the actual product or item centered as the hero. Bold outline rendering with supporting text below or around. Literal and clear about what is being sold.',
-    humor: 'Concept-driven funny visual with a clear punchline built into the design. Simple clean illustration that delivers the joke at a glance. Must still be production-printable.',
-    heritage: 'Established legacy feel with founding dates, classic serif typography, and a simple timeless icon. Feels like the brand has been around for decades. Clean and dignified.',
-    line_art: 'Controlled continuous line art with intentional negative space. Every line is deliberate with consistent medium-weight strokes. Premium minimalist aesthetic that still prints bold.',
-    patch_first: 'Designed specifically for embroidered patches: thick simplified shapes, bold merrowed border edge, limited detail inside, maximum 5-6 distinct areas. Built for stitching on hats and jackets.',
-    event_series: 'Template-based layout designed to be reused annually. Consistent frame structure with designated swap zones for year, date, or event-specific text. Systematic and brandable.'
-  };
-
-  // Support multiple styles (up to 3) - combine their descriptions
-  const styles = Array.isArray(formData.styles) ? formData.styles : [style];
-  const styleDescs = styles.map(s => styleMap[s]).filter(Boolean);
-  const styleDesc = styleDescs.length > 0 ? styleDescs.join(' ALSO BLEND IN: ') : styleMap.badge;
-
-  // 6 variations - each targets a different composition approach
-  const variations = [
-    'LAYOUT A: Classic centered symmetrical composition. The icon or main visual sits dead center with text arching above and below. Most traditional merchandise layout.',
-    'LAYOUT B: Typography-forward composition. The text and lettering drive the visual weight. Supporting icon or graphic is secondary, integrated into or behind the text structure.',
-    'LAYOUT C: Illustration-forward composition. The graphic, character, or scene is the dominant element taking up 60-70% of the design. Text is compact and positioned below or integrated.',
-    'LAYOUT D: Horizontal wide composition. Elements spread across the width. Text and icon side by side or in a landscape banner arrangement. Great for back-of-shirt prints.',
-    'LAYOUT E: Stacked vertical composition. Elements stacked top to bottom: icon on top, text centered below, supporting details at bottom. Clean column layout.',
-    'LAYOUT F: Asymmetric bold composition. Main element pushed to one side with text balanced on the opposite side. Dynamic and modern with intentional visual tension.'
-  ];
-
-  const prompt = `Create a production-ready custom merchandise design.
-
-STYLE: ${styleDesc}
-
-PRODUCTION RULES: ${merchyRules}
-
-${desc ? `CONCEPT: ${desc}` : ''}
-${text ? `TEXT TO INCLUDE (spell exactly): ${text}` : ''}
-${business ? `BRAND: ${business}` : ''}
-
-${variations[variation] || variations[0]}
-
-FINAL CHECK: Would someone buy a shirt with this on it? Is it readable from across the room? Can it be screen printed in one color with zero issues? If yes to all three, this design is correct.`;
-
-  return prompt;
-}
-
-
-// ---- Local demo designs (no API needed) ----
-// Produces 6 black and white SVG layout previews using the client's own text,
-// written to /uploads so they behave exactly like generated PNGs downstream.
-function escapeXml(s) {
-  return String(s || '').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
-}
-
-function splitWords(text, maxPerLine) {
-  const words = String(text || '').split(/\s+/).filter(Boolean);
-  const lines = [];
-  let cur = '';
-  for (const w of words) {
-    if ((cur + ' ' + w).trim().length > maxPerLine && cur) { lines.push(cur); cur = w; }
-    else cur = (cur + ' ' + w).trim();
+// ---- Product trees: asked in addition to the logo brief when the context is a product ----
+const PRODUCT_TREES = {
+  apparel: {
+    label: 'Apparel',
+    match: ['tee', 't-shirt', 'shirt', 'hoodie', 'sweatshirt', 'polo', 'jacket', 'hat', 'cap', 'beanie', 'apparel', 'uniform', 'jersey'],
+    questions: [
+      { id: 'garment', q: 'What garment and color is this going on?', type: 'text', why: 'Garment color decides the ink palette.' },
+      { id: 'placement', q: 'Where does the design sit?', type: 'chips', multi: true, options: ['Full front', 'Chest logo', 'Pocket logo', 'Full back', 'Upper back', 'Sleeve', 'Hat front', 'Hat side'], why: 'Placement sets size and proportion.' },
+      { id: 'decoration', q: 'How is it being decorated?', type: 'chips', options: ['DTF (full color)', 'Screen print', 'Embroidery', 'Not sure'], why: 'Embroidery needs fewer colors and thicker shapes.' },
+      { id: 'size', q: 'Rough print size?', type: 'chips', options: ['Small (3-4 in)', 'Standard (10-12 in)', 'Oversized (14 in+)', 'Let the artist decide'], why: 'Detail has to survive the size.' }
+    ]
+  },
+  banner: {
+    label: 'Banner / Sign',
+    match: ['banner', 'sign', 'yard', 'retractable', 'a-frame', 'window', 'wall', 'wrap', 'acrylic', 'poster', 'backdrop', 'flag'],
+    questions: [
+      { id: 'dimensions', q: 'Finished size and orientation? (e.g. 6 ft x 3 ft, landscape)', type: 'text', why: 'Layout is built to the real proportions.' },
+      { id: 'distance', q: 'How far away will people read it from?', type: 'chips', options: ['Arm\'s length', 'Across a room', 'Across a street', 'From a moving car'], why: 'Sets minimum text size and contrast.' },
+      { id: 'content', q: 'List everything that must be on it: headline, dates, phone, website, QR, sponsor logos.', type: 'text', why: 'Nothing gets added later without a reprint.' },
+      { id: 'hierarchy', q: 'What is the ONE thing they should read first?', type: 'text', why: 'Drives the visual hierarchy.' },
+      { id: 'environment', q: 'Where does it hang?', type: 'chips', options: ['Indoor', 'Outdoor', 'Trade show', 'Storefront', 'Vehicle'], why: 'Material and finish follow from this.' },
+      { id: 'photos', q: 'Will it include photos, or artwork only?', type: 'chips', options: ['Photos (I will supply)', 'Artwork only', 'Both'], why: 'Photo layouts and vector layouts are built differently.' }
+    ]
+  },
+  drinkware: {
+    label: 'Drinkware',
+    match: ['mug', 'cup', 'tumbler', 'bottle', 'koozie', 'drinkware', 'glass', 'travel mug'],
+    questions: [
+      { id: 'item', q: 'Which item and color? (e.g. 20 oz black tumbler, white ceramic mug)', type: 'text', why: 'Item color is the background of the design.' },
+      { id: 'wrap', q: 'One-sided logo, two-sided, or a full wrap?', type: 'chips', options: ['One side', 'Both sides', 'Full wrap'], why: 'Wrap designs need a continuous layout.' },
+      { id: 'method', q: 'Decoration method?', type: 'chips', options: ['Laser engraving (one tone)', 'UV print (full color)', 'Sublimation (full color)', 'Not sure'], why: 'Engraving is single tone; print can be full color.' },
+      { id: 'imprint', q: 'Imprint size, if known.', type: 'text', why: 'Most drinkware imprint areas are 2-3 in wide.' }
+    ]
+  },
+  promo: {
+    label: 'Promo Item',
+    match: ['pen', 'keychain', 'lanyard', 'magnet', 'pin', 'usb', 'tote', 'bag', 'promo', 'notebook', 'calendar', 'umbrella', 'towel', 'cooler'],
+    questions: [
+      { id: 'item', q: 'Which item and color?', type: 'text', why: 'Imprint area and color options depend on the item.' },
+      { id: 'imprint', q: 'Imprint area is usually small. What is the one element that must fit? Logo only, or logo plus text?', type: 'chips', options: ['Logo only', 'Logo + website', 'Logo + phone', 'Text only'], why: 'Small imprints need the simplest version.' },
+      { id: 'colors', q: 'Most promo imprints are 1 color. Is a one-color version acceptable?', type: 'chips', options: ['Yes, one color is fine', 'Need full color'], why: 'Determines which processes qualify.' }
+    ]
+  },
+  stickers: {
+    label: 'Stickers / Labels',
+    match: ['sticker', 'label', 'decal'],
+    questions: [
+      { id: 'shape', q: 'Shape?', type: 'chips', options: ['Circle', 'Square', 'Rectangle', 'Die cut to the artwork', 'Oval'], why: 'Die cuts need a clean outline.' },
+      { id: 'size', q: 'Size in inches?', type: 'text', why: 'Small stickers drop fine detail.' },
+      { id: 'surface', q: 'Where will it be stuck?', type: 'chips', options: ['Laptops / water bottles', 'Product packaging', 'Windows', 'Vehicles', 'Outdoors'], why: 'Material and finish follow from this.' },
+      { id: 'finish', q: 'Finish?', type: 'chips', options: ['Glossy', 'Matte', 'Holographic', 'Clear'], why: 'Affects how colors read.' }
+    ]
+  },
+  patches: {
+    label: 'Patches',
+    match: ['patch', 'chenille', 'pvc', 'woven'],
+    questions: [
+      { id: 'type', q: 'Patch type?', type: 'chips', options: ['Embroidered', 'Woven', 'PVC', 'Chenille', 'Not sure'], why: 'Each has different detail limits.' },
+      { id: 'size_shape', q: 'Size and shape? (e.g. 3 in circle, 4x2 in rectangle)', type: 'text', why: 'Embroidery needs thick shapes at small sizes.' },
+      { id: 'border', q: 'Border?', type: 'chips', options: ['Merrowed (classic stitched edge)', 'Laser cut', 'Let the artist decide'], why: 'Border eats about 1/8 in of the design.' },
+      { id: 'thread_colors', q: 'Max thread colors you are OK with (fewer is cheaper and cleaner)?', type: 'chips', options: ['1-2', '3-4', '5-6', 'Whatever it needs'], why: 'Sets the palette ceiling.' },
+      { id: 'backing', q: 'Attachment?', type: 'chips', options: ['Sew on', 'Iron on', 'Velcro / hook and loop', 'Adhesive'], why: 'Noted for production.' }
+    ]
+  },
+  print: {
+    label: 'Business Printing',
+    match: ['business card', 'flyer', 'brochure', 'postcard', 'menu', 'booklet', 'letterhead', 'door hanger', 'card', 'print', 'ncr'],
+    questions: [
+      { id: 'piece', q: 'Which piece and size? (e.g. standard business card, 8.5x11 flyer, trifold)', type: 'text', why: 'Layout is built to the trim size.' },
+      { id: 'sides', q: 'One or two sided?', type: 'chips', options: ['One side', 'Two sides'], why: 'Doubles the content plan.' },
+      { id: 'content', q: 'All copy that must appear: names, titles, phone, email, address, social, website, QR.', type: 'text', why: 'Every line gets proofed.' },
+      { id: 'tone', q: 'Should it feel more corporate or more creative?', type: 'chips', options: ['Corporate', 'Creative', 'Somewhere between'], why: 'Guides type and layout.' }
+    ]
+  },
+  packaging: {
+    label: 'Packaging',
+    match: ['box', 'mailer', 'packaging', 'bag', 'tissue', 'tape', 'pouch'],
+    questions: [
+      { id: 'item', q: 'Which packaging item and dimensions?', type: 'text', why: 'Dielines come from the item.' },
+      { id: 'panels', q: 'Which panels get printed?', type: 'chips', multi: true, options: ['Top / lid', 'All outside panels', 'Inside', 'One logo spot'], why: 'Sets how much artwork is needed.' },
+      { id: 'colors', q: 'Number of print colors you expect?', type: 'chips', options: ['1', '2', 'Full color'], why: 'Flexo and digital differ in cost.' }
+    ]
   }
-  if (cur) lines.push(cur);
-  return lines.slice(0, 3);
+};
+
+function detectProductTree(context) {
+  const hay = `${context?.product || ''} ${context?.service || ''} ${context?.category || ''}`.toLowerCase();
+  if (!hay.trim() || context?.mode === 'logo') return null;
+  for (const [key, tree] of Object.entries(PRODUCT_TREES)) {
+    if (tree.match.some(m => hay.includes(m))) return { key, ...tree };
+  }
+  return null;
 }
 
-// Shrink a font size so `text` fits within maxWidth px (approx. 0.7em per char for heavy sans)
-function fitSize(text, maxWidth, base, charW = 0.7) {
-  const len = Math.max(1, String(text || '').length);
-  return Math.max(28, Math.min(base, Math.floor(maxWidth / (len * charW))));
+// Stage 1 questions for a session
+function briefQuestions(context) {
+  const tree = detectProductTree(context);
+  return tree ? [...tree.questions, ...BRIEF_LOGO] : BRIEF_LOGO;
 }
 
-function buildDemoDesigns(formData) {
-  const business = (formData.business || formData.name || "MERCHY'S").toUpperCase();
-  const rawText = (formData.text || '').replace(/^(front|back|sleeve|hat)\s*:/gim, '').trim();
-  const line = (rawText || formData.desc || 'CUSTOM DONE RIGHT').toUpperCase();
-  const words = splitWords(line, 16);
-  const styleName = (formData.styles && formData.styles[0]) || formData.style || 'badge';
-  const B = escapeXml(business);
-  const L1 = escapeXml(words[0] || '');
-  const L2 = escapeXml(words[1] || '');
-  const year = new Date().getFullYear();
+// ---- Stage 2: per selected style, before refinement ----
+const STYLE_QUESTIONS = {
+  badge: [{ id: 'badge_shape', q: 'Keep it round, or try a shield or rectangle?', type: 'chips', options: ['Round', 'Shield', 'Rectangle / plaque', 'Mix it up'] }, { id: 'badge_text', q: 'Should the text wrap the edge, sit inside, or both?', type: 'chips', options: ['Wrap the edge', 'Inside the badge', 'Both'] }],
+  typography: [{ id: 'type_feel', q: 'Lettering direction?', type: 'chips', options: ['Block / varsity', 'Condensed sans', 'Serif', 'Script', 'Hand drawn'] }, { id: 'type_arrange', q: 'Stacked, arched, or one line?', type: 'chips', options: ['Stacked', 'Arched', 'One line', 'Try all'] }],
+  mascot: [{ id: 'mascot_who', q: 'Describe the character: species or person, expression, pose.', type: 'text' }, { id: 'mascot_detail', q: 'Cartoon simple or more illustrated?', type: 'chips', options: ['Simple cartoon', 'Detailed illustration'] }],
+  scene: [{ id: 'scene_what', q: 'What is happening in the scene, and what time of day?', type: 'text' }, { id: 'scene_frame', q: 'Open scene or framed in a shape?', type: 'chips', options: ['Open', 'Framed circle', 'Framed rectangle'] }],
+  icon_logo: [{ id: 'icon_meaning', q: 'What should the symbol stand for?', type: 'text' }, { id: 'icon_text', q: 'Symbol alone, or symbol with the name beside it?', type: 'chips', options: ['Symbol alone', 'Symbol + name'] }],
+  vintage_script: [{ id: 'script_era', q: 'Which era?', type: 'chips', options: ['1920s-30s', '1950s diner', '1970s', 'Western'] }],
+  streetwear: [{ id: 'street_energy', q: 'How loud?', type: 'chips', options: ['Clean and bold', 'Distressed', 'Graffiti-leaning'] }],
+  patch_first: [{ id: 'patch_colors', q: 'How many thread colors are you OK with?', type: 'chips', options: ['2', '4', '6+'] }],
+  heritage: [{ id: 'heritage_year', q: 'Founding year or date to feature?', type: 'text' }],
+  event_series: [{ id: 'event_swap', q: 'What changes each year? (year, date, location, theme)', type: 'text' }]
+};
 
-  const font = `font-family="Arial Black, Impact, Helvetica, sans-serif" font-weight="900"`;
-  const defs = `<defs><path id="arcTop" d="M 112 512 A 400 400 0 0 1 912 512"/><path id="arcBot" d="M 132 512 A 380 380 0 0 0 892 512"/></defs>`;
-  const bg = `<rect width="1024" height="1024" fill="#fff"/>`;
-  const label = (n) => `<text x="992" y="1004" text-anchor="end" font-family="Arial, sans-serif" font-size="22" fill="#999">LAYOUT ${n} PREVIEW</text>`;
+const STYLE_GENERIC = [
+  { id: 'keep', q: 'What do you like most about this one?', type: 'chips+text', options: ['The layout', 'The lettering', 'The icon', 'The colors', 'The overall vibe'] },
+  { id: 'change', q: 'What should change in the next 5?', type: 'chips+text', multi: true, options: ['Simpler', 'More detail', 'Bigger text', 'Different icon', 'Different colors', 'Different proportions', 'Nothing major'] }
+];
 
-  // Simple generic center marks per layout (bold shapes that print in one color)
-  const starMark = `<path d="M512 330 L556 440 L674 448 L582 522 L616 638 L512 572 L408 638 L442 522 L350 448 L468 440 Z" fill="#000"/>`;
-  const boltMark = `<path d="M560 300 L420 540 L510 540 L470 740 L620 470 L530 470 Z" fill="#000"/>`;
-  const shieldMark = `<path d="M512 300 L660 350 L640 560 Q600 660 512 720 Q424 660 384 560 L364 350 Z" fill="none" stroke="#000" stroke-width="28"/><path d="M460 520 L500 560 L580 460" fill="none" stroke="#000" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const toolsMark = `<g stroke="#000" stroke-width="40" stroke-linecap="round"><line x1="380" y1="360" x2="644" y2="624"/><line x1="644" y1="360" x2="380" y2="624"/></g><circle cx="512" cy="492" r="70" fill="#fff" stroke="#000" stroke-width="28"/>`;
-  const mountMark = `<path d="M300 660 L440 420 L520 540 L580 450 L724 660 Z" fill="#000"/><circle cx="660" cy="380" r="40" fill="#000"/>`;
-  const monoMark = `<text x="512" y="600" text-anchor="middle" ${font} font-size="360" fill="#000">${escapeXml(business.charAt(0) || 'M')}</text>`;
+function styleQuestions(styleId) {
+  return [...(STYLE_QUESTIONS[styleId] || []), ...STYLE_GENERIC];
+}
 
-  const layouts = [
-    // A: classic badge, arc text
-    `${defs}${bg}<circle cx="512" cy="512" r="440" fill="none" stroke="#000" stroke-width="30"/><circle cx="512" cy="512" r="380" fill="none" stroke="#000" stroke-width="8"/>
-     <text ${font} font-size="76" fill="#000" letter-spacing="6"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">${B}</textPath></text>
-     ${starMark}
-     <text ${font} font-size="58" fill="#000" letter-spacing="4"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">${L1 || 'EST. ' + year}</textPath></text>${label('A')}`,
-    // B: typography-forward stacked block
-    `${bg}<rect x="92" y="92" width="840" height="840" fill="none" stroke="#000" stroke-width="22"/>
-     <text x="512" y="380" text-anchor="middle" ${font} font-size="${fitSize(business.split(' ')[0] || 'MERCH', 760, 150)}" fill="#000">${escapeXml(business.split(' ')[0] || 'MERCH')}</text>
-     <rect x="160" y="420" width="704" height="110" fill="#000"/>
-     <text x="512" y="500" text-anchor="middle" ${font} font-size="${fitSize(words[0] || business, 640, 68)}" fill="#fff" letter-spacing="4">${L1 || B}</text>
-     <text x="512" y="660" text-anchor="middle" ${font} font-size="${fitSize(words[1] || business.split(' ').slice(1).join(' ') || 'EST. 2000', 760, 64)}" fill="#000" letter-spacing="4">${L2 || escapeXml(business.split(' ').slice(1).join(' ') || 'EST. ' + year)}</text>
-     <text x="512" y="800" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" fill="#000" letter-spacing="12">${escapeXml((formData.decoration || 'CUSTOM').toUpperCase())}</text>${label('B')}`,
-    // C: illustration-forward with compact text
-    `${bg}${mountMark}<rect x="200" y="700" width="624" height="16" fill="#000"/>
-     <text x="512" y="800" text-anchor="middle" ${font} font-size="${fitSize(business, 860, 84)}" fill="#000" letter-spacing="4">${B}</text>
-     <text x="512" y="880" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="42" fill="#000" letter-spacing="10">${L1 || 'EST. ' + year}</text>${label('C')}`,
-    // D: horizontal banner (back of shirt)
-    `${bg}<rect x="60" y="380" width="904" height="264" fill="#000"/>
-     <text x="512" y="490" text-anchor="middle" ${font} font-size="${fitSize(business, 840, 110)}" fill="#fff" letter-spacing="2">${B}</text>
-     <text x="512" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${fitSize(words[0] || 'CUSTOM DONE RIGHT', 820, 54, 0.75)}" fill="#fff" letter-spacing="6">${L1 || 'CUSTOM DONE RIGHT'}</text>
-     <g transform="translate(0,-220) scale(0.55) translate(420,180)">${boltMark}</g>
-     <g transform="translate(0,370) scale(0.55) translate(420,180)">${boltMark}</g>${label('D')}`,
-    // E: stacked vertical column
-    `${bg}<g transform="translate(0,-150)">${shieldMark}</g>
-     <text x="512" y="700" text-anchor="middle" ${font} font-size="${fitSize(business, 880, 96)}" fill="#000" letter-spacing="2">${B}</text>
-     <line x1="300" y1="740" x2="724" y2="740" stroke="#000" stroke-width="10"/>
-     <text x="512" y="820" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="46" fill="#000" letter-spacing="8">${L1 || 'EST. ' + year}</text>
-     <text x="512" y="890" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" fill="#000" letter-spacing="6">${L2 || escapeXml('SAN DIEGO, CA')}</text>${label('E')}`,
-    // F: asymmetric bold
-    `${bg}<g transform="translate(-290,-20) scale(0.95) translate(0,40)">${styleName === 'trade_tools' ? toolsMark : monoMark}</g>
-     <text x="560" y="420" ${font} font-size="${fitSize(business.split(' ')[0] || 'MERCH', 420, 100)}" fill="#000">${escapeXml(business.split(' ')[0] || 'MERCH')}</text>
-     <text x="560" y="520" ${font} font-size="${fitSize(business.split(' ').slice(1).join(' ') || 'MERCH', 420, 100)}" fill="#000">${escapeXml(business.split(' ').slice(1).join(' ') || 'MERCH')}</text>
-     <rect x="560" y="560" width="380" height="14" fill="#000"/>
-     <text x="560" y="640" font-family="Arial, sans-serif" font-weight="700" font-size="${fitSize(words[0] || 'EST. 2000', 400, 44, 0.75)}" fill="#000" letter-spacing="4">${L1 || 'EST. ' + year}</text>${label('F')}`
+// ---- Stage 3: final vetting per selected image (notes for the design team) ----
+const FINAL_CHECKLIST = ['Colors', 'Size', 'Shape', 'Spacing', 'Font', 'Spelling', 'Remove something', 'Add something'];
+
+
+const COLOR_RULES = 'Flat solid colors only, a limited palette of 2 to 5 colors, crisp clean edges, no gradients, no shading, no photographic texture, no tiny detail. Built to be vectorized and printed. White background. Balanced centered composition, text integrated into the structure of the design, every word spelled exactly as given.';
+
+const STYLE_DESCRIPTIONS = {
+  badge: 'Classic circular shield or emblem crest. Top arc text crowns the design, bold center icon as focal point, bottom text anchors.',
+  icon_logo: 'Single powerful scalable icon or logo mark. One strong symbol. Minimal text. Recognizable at thumbnail size.',
+  typography: 'Typography-driven design where bold stacked or arched lettering IS the design. Minimal supporting graphics.',
+  mascot: 'Custom illustrated character or mascot as the hero. Bold outlines, simple shapes, expressive but clean.',
+  scene: 'Full illustrated scene with foreground, background, and text woven into the composition. Simplified for print.',
+  badge_scene: 'Illustrated scene contained inside a circular or shield badge frame with text wrapping the edge.',
+  diagram: 'Technical structured layout like a cut chart or labeled blueprint. Main object centered with clean labeled sections.',
+  vintage_script: 'Retro travel postcard style. Flowing script headline with a supporting scene or simple icon.',
+  streetwear: 'Bold high-contrast modern street graphic. Oversized central element, minimal text.',
+  trade_tools: 'Crossed tools or industry symbols as the centerpiece, arranged symmetrically with trade text.',
+  corporate_seal: 'Professional polished emblem. Clean geometric icon centered with balanced typography.',
+  pattern: 'Repeating icons arranged in a structured grid or scattered all-over pattern. Simple bold elements.',
+  monogram: 'Bold oversized initials or numbers as the dominant visual. Thick letterforms, varsity feel.',
+  collage: 'Multiple bold elements composed in a controlled layered arrangement with clear boundaries.',
+  product_focus: 'Clean illustration of the actual product or item centered as the hero with supporting text.',
+  humor: 'Concept-driven funny visual with a clear punchline at a glance. Simple clean illustration.',
+  heritage: 'Established legacy feel: founding dates, classic serif typography, simple timeless icon.',
+  line_art: 'Controlled continuous line art with intentional negative space and consistent stroke weight.',
+  patch_first: 'Designed for an embroidered patch: thick simplified shapes, bold border edge, limited detail, 5 to 6 color areas.',
+  event_series: 'Reusable annual layout with a consistent frame and designated zones for year, date, or event text.'
+};
+
+function buildPrompt(session, styleId, refinement) {
+  const a = session.brief?.answers || {};
+  const client = session.client || {};
+  const ctx = session.context || {};
+  const parts = [
+    `Design a ${ctx.mode === 'logo' || !ctx.product ? 'logo / merchandise graphic' : 'graphic for a ' + ctx.product} for ${client.business || 'the client'}.`,
+    `STYLE: ${STYLE_DESCRIPTIONS[styleId] || styleId}.`,
+    a.exact_text ? `TEXT (spell exactly): ${a.exact_text}.` : `TEXT (spell exactly): ${client.business || ''}.`,
+    a.subject ? `MAIN IMAGE: ${a.subject}.` : '',
+    a.mood ? `FEEL: ${[].concat(a.mood).join(', ')}.` : '',
+    a.palette ? `COLORS: ${a.palette}.` : '',
+    a.references ? `REFERENCE POINTS: ${a.references}.` : '',
+    a.avoid ? `DO NOT INCLUDE: ${a.avoid}.` : ''
   ];
-
-  const stamp = Date.now();
-  return layouts.map((inner, i) => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${inner}</svg>`;
-    const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    return { url: dataUrl, remoteUrl: dataUrl, variation: i, source: 'demo', prompt: buildDesignPrompt(formData, i) };
+  // product tree answers
+  Object.entries(a).forEach(([k, v]) => {
+    if (!['exact_text', 'subject', 'mood', 'palette', 'references', 'avoid'].includes(k) && v) parts.push(`${k.replace(/_/g, ' ').toUpperCase()}: ${[].concat(v).join(', ')}.`);
   });
+  if (refinement) {
+    parts.push('REFINEMENT ROUND. Keep what the client liked, change what they asked for:');
+    Object.entries(refinement.answers || {}).forEach(([k, v]) => v && parts.push(`${k.replace(/_/g, ' ')}: ${[].concat(v).join(', ')}.`));
+    if (refinement.notes) parts.push(`CLIENT NOTES: ${refinement.notes}.`);
+    if (refinement.variation !== undefined) parts.push(`Variation ${refinement.variation + 1} of 5: make this one noticeably different from the others in ${['layout', 'icon treatment', 'lettering', 'color balance', 'level of detail'][refinement.variation % 5]}.`);
+  }
+  parts.push(`PRODUCTION RULES: ${COLOR_RULES}`);
+  return parts.filter(Boolean).join('\n');
+}
+
+// Final brief for the design team: approved designs, notes per image, dislikes
+function finalBrief(session) {
+  const a = session.brief?.answers || {};
+  const lines = [];
+  lines.push(`Design Studio brief for ${session.client?.business || session.client?.name || 'client'}`);
+  lines.push(`Context: ${session.context?.mode === 'logo' || !session.context?.product ? 'Logo / artwork' : 'Product: ' + session.context.product}${session.context?.decoration ? ' | ' + session.context.decoration : ''}`);
+  lines.push('');
+  lines.push('Brief answers:');
+  Object.entries(a).forEach(([k, v]) => lines.push(`- ${k.replace(/_/g, ' ')}: ${[].concat(v).join(', ')}`));
+  lines.push('');
+  lines.push('Approved designs (reference images with client notes):');
+  (session.board?.selections || []).forEach((sel, i) => {
+    lines.push(`${i + 1}. ${sel.styleName} ${sel.label}: ${sel.url}`);
+    if (sel.checks?.length) lines.push(`   Needs attention: ${sel.checks.join(', ')}`);
+    if (sel.notes) lines.push(`   Notes: ${sel.notes}`);
+  });
+  if (session.board?.dislikes) { lines.push(''); lines.push(`What the client does NOT want: ${session.board.dislikes}`); }
+  const skipped = (session.styles || []).filter(s => s.skipped).map(s => s.name);
+  if (skipped.length) lines.push(`Styles the client passed on: ${skipped.join(', ')}`);
+  if (session.schedule) { lines.push(''); lines.push(`Artist call: ${session.schedule.summary}`); }
+  return lines.join('\n');
 }
 
 
-const json = (obj) => new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json' } });
+// ---- Demo SVG previews (full color, style-aware) ----
+const PALETTES = [
+  ['#1f2a44', '#e9b44c', '#f4f1ea'], ['#1b4332', '#d8f3dc', '#f0a202'], ['#7a1f1f', '#f3e9d2', '#1c1c1c'],
+  ['#0b3954', '#ff6663', '#fefffe'], ['#2d2a32', '#f2c14e', '#7fb7be'], ['#3a2e39', '#e3b23c', '#edf2f4']
+];
+const esc = s => String(s || '').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
+const fit = (text, maxW, base, cw = 0.68) => Math.max(26, Math.min(base, Math.floor(maxW / (Math.max(1, String(text || '').length) * cw))));
+
+function demoImage(prompt, styleId, variant, tag) {
+  const textMatch = prompt.match(/TEXT \(spell exactly\): ([^\n.]*)/);
+  const text = (textMatch ? textMatch[1] : 'MERCHYS').trim().toUpperCase() || "MERCHY'S";
+  const words = text.split(/\s+/);
+  const first = words[0], rest = words.slice(1).join(' ');
+  const [ink, accent, paper] = PALETTES[(Object.keys(STYLE_NAMES).indexOf(styleId) + variant) % PALETTES.length];
+  const F = 'font-family="Arial Black, Impact, Helvetica, sans-serif" font-weight="900"';
+  const name = STYLE_NAMES[styleId] || styleId;
+  const sub = variant ? `REFINEMENT ${variant}` : 'CONCEPT';
+  const label = `<text x="992" y="1004" text-anchor="end" font-family="Arial, sans-serif" font-size="22" fill="#999">${esc(name)} ${sub} PREVIEW</text>`;
+  const bg = `<rect width="1024" height="1024" fill="#fff"/>`;
+  const rot = (variant * 7) % 21 - 10;
+  let body;
+  switch (styleId) {
+    case 'typography': case 'monogram': case 'streetwear':
+      body = `<rect x="92" y="92" width="840" height="840" rx="${variant * 20}" fill="${paper}" stroke="${ink}" stroke-width="22"/>
+        <text x="512" y="430" text-anchor="middle" ${F} font-size="${fit(first, 760, 170)}" fill="${ink}" transform="rotate(${rot} 512 430)">${esc(first)}</text>
+        <rect x="160" y="470" width="704" height="100" fill="${accent}"/>
+        <text x="512" y="542" text-anchor="middle" ${F} font-size="${fit(rest || 'EST 2026', 640, 60)}" fill="${ink}">${esc(rest || 'EST. 2026')}</text>`;
+      break;
+    case 'mascot': case 'humor':
+      body = `<circle cx="512" cy="400" r="${230 + variant * 10}" fill="${accent}" stroke="${ink}" stroke-width="20"/>
+        <circle cx="440" cy="370" r="34" fill="${ink}"/><circle cx="584" cy="370" r="34" fill="${ink}"/>
+        <path d="M400 480 Q512 ${560 + variant * 15} 624 480" stroke="${ink}" stroke-width="22" fill="none" stroke-linecap="round"/>
+        <text x="512" y="780" text-anchor="middle" ${F} font-size="${fit(text, 880, 90)}" fill="${ink}">${esc(text)}</text>`;
+      break;
+    case 'scene': case 'badge_scene': case 'line_art':
+      body = `<rect x="112" y="160" width="800" height="520" rx="${styleId === 'badge_scene' ? 400 : 16}" fill="${paper}" stroke="${ink}" stroke-width="20"/>
+        <circle cx="${700 - variant * 30}" cy="300" r="60" fill="${accent}"/>
+        <path d="M160 620 L360 ${380 + variant * 20} L470 520 L560 440 L860 620 Z" fill="${ink}"/>
+        <text x="512" y="800" text-anchor="middle" ${F} font-size="${fit(text, 860, 84)}" fill="${ink}">${esc(text)}</text>`;
+      break;
+    case 'trade_tools': case 'diagram': case 'corporate_seal':
+      body = `<g stroke="${ink}" stroke-width="44" stroke-linecap="round" transform="rotate(${rot} 512 430)"><line x1="360" y1="280" x2="664" y2="584"/><line x1="664" y1="280" x2="360" y2="584"/></g>
+        <circle cx="512" cy="432" r="90" fill="${accent}" stroke="${ink}" stroke-width="24"/>
+        <text x="512" y="760" text-anchor="middle" ${F} font-size="${fit(text, 880, 90)}" fill="${ink}">${esc(text)}</text>
+        <text x="512" y="840" text-anchor="middle" font-family="Arial" font-weight="700" font-size="40" fill="${ink}" letter-spacing="10">SAN DIEGO, CA</text>`;
+      break;
+    default: // badge and the rest
+      body = `<defs><path id="a${variant}" d="M 132 512 A 380 380 0 0 1 892 512"/><path id="b${variant}" d="M 152 512 A 360 360 0 0 0 872 512"/></defs>
+        <circle cx="512" cy="512" r="440" fill="${paper}" stroke="${ink}" stroke-width="30"/><circle cx="512" cy="512" r="300" fill="${accent}"/>
+        <path d="M512 380 L548 470 L644 476 L570 536 L596 630 L512 578 L428 630 L454 536 L380 476 L476 470 Z" fill="${ink}" transform="rotate(${rot} 512 512)"/>
+        <text ${F} font-size="${fit(text, 1100, 74)}" fill="${ink}" letter-spacing="4"><textPath href="#a${variant}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>
+        <text ${F} font-size="52" fill="${ink}" letter-spacing="4"><textPath href="#b${variant}" startOffset="50%" text-anchor="middle">EST. 2026</textPath></text>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${bg}${body}${label}</svg>`;
+  const u = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); return { url: u, remoteUrl: u, source: 'demo', prompt };
+}
+
+
+const PRODUCT_TREE_LIST = Object.entries(PRODUCT_TREES).map(([key, t]) => ({ key, label: t.label }));
+const sessions = {};
+const rid = () => Math.random().toString(16).slice(2, 10);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const json = obj => new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json' } });
+const err = (msg, code) => new Response(JSON.stringify({ error: msg }), { status: code || 400, headers: { 'Content-Type': 'application/json' } });
+
+function styleQueue(s) {
+  if (s._q) return; s._q = true;
+  (async () => {
+    let st;
+    while ((st = s.styles.find(x => x.status === 'queued'))) {
+      st.status = 'generating'; await sleep(1400);
+      st.image = demoImage(buildPrompt(s, st.id), st.id, 0, s.id); st.status = 'ready';
+    }
+    s._q = false;
+  })();
+}
+function finalBriefText(s) { return finalBrief(s).replace(/data:image\/svg\+xml[^\s]*/g, '[preview image attached]'); }
+
 const realFetch = window.fetch.bind(window);
 window.fetch = async function(url, opts) {
-  const u = String(url);
-  const i = u.indexOf('/api/');
+  const u = String(url); const i = u.indexOf('/api/');
   if (i < 0) return realFetch(url, opts);
-  const route = u.slice(i);
-  if (route.startsWith('/api/widget-config')) return json(WIDGET_CONFIG);
-  if (route.startsWith('/api/generate')) {
-    const body = opts && opts.body ? JSON.parse(opts.body) : {};
-    await new Promise(r => setTimeout(r, 1800));
-    return json({ designs: buildDemoDesigns(body), demo: true, notice: 'Demo build: these are layout previews. The live version generates 6 AI concepts from your brief.' });
+  const route = u.slice(i).split('?')[0];
+  const body = opts && opts.body ? JSON.parse(opts.body) : {};
+  const m = route.match(/^\/api\/studio\/session\/([^/]+)(?:\/(.*))?$/);
+  if (route === '/api/studio/capabilities') return json({ director: false, generation: false, asana: false, email: false, calendly: false, styles: Object.entries(STYLE_NAMES).map(([id, name]) => ({ id, name })), productTrees: PRODUCT_TREE_LIST, finalChecklist: FINAL_CHECKLIST });
+  if (route === '/api/studio/session') {
+    const client = body.client || {}, context = body.context || {};
+    const s = { id: rid(), client, context: { mode: context.mode || (context.product ? 'product' : 'logo'), product: context.product, decoration: context.decoration, service: context.service, category: context.category }, brief: { answers: {}, done: false, summary: '' }, styles: [], board: { selections: [], dislikes: '' }, library: [], schedule: null, finalized: null };
+    s.productTree = (detectProductTree(s.context) || {}).key || null;
+    sessions[s.id] = s; return json({ session: s });
   }
-  if (route.startsWith('/api/upload')) return json({ files: [] });
-  if (route.startsWith('/api/submit')) {
-    await new Promise(r => setTimeout(r, 600));
-    return json({ success: true, results: { asana: { success: true, action: 'demo' } } });
+  if (!m) return json({});
+  const s = sessions[m[1]]; if (!s) return err('Session not found', 404);
+  const sub = m[2] || '';
+  if (!sub) return json({ session: s });
+  if (sub === 'brief') {
+    Object.assign(s.brief.answers, body.answers || {});
+    if (body.finish) { s.brief.done = true; return json({ session: s, questions: [], done: true }); }
+    const base = briefQuestions(s.context); const remaining = base.filter(q => !(q.id in s.brief.answers));
+    await sleep(350);
+    if (!remaining.length) s.brief.done = true;
+    return json({ session: s, questions: remaining.slice(0, 3), done: !remaining.length, source: 'bank' });
   }
-  if (route.startsWith('/api/create-checkout')) return json({ error: 'Payments are off in this demo. Call 619-800-0949.' });
+  if (sub === 'styles') {
+    const ids = (body.styles || []).filter(id => STYLE_NAMES[id]).slice(0, 20);
+    ids.forEach(id => { if (!s.styles.find(x => x.id === id)) s.styles.push({ id, name: STYLE_NAMES[id], status: 'queued', image: null, liked: false, skipped: false, questions: null, refinement: null, refinements: [], refineStatus: 'idle' }); });
+    s.styles = s.styles.filter(x => ids.includes(x.id)); styleQueue(s); return json({ session: s });
+  }
+  if (sub === 'like') { const liked = new Set(body.liked || []); s.styles.forEach(st => st.liked = liked.has(st.id)); return json({ session: s }); }
+  let sm = sub.match(/^style\/([^/]+)\/(questions|refine|retry)$/);
+  if (sm) {
+    const st = s.styles.find(x => x.id === sm[1]); if (!st) return err('Not found', 404);
+    if (sm[2] === 'questions') { await sleep(300); return json({ questions: styleQuestions(st.id) }); }
+    if (sm[2] === 'retry') { st.status = 'queued'; styleQueue(s); return json({ session: s }); }
+    if (body.skip) { st.skipped = true; st.liked = false; return json({ session: s }); }
+    st.refinement = { answers: body.answers || {}, notes: body.notes || '' }; st.refineStatus = 'generating'; st.refinements = [];
+    (async () => { await sleep(2500); st.refinements = [0,1,2,3,4].map(v => demoImage(buildPrompt(s, st.id, { ...st.refinement, variation: v }), st.id, v + 1, s.id)); st.refineStatus = 'ready'; })();
+    return json({ session: s });
+  }
+  if (sub === 'board') { s.board = { selections: (body.selections || []).map(sel => ({ styleId: sel.styleId, styleName: STYLE_NAMES[sel.styleId] || sel.styleId, label: sel.label, url: sel.url, notes: sel.notes || '', checks: sel.checks || [] })), dislikes: body.dislikes || '' }; return json({ session: s }); }
+  if (sub === 'library') { (body.items || []).forEach(it => s.library.push(rid())); return json({ session: s, library: { items: s.library } }); }
+  if (sub === 'schedule-link') {
+    const out = []; const d = new Date(); d.setHours(0,0,0,0);
+    while (out.length < 15) { d.setDate(d.getDate() + 1); if (d.getDay() === 0 || d.getDay() === 6) continue; ['10:00 AM','1:00 PM','3:30 PM'].forEach(t => out.push({ date: d.toISOString().slice(0,10), time: t, label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' ' + t })); }
+    return json({ url: null, type: 'request', slots: out });
+  }
+  if (sub === 'schedule') { s.schedule = { summary: body.slot ? 'Requested ' + body.slot.label + ' PT (' + (body.scope || 'all designs') + ')' : 'Not scheduled', slot: body.slot || null, scope: body.scope }; return json({ session: s }); }
+  if (sub === 'finalize') { await sleep(700); const brief = finalBriefText(s); s.finalized = { brief }; return json({ success: true, brief, results: { asana: { success: true, action: 'demo' } }, session: s }); }
   return json({});
 };
 })();
 
-const API_BASE = window.location.origin;
-let config = null;
-let selectedService = null;
-let selectedCategory = 'all';
-let selectedLocations = {};
-let selectedStyles = ['badge'];
-let uploadedFileUrl = null;
-let designs = [];
-let selectedDesignIdxs = [];
+const API_BASE = (window.MERCHY_API_URL) || window.location.origin;
+const qs = new URLSearchParams(location.search);
+let caps = null, session = null, hostInit = null, pollTimer = null;
+let currentQuestions = [], selectedStyles = new Set(), likedStyles = new Set();
+let refineOrder = [], refineIdx = 0, boardSel = {}, scope = 'All designs', slotPick = null, schedInfo = null;
+const STAGES = ['Context', 'Brief', 'Styles', 'Concepts', 'Refine', 'Review', 'Schedule', 'Done'];
+const DEFAULT_LOCATIONS = [];
 
-const DEFAULT_LOCATIONS = [
-  { id: 'front', name: 'Front', positions: ['Full Front', 'Chest Logo', 'Pocket Logo', 'Oversized'] },
-  { id: 'back', name: 'Back', positions: ['Full Back', 'Oversized'] },
-  { id: 'left-sleeve', name: 'Left Sleeve' },
-  { id: 'right-sleeve', name: 'Right Sleeve' },
-  { id: 'neck-label', name: 'Neck Label' },
-  { id: 'hat', name: 'Hat' }
-];
-
-// SVG icons for service categories
-const CATEGORY_ICONS = {
-  'dtf-printing': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><rect x="20" y="22" width="8" height="10" rx="1"/></svg>',
-  'screen-printing': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="12" rx="2"/><line x1="12" y1="14" x2="36" y2="14"/><path d="M14 20V40H34V20"/><rect x="18" y="26" width="12" height="8" rx="1"/></svg>',
-  'embroidery': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="14"/><path d="M18 18L24 30L30 18"/><path d="M16 24H32" stroke-dasharray="3 2"/></svg>',
-  'dtg-printing': '<svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="32" rx="3"/><rect x="16" y="16" width="16" height="16" rx="2"/><circle cx="24" cy="24" r="4"/></svg>',
-  'heat-transfer': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><path d="M20 28L24 20L28 28" stroke-dasharray="3 2"/></svg>',
-  'sublimation-apparel': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><path d="M16 22H32"/><path d="M16 28H32"/><path d="M16 34H32"/></svg>',
-  'vinyl-banners': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="22" rx="2"/><line x1="12" y1="18" x2="36" y2="18"/><line x1="12" y1="24" x2="30" y2="24"/><line x1="6" y1="10" x2="6" y2="6"/><line x1="42" y1="10" x2="42" y2="6"/></svg>',
-  'retractable-banners': '<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="32" rx="1"/><line x1="18" y1="14" x2="30" y2="14"/><line x1="18" y1="20" x2="28" y2="20"/><rect x="16" y="38" width="16" height="4" rx="1"/></svg>',
-  'yard-signs': '<svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="18" rx="2"/><line x1="18" y1="14" x2="34" y2="14"/><line x1="18" y1="20" x2="28" y2="20"/><line x1="20" y1="26" x2="20" y2="42"/><line x1="28" y1="26" x2="28" y2="42"/></svg>',
-  'window-graphics': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="2"/><line x1="24" y1="8" x2="24" y2="40"/><line x1="8" y1="24" x2="40" y2="24"/><circle cx="16" cy="16" r="3"/></svg>',
-  'wall-wraps': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="2"/><path d="M12 24L20 18L28 26L36 20"/><circle cx="14" cy="16" r="2"/></svg>',
-  'car-wraps': '<svg viewBox="0 0 48 48"><path d="M8 28L12 20H36L40 28"/><rect x="6" y="28" width="36" height="10" rx="3"/><circle cx="14" cy="38" r="3"/><circle cx="34" cy="38" r="3"/></svg>',
-  'a-frame-signs': '<svg viewBox="0 0 48 48"><path d="M12 40L24 8L36 40"/><line x1="16" y1="28" x2="32" y2="28"/><line x1="18" y1="20" x2="30" y2="20"/></svg>',
-  'acrylic-signs': '<svg viewBox="0 0 48 48"><rect x="8" y="12" width="32" height="20" rx="3"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="26" x2="28" y2="26"/><line x1="24" y1="32" x2="24" y2="40"/><line x1="18" y1="40" x2="30" y2="40"/></svg>',
-  'business-cards': '<svg viewBox="0 0 48 48"><rect x="6" y="14" width="36" height="22" rx="2"/><line x1="14" y1="22" x2="28" y2="22"/><line x1="14" y1="28" x2="22" y2="28"/><circle cx="36" cy="28" r="3"/></svg>',
-  'flyers': '<svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="2"/><line x1="16" y1="14" x2="32" y2="14"/><line x1="16" y1="20" x2="32" y2="20"/><line x1="16" y1="26" x2="24" y2="26"/></svg>',
-  'brochures': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="2"/><line x1="20" y1="10" x2="20" y2="38"/><line x1="34" y1="10" x2="34" y2="38"/><line x1="9" y1="18" x2="17" y2="18"/><line x1="23" y1="18" x2="31" y2="18"/></svg>',
-  'postcards': '<svg viewBox="0 0 48 48"><rect x="6" y="12" width="36" height="24" rx="2"/><line x1="26" y1="12" x2="26" y2="36"/><line x1="30" y1="20" x2="38" y2="20"/><line x1="30" y1="26" x2="38" y2="26"/><rect x="10" y="16" width="12" height="8" rx="1"/></svg>',
-  'menus': '<svg viewBox="0 0 48 48"><rect x="8" y="6" width="32" height="36" rx="2"/><line x1="14" y1="14" x2="34" y2="14"/><line x1="14" y1="20" x2="30" y2="20"/><line x1="14" y1="26" x2="28" y2="26"/><line x1="14" y1="32" x2="32" y2="32"/></svg>',
-  'ncr-forms': '<svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="34" rx="2"/><rect x="13" y="10" width="28" height="34" rx="2"/><line x1="19" y1="20" x2="35" y2="20"/><line x1="19" y1="26" x2="31" y2="26"/></svg>',
-  'booklets': '<svg viewBox="0 0 48 48"><path d="M8 8V40L24 36L40 40V8L24 12Z"/><line x1="24" y1="12" x2="24" y2="36"/></svg>',
-  'letterhead': '<svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="2"/><circle cx="24" cy="14" r="4"/><line x1="16" y1="24" x2="32" y2="24"/><line x1="16" y1="30" x2="32" y2="30"/><line x1="16" y1="36" x2="24" y2="36"/></svg>',
-  'door-hangers': '<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="36" rx="3"/><circle cx="24" cy="14" r="4"/><line x1="18" y1="24" x2="30" y2="24"/><line x1="18" y1="30" x2="28" y2="30"/></svg>',
-  'drinkware': '<svg viewBox="0 0 48 48"><path d="M14 10H34L32 40H16Z"/><path d="M34 16H40V24H34"/><line x1="20" y1="22" x2="28" y2="22"/></svg>',
-  'tote-bags': '<svg viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="24" rx="2"/><path d="M18 18V12A6 6 0 0 1 30 12V18"/><rect x="18" y="26" width="12" height="8" rx="1"/></svg>',
-  'pens': '<svg viewBox="0 0 48 48"><path d="M32 8L40 16L18 38L10 40L12 32Z"/><line x1="28" y1="12" x2="36" y2="20"/></svg>',
-  'tech-accessories': '<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="36" rx="4"/><line x1="14" y1="12" x2="34" y2="12"/><line x1="14" y1="36" x2="34" y2="36"/><circle cx="24" cy="40" r="1.5"/></svg>',
-  'trade-show-displays': '<svg viewBox="0 0 48 48"><rect x="6" y="6" width="36" height="28" rx="2"/><line x1="6" y1="34" x2="42" y2="34"/><line x1="12" y1="34" x2="12" y2="42"/><line x1="36" y1="34" x2="36" y2="42"/></svg>',
-  'lanyards': '<svg viewBox="0 0 48 48"><path d="M18 6V28H30V6"/><rect x="16" y="28" width="16" height="12" rx="2"/><line x1="20" y1="34" x2="28" y2="34"/></svg>',
-  'stickers-labels': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M24 8A16 16 0 0 1 40 24L24 24Z" fill="none"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="18" y1="28" x2="26" y2="28"/></svg>',
-  'keychains': '<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="10"/><circle cx="24" cy="18" r="4"/><path d="M24 28V42"/><line x1="24" y1="34" x2="30" y2="34"/><line x1="24" y1="38" x2="28" y2="38"/></svg>',
-  'packaging': '<svg viewBox="0 0 48 48"><path d="M8 16L24 8L40 16V36L24 44L8 36Z"/><line x1="24" y1="8" x2="24" y2="44"/><line x1="8" y1="16" x2="40" y2="16"/></svg>',
-  'food-wellness': '<svg viewBox="0 0 48 48"><circle cx="24" cy="28" r="14"/><path d="M24 14V8"/><path d="M20 10C20 10 24 6 28 10"/></svg>',
-  'outdoor-leisure': '<svg viewBox="0 0 48 48"><path d="M24 6L40 38H8Z"/><path d="M16 28L24 16L32 28"/><circle cx="34" cy="14" r="4"/></svg>',
-  'awards': '<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="12"/><path d="M18 28L16 40H32L30 28"/><line x1="24" y1="12" x2="24" y2="24"/><line x1="18" y1="18" x2="30" y2="18"/></svg>',
-  'pet-supplies': '<svg viewBox="0 0 48 48"><circle cx="24" cy="28" r="8"/><circle cx="16" cy="16" r="4"/><circle cx="32" cy="16" r="4"/><circle cx="12" cy="24" r="3"/><circle cx="36" cy="24" r="3"/></svg>',
-  'auto-accessories': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><line x1="24" y1="8" x2="24" y2="16"/><line x1="24" y1="32" x2="24" y2="40"/><line x1="8" y1="24" x2="16" y2="24"/><line x1="32" y1="24" x2="40" y2="24"/></svg>',
-  'uv-printing': '<svg viewBox="0 0 48 48"><circle cx="24" cy="16" r="8"/><path d="M14 28H34V40H14Z" rx="2"/><line x1="24" y1="24" x2="24" y2="28"/><path d="M18 20L10 26"/><path d="M30 20L38 26"/></svg>',
-  'sublimation': '<svg viewBox="0 0 48 48"><path d="M14 10H34L32 40H16Z"/><circle cx="24" cy="24" r="6"/><path d="M20 18H28"/></svg>',
-  'laser-engraving': '<svg viewBox="0 0 48 48"><rect x="10" y="16" width="28" height="24" rx="2"/><path d="M24 6L24 16"/><path d="M20 6L28 6"/><line x1="16" y1="24" x2="32" y2="24"/><line x1="16" y1="30" x2="28" y2="30"/></svg>',
-  'patches': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="12" stroke-dasharray="4 2"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>',
-  'embroidered-patches': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M16 20L24 14L32 20" stroke-dasharray="3 2"/><line x1="16" y1="28" x2="32" y2="28" stroke-dasharray="3 2"/></svg>',
-  'pvc-patches': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="6"/><rect x="14" y="14" width="20" height="20" rx="3"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>',
-  'chenille-patches': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M18 22C18 22 21 18 24 22C27 26 30 22 30 22"/><line x1="16" y1="30" x2="32" y2="30"/></svg>',
-  'logo-design': '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><path d="M18 30L24 16L30 30"/><line x1="20" y1="26" x2="28" y2="26"/></svg>',
-  'vectorizing': '<svg viewBox="0 0 48 48"><path d="M12 36L24 12L36 36"/><line x1="16" y1="28" x2="32" y2="28"/><circle cx="24" cy="12" r="3"/><circle cx="12" cy="36" r="3"/><circle cx="36" cy="36" r="3"/></svg>',
-  'mockups': '<svg viewBox="0 0 48 48"><rect x="8" y="10" width="20" height="28" rx="2"/><rect x="20" y="14" width="20" height="20" rx="2"/></svg>',
-  'brand-identity': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><circle cx="24" cy="20" r="6"/><line x1="14" y1="30" x2="34" y2="30"/><line x1="18" y1="36" x2="30" y2="36"/></svg>',
-  'social-media-graphics': '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><circle cx="24" cy="24" r="8"/><circle cx="34" cy="14" r="2"/></svg>',
-  'illustration': '<svg viewBox="0 0 48 48"><path d="M12 40L14 28L32 10L40 18L22 36Z"/><line x1="28" y1="14" x2="36" y2="22"/></svg>',
-  'photo-editing': '<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="2"/><circle cx="16" cy="20" r="4"/><path d="M6 34L18 24L28 32L36 26L42 32"/></svg>',
-  'shirt-design': '<svg viewBox="0 0 48 48"><path d="M14 10L20 6L28 6L34 10L40 16L36 20L32 16V40H16V16L12 20L8 16Z"/><circle cx="24" cy="26" r="6"/></svg>',
-  'packaging-design': '<svg viewBox="0 0 48 48"><path d="M8 16L24 8L40 16V36L24 44L8 36Z"/><line x1="24" y1="8" x2="24" y2="44"/><line x1="8" y1="16" x2="24" y2="24"/><line x1="40" y1="16" x2="24" y2="24"/></svg>',
-  'digitizing': '<svg viewBox="0 0 48 48"><path d="M12 36L24 12L36 36"/><line x1="16" y1="28" x2="32" y2="28"/><path d="M8 40H40" stroke-dasharray="4 2"/></svg>'
-};
-
-// SVG icons for 20 design styles
 const STYLE_ICONS = {
   badge: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M14 14L24 8L34 14" fill="none"/><line x1="16" y1="28" x2="32" y2="28"/></svg>',
   icon_logo: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="18" stroke-dasharray="6 4"/></svg>',
@@ -870,412 +668,239 @@ const STYLE_ICONS = {
   patch_first: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-width="3"/><circle cx="24" cy="24" r="14" stroke-dasharray="5 3"/><path d="M18 22L24 16L30 22"/><line x1="16" y1="28" x2="32" y2="28" stroke-width="2"/></svg>',
   event_series: '<svg viewBox="0 0 48 48"><rect x="8" y="10" width="24" height="28" rx="2"/><rect x="16" y="14" width="24" height="28" rx="2"/><line x1="22" y1="22" x2="34" y2="22"/><line x1="22" y1="28" x2="32" y2="28"/><line x1="22" y1="34" x2="30" y2="34"/></svg>'
 };
+const STYLE_HINTS = { badge:'Emblem with arc text', icon_logo:'One strong symbol', typography:'Lettering is the design', mascot:'Illustrated character', scene:'Full illustration', badge_scene:'Scene inside a badge', diagram:'Labeled technical layout', vintage_script:'Retro script', streetwear:'Bold modern graphic', trade_tools:'Crossed tools', corporate_seal:'Polished emblem', pattern:'Repeating icons', monogram:'Big initials', collage:'Layered elements', product_focus:'The product as hero', humor:'Punchline visual', heritage:'Est. date, classic', line_art:'Clean single line', patch_first:'Built to stitch', event_series:'Annual template' };
 
-async function init() {
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const imgSrc = im => im ? (im.remoteUrl || (im.url?.startsWith('/') ? API_BASE + im.url : im.url)) : '';
+async function api(path, opts) {
+  const r = await fetch(API_BASE + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || ('Server error ' + r.status));
+  return d;
+}
+function go(n) {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  $('st' + n).classList.add('active');
+  $('progress').innerHTML = STAGES.slice(1).map((_, i) => `<span class="${i + 1 < n ? 'done' : i + 1 === n ? 'on' : ''}"></span>`).join('');
+  $('content').scrollTop = 0;
+  const c = session?.client || {}; const ctx = session?.context || {};
+  $('subline').innerHTML = `${STAGES[n]} ${n > 0 ? '' : ''}${c.business ? '&middot; <b>' + esc(c.business) + '</b>' : ''}${ctx.product ? ' &middot; ' + esc(ctx.product) : (ctx.mode === 'logo' ? ' &middot; Logo' : '')}`;
+}
+function closeStudio() { parent.postMessage({ type: 'merchy-studio-close', sessionId: session?.id }, '*'); }
+
+// ---------- boot ----------
+window.addEventListener('message', e => { if (e.data && e.data.type === 'merchy-studio-init') { hostInit = e.data; boot(); } });
+parent.postMessage({ type: 'merchy-studio-ready' }, '*');
+(async function init() {
+  caps = await api('/api/studio/capabilities');
+  renderStyleWall();
+  $('ctxChips').innerHTML = ['Logo / artwork', ...caps.productTrees.map(t => t.label)].map(l => `<div class="chip" onclick="pickCtx(this)">${esc(l)}</div>`).join('');
+  if (qs.get('demo') || qs.get('standalone')) { setTimeout(() => { if (!hostInit) { go(0); $('subline').textContent = 'Standalone demo'; } }, 300); }
+  else setTimeout(() => { if (!hostInit && !session) { go(0); $('subline').textContent = 'No host context received'; } }, 1500);
+})();
+let ctxPick = null;
+function pickCtx(el) { document.querySelectorAll('#ctxChips .chip').forEach(c => c.classList.remove('on')); el.classList.add('on'); ctxPick = el.textContent; $('ctxProductWrap').style.display = ctxPick === 'Logo / artwork' ? 'none' : 'block'; }
+async function startFromContext() {
+  const business = $('ctxBusiness').value.trim() || 'Demo Business';
+  const product = ctxPick && ctxPick !== 'Logo / artwork' ? ($('ctxProduct').value.trim() || ctxPick) : null;
+  hostInit = { client: { id: 'demo-' + business.toLowerCase().replace(/\W+/g, '-'), name: 'Demo Client', email: '', business }, context: product ? { mode: 'product', product } : { mode: 'logo' } };
+  boot();
+}
+async function boot() {
+  if (session) return;
   try {
-    const res = await fetch(`${API_BASE}/api/widget-config`);
-    config = await res.json();
-  } catch(e) {
-    config = { services: [], categories: [], styles: [], locations: DEFAULT_LOCATIONS };
-  }
-  renderCategoryTabs();
-  renderServices();
-  renderStylePicker();
-  renderLocationPicker();
+    const d = await api('/api/studio/session', { method: 'POST', body: JSON.stringify({ client: hostInit.client || {}, context: hostInit.context || {} }) });
+    session = d.session;
+    parent.postMessage({ type: 'merchy-studio-session', sessionId: session.id }, '*');
+    go(1); await loadQuestions();
+  } catch (e) { $('subline').textContent = 'Could not start: ' + e.message; }
 }
 
-// Category tabs
-function renderCategoryTabs() {
-  const cats = config.categories || [];
-  let html = '<div class="cat-tab active" onclick="selectCategory(\'all\',this)">All</div>';
-  cats.forEach(c => { html += `<div class="cat-tab" onclick="selectCategory('${c.id}',this)">${c.name}</div>`; });
-  document.getElementById('catTabs').innerHTML = html;
+// ---------- stage 1: interview ----------
+async function loadQuestions(answers) {
+  $('qList').innerHTML = '<div class="spinner" style="margin:20px auto"></div>'; $('qNext').disabled = true;
+  try {
+    const d = await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: answers || {} }) });
+    session = d.session;
+    if (d.session.brief.summary) { $('briefBox').style.display = 'block'; $('briefBox').textContent = 'Direction so far: ' + d.session.brief.summary; }
+    if (d.done || !d.questions.length) { go(2); return; }
+    renderQuestions(d.questions, 'qList');
+    $('qNext').disabled = false;
+  } catch (e) { $('qList').innerHTML = `<p class="err">${esc(e.message)}</p>`; $('qNext').disabled = false; }
 }
-
-function selectCategory(id, el) {
-  selectedCategory = id;
-  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  renderServices();
-}
-
-// Service tiles - 6 wide grid with SVG icons
-function renderServices() {
-  const search = (document.getElementById('searchBar').value || '').toLowerCase();
-  let svcs = config?.services || [];
-  if(selectedCategory !== 'all') svcs = svcs.filter(s => s.category === selectedCategory);
-  if(search) svcs = svcs.filter(s => s.name.toLowerCase().includes(search) || s.desc.toLowerCase().includes(search));
-
-  const grid = document.getElementById('serviceGrid');
-  const noRes = document.getElementById('noResults');
-  if(!svcs.length) { grid.innerHTML=''; noRes.style.display='block'; return; }
-  noRes.style.display='none';
-
-  grid.innerHTML = svcs.map(s => {
-    const icon = CATEGORY_ICONS[s.id] || '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>';
-    return `<div class="svc-tile ${selectedService?.id===s.id?'selected':''}" onclick="selectService('${s.id}')">
-      <div class="tile-icon">${icon}</div>
-      <div class="tile-name">${s.name}</div>
-      <div class="tile-desc">${s.desc}</div>
-    </div>`;
+function renderQuestions(list, targetId) {
+  currentQuestions = list;
+  $(targetId).innerHTML = list.map(q => {
+    const chips = (q.type === 'chips' || q.type === 'chips+text') ? `<div class="chips" data-q="${esc(q.id)}" data-multi="${q.multi ? 1 : 0}">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>` : '';
+    const text = (q.type === 'text' || q.type === 'chips+text') ? `<textarea data-q="${esc(q.id)}" placeholder="${q.type === 'chips+text' ? 'Or type your own' : 'Type here'}"></textarea>` : '';
+    return `<div class="q"><label>${esc(q.q)}${q.why ? `<span class="why">${esc(q.why)}</span>` : ''}</label>${chips}${text}</div>`;
   }).join('');
 }
-
-function filterServices() { renderServices(); }
-
-function selectService(id) {
-  selectedService = (config?.services||[]).find(s => s.id === id);
-  renderServices();
-  if(selectedService) setTimeout(() => goStep(2), 150);
+function toggleChip(el) {
+  const grp = el.parentElement; const multi = grp.dataset.multi === '1';
+  if (!multi) grp.querySelectorAll('.chip').forEach(c => { if (c !== el) c.classList.remove('on'); });
+  el.classList.toggle('on');
 }
-
-// Location picker
-function renderLocationPicker() {
-  const locs = config?.locations || DEFAULT_LOCATIONS;
-  document.getElementById('locGrid').innerHTML = locs.map(l =>
-    `<div class="loc-btn" id="loc-${l.id}" onclick="toggleLocation('${l.id}')">${l.name}</div>`
-  ).join('');
-}
-
-function toggleLocation(id) {
-  const btn = document.getElementById(`loc-${id}`);
-  if(selectedLocations[id]) { delete selectedLocations[id]; btn.classList.remove('active'); }
-  else { selectedLocations[id] = { instructions:'', position:'' }; btn.classList.add('active'); }
-  renderLocationDetails();
-}
-
-function renderLocationDetails() {
-  const locs = config?.locations || DEFAULT_LOCATIONS;
-  let html = '';
-  Object.keys(selectedLocations).forEach(id => {
-    const loc = locs.find(l => l.id === id);
-    if(!loc) return;
-    const hasPos = loc.positions?.length > 0;
-    html += `<div class="loc-detail visible">
-      <h4>${loc.name}</h4>
-      ${hasPos ? `<select onchange="selectedLocations['${id}'].position=this.value">
-        <option value="">Select position...</option>
-        ${loc.positions.map(p => `<option value="${p}">${p}</option>`).join('')}
-      </select>` : ''}
-      <textarea placeholder="Instructions for ${loc.name} (e.g. logo centered, 4 inches wide)" oninput="selectedLocations['${id}'].instructions=this.value"></textarea>
-    </div>`;
+function collectAnswers(targetId) {
+  const out = {};
+  document.querySelectorAll(`#${targetId} .chips[data-q]`).forEach(g => {
+    const on = [...g.querySelectorAll('.chip.on')].map(c => c.textContent);
+    if (on.length) out[g.dataset.q] = g.dataset.multi === '1' ? on : on[0];
   });
-  document.getElementById('locDetails').innerHTML = html;
+  document.querySelectorAll(`#${targetId} textarea[data-q]`).forEach(t => {
+    const v = t.value.trim(); if (!v) return;
+    const prev = out[t.dataset.q];
+    out[t.dataset.q] = prev ? (Array.isArray(prev) ? [...prev, v] : prev + '; ' + v) : v;
+  });
+  // unanswered questions are recorded as skipped so they are not asked again
+  currentQuestions.forEach(q => { if (!(q.id in out)) out[q.id] = ''; });
+  return out;
+}
+async function submitAnswers() { await loadQuestions(collectAnswers('qList')); }
+async function finishBrief() {
+  const a = collectAnswers('qList');
+  await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: a, finish: true }) });
+  go(2);
 }
 
-// Style picker with SVG icons - multi-select up to 3
-function renderStylePicker() {
-  const styles = config?.styles || [];
-  const grid = document.getElementById('styleGrid');
-  const isObj = styles.length > 0 && typeof styles[0] === 'object';
+// ---------- stage 2: style wall ----------
+function renderStyleWall() {
+  $('styleGrid').innerHTML = caps.styles.map(s => `<div class="style-card ${selectedStyles.has(s.id) ? 'on' : ''}" onclick="toggleStyle('${s.id}',this)">${STYLE_ICONS[s.id] || ''}<div class="n">${esc(s.name)}</div><div class="h">${esc(STYLE_HINTS[s.id] || '')}</div></div>`).join('');
+  updateStyleCount();
+}
+function toggleStyle(id, el) { selectedStyles.has(id) ? selectedStyles.delete(id) : selectedStyles.add(id); el.classList.toggle('on'); updateStyleCount(); }
+function updateStyleCount() { const n = selectedStyles.size; $('styleCounter').textContent = `${n} of ${caps.styles.length} selected`; $('genBtn').disabled = !n; $('genBtn').textContent = n ? `Generate ${n} concept${n > 1 ? 's' : ''}` : 'Generate concepts'; }
+async function generateConcepts() {
+  $('genBtn').disabled = true;
+  const d = await api(`/api/studio/session/${session.id}/styles`, { method: 'POST', body: JSON.stringify({ styles: [...selectedStyles] }) });
+  session = d.session; go(3); renderConcepts(); startPolling(renderConcepts);
+  $('genBtn').disabled = false;
+}
 
-  grid.innerHTML = (isObj ? styles : []).map(s => {
-    const isActive = selectedStyles.includes(s.id);
-    const atMax = selectedStyles.length >= 3 && !isActive;
-    const icon = STYLE_ICONS[s.id] || '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/></svg>';
-    return `<div class="style-card ${isActive?'active':''} ${atMax?'disabled':''}" onclick="toggleStyle('${s.id}')">
-      <div class="s-icon">${icon}</div>
-      <div class="s-name">${s.name}</div>
-      <div class="s-hint">${s.desc}</div>
+// ---------- polling ----------
+function startPolling(fn) {
+  stopPolling();
+  pollTimer = setInterval(async () => { try { const d = await api(`/api/studio/session/${session.id}`); session = d.session; fn(); } catch (e) {} }, 1500);
+}
+function stopPolling() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+
+// ---------- stage 3: concepts ----------
+function renderConcepts() {
+  const sts = session.styles;
+  $('conceptGrid').innerHTML = sts.map(st => {
+    const on = likedStyles.has(st.id);
+    let inner;
+    if (st.status === 'ready' && st.image) inner = `<img src="${esc(imgSrc(st.image))}" alt="${esc(st.name)}">`;
+    else if (st.status === 'failed') inner = `<div class="fail">Failed<br><button class="btn btn-ghost" onclick="event.stopPropagation();retryStyle('${st.id}')">Retry</button></div>`;
+    else inner = `<div class="spinner"></div>`;
+    return `<div class="concept ${on ? 'on' : ''}" onclick="toggleLike('${st.id}')" id="c-${st.id}"><div class="img">${inner}${st.status === 'generating' ? '<span class="badge">DRAWING</span>' : (on ? '<span class="badge">LIKED</span>' : '')}</div><div class="t"><span>${esc(st.name)}</span><small>${st.status === 'ready' ? '' : st.status}</small></div></div>`;
+  }).join('');
+  const pending = sts.filter(s => s.status === 'queued' || s.status === 'generating').length;
+  const ready = sts.filter(s => s.status === 'ready').length;
+  $('conceptLead').textContent = pending ? `${ready} of ${sts.length} ready. The rest are drawing now. Tap the ones you like as they come in.` : `All ${sts.length} ready. Tap the ones you like.`;
+  if (!pending) stopPolling();
+  updateLikeBtn();
+}
+function toggleLike(id) { const st = session.styles.find(s => s.id === id); if (!st || st.status !== 'ready') return; likedStyles.has(id) ? likedStyles.delete(id) : likedStyles.add(id); renderConcepts(); }
+function updateLikeBtn() { const n = likedStyles.size; $('likeBtn').disabled = !n; $('likeBtn').textContent = n ? `Continue with ${n} style${n > 1 ? 's' : ''}` : 'Continue with 0 styles'; }
+async function retryStyle(id) { const d = await api(`/api/studio/session/${session.id}/style/${id}/retry`, { method: 'POST', body: '{}' }); session = d.session; renderConcepts(); startPolling(renderConcepts); }
+async function continueToRefine() {
+  stopPolling();
+  const d = await api(`/api/studio/session/${session.id}/like`, { method: 'POST', body: JSON.stringify({ liked: [...likedStyles] }) });
+  session = d.session;
+  refineOrder = session.styles.filter(s => s.liked).map(s => s.id); refineIdx = 0;
+  go(4); loadRefine();
+}
+
+// ---------- stage 4: refine loop ----------
+async function loadRefine() {
+  if (refineIdx >= refineOrder.length) { go(5); renderBoard(); startPolling(renderBoard); return; }
+  const id = refineOrder[refineIdx]; const st = session.styles.find(s => s.id === id);
+  $('refineQueue').innerHTML = refineOrder.map((rid, i) => { const s = session.styles.find(x => x.id === rid); return `<span class="${i === refineIdx ? 'now' : i < refineIdx ? (s.skipped ? 'skip' : 'done') : ''}">${esc(s.name)}</span>`; }).join('');
+  $('refImg').src = imgSrc(st.image); $('refName').textContent = st.name; $('refPos').textContent = `Style ${refineIdx + 1} of ${refineOrder.length}`;
+  $('refNotes').value = '';
+  $('refQList').innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try { const d = await api(`/api/studio/session/${session.id}/style/${id}/questions`); renderQuestions(d.questions, 'refQList'); }
+  catch (e) { $('refQList').innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+}
+async function submitRefine(skip) {
+  const id = refineOrder[refineIdx];
+  const body = skip ? { skip: true } : { answers: collectAnswers('refQList'), notes: $('refNotes').value.trim() };
+  const d = await api(`/api/studio/session/${session.id}/style/${id}/refine`, { method: 'POST', body: JSON.stringify(body) });
+  session = d.session; refineIdx++; loadRefine();
+}
+
+// ---------- stage 5: review board ----------
+function renderBoard() {
+  const liked = session.styles.filter(s => s.liked && !s.skipped);
+  const waiting = liked.filter(s => s.refineStatus === 'generating');
+  $('boardWait').textContent = waiting.length ? `Still drawing refinements for: ${waiting.map(s => s.name).join(', ')}. You can start selecting.` : '';
+  if (!waiting.length) stopPolling();
+  $('board').innerHTML = liked.map(st => {
+    const imgs = [{ ...st.image, label: '#1 Original' }, ...st.refinements.map((r, i) => ({ ...r, label: `#${i + 2}` }))];
+    const pending = st.refineStatus === 'generating' ? [1, 2, 3, 4, 5].map(() => `<div class="concept"><div class="img"><div class="spinner"></div></div></div>`).join('') : '';
+    const failed = st.refineStatus === 'failed' ? `<div class="fail">Refinements failed: ${esc(st.error || '')}</div>` : '';
+    return `<div class="board-section"><h3><span>${esc(st.name)}</span><small>${imgs.length} option${imgs.length > 1 ? 's' : ''}</small></h3>
+      <div class="board-grid">${imgs.map((im, i) => { const key = st.id + ':' + i; const on = !!boardSel[key]; return `<div class="concept ${on ? 'on' : ''}" onclick="toggleBoard('${st.id}',${i})"><div class="img"><img src="${esc(imgSrc(im))}" alt=""><span class="num">${i + 1}</span></div><div class="t"><span>${esc(im.label)}</span></div></div>`; }).join('')}${pending}</div>${failed}
+      ${imgs.map((im, i) => { const key = st.id + ':' + i; const sel = boardSel[key]; if (!sel) return ''; return `<div class="note-card"><div class="nh"><img src="${esc(imgSrc(im))}" alt=""><b>${esc(st.name)} ${esc(im.label)}</b></div>
+        <div class="chips">${caps.finalChecklist.map(c => `<div class="chip ${sel.checks.includes(c) ? 'on' : ''}" onclick="toggleCheck('${key}','${esc(c)}',this)">${esc(c)}</div>`).join('')}</div>
+        <textarea placeholder="What should the artist do with this one? Colors, size, shape, spacing, font, spelling, add or remove." oninput="boardSel['${key}'].notes=this.value">${esc(sel.notes)}</textarea></div>`; }).join('')}
     </div>`;
   }).join('');
-
-  document.getElementById('styleCounter').textContent = `${selectedStyles.length} of 3 selected`;
+  const n = Object.keys(boardSel).length;
+  $('boardBtn').disabled = !n; $('boardBtn').textContent = `Save selections (${n})`;
+}
+function toggleBoard(styleId, i) {
+  const key = styleId + ':' + i;
+  if (boardSel[key]) delete boardSel[key];
+  else { const st = session.styles.find(s => s.id === styleId); const im = i === 0 ? st.image : st.refinements[i - 1]; boardSel[key] = { styleId, idx: i, url: im.url || im.remoteUrl, label: i === 0 ? '#1 Original' : '#' + (i + 1), notes: '', checks: [] }; }
+  renderBoard();
+}
+function toggleCheck(key, c, el) { const arr = boardSel[key].checks; const i = arr.indexOf(c); i > -1 ? arr.splice(i, 1) : arr.push(c); el.classList.toggle('on'); }
+async function submitBoard() {
+  stopPolling();
+  const selections = Object.values(boardSel);
+  $('boardBtn').disabled = true;
+  await api(`/api/studio/session/${session.id}/board`, { method: 'POST', body: JSON.stringify({ selections, dislikes: $('dislikes').value.trim() }) });
+  const d = await api(`/api/studio/session/${session.id}/library`, { method: 'POST', body: JSON.stringify({ items: selections.map(s => ({ styleId: s.styleId, label: s.label, url: s.url })) }) });
+  session = d.session;
+  go(6); loadSchedule();
 }
 
-function toggleStyle(id) {
-  const idx = selectedStyles.indexOf(id);
-  if(idx > -1) { selectedStyles.splice(idx, 1); }
-  else { if(selectedStyles.length >= 3) return; selectedStyles.push(id); }
-  renderStylePicker();
-}
-
-// Upload
-function handleUpload(input) {
-  const file = input.files[0];
-  if(!file) return;
-  const area = document.getElementById('uploadArea');
-  const fd = new FormData();
-  fd.append('files', file);
-  fetch(`${API_BASE}/api/upload`, { method:'POST', body:fd })
-    .then(r => r.json())
-    .then(d => { if(d.files?.length) uploadedFileUrl = d.files[0].url; else uploadedFileUrl = null; })
-    .catch(console.error);
-  const reader = new FileReader();
-  reader.onload = e => {
-    area.innerHTML = `<img class="upload-preview" src="${e.target.result}"><p style="font-size:13px;color:#888">${file.name}</p>`;
-    area.classList.add('has-file');
-  };
-  reader.readAsDataURL(file);
-}
-
-// Navigation
-function goStep(n) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById(`step${n}`).classList.add('active');
-  const labels = ['Choose Service','Design Details','Review Designs','Get Your File','Confirmation'];
-  document.getElementById('stepLabel').textContent = n >= 5 ? 'Done - Confirmation' : `Step ${n} of 4 - ${labels[n-1]||''}`;
-  if(n===2 && selectedService) {
-    document.getElementById('selSvcName').textContent = selectedService.name;
-    document.getElementById('locationSection').style.display = selectedService.category==='apparel_decoration'?'block':'none';
+// ---------- stage 6: schedule ----------
+async function loadSchedule() {
+  const sels = Object.values(boardSel);
+  const opts = ['All designs', ...[...new Set(sels.map(s => session.styles.find(x => x.id === s.styleId)?.name))].filter(Boolean)];
+  $('scopeChips').innerHTML = opts.map((o, i) => `<div class="chip ${i === 0 ? 'on' : ''}" onclick="document.querySelectorAll('#scopeChips .chip').forEach(c=>c.classList.remove('on'));this.classList.add('on');scope=this.textContent">${esc(o)}</div>`).join('');
+  schedInfo = await api(`/api/studio/session/${session.id}/schedule-link`);
+  if (schedInfo.url) {
+    $('schedBody').innerHTML = `<a class="btn btn-primary" style="text-align:center;text-decoration:none" href="${esc(schedInfo.url)}" target="_blank" rel="noopener">Open the booking calendar</a><button class="btn btn-dark" onclick="confirmSchedule(true)">I booked my call</button>`;
+  } else {
+    $('schedBody').innerHTML = `<p class="lead">Pick a time that works (Pacific). The team confirms by email.</p><div class="slots">${schedInfo.slots.map((s, i) => `<div class="slot" onclick="document.querySelectorAll('.slot').forEach(x=>x.classList.remove('on'));this.classList.add('on');slotPick=schedInfo.slots[${i}]">${esc(s.label)}</div>`).join('')}</div><button class="btn btn-primary" onclick="confirmSchedule(false)">Request this time</button>`;
   }
-  if(n===4) {
-    hideSubPages();
-    document.getElementById('pathSelection').style.display = 'block';
-    // Show selected design thumbnails
-    document.getElementById('selectedPreview').innerHTML = selectedDesignIdxs.map(i => {
-      const d = designs[i]||{};
-      const src = d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : '');
-      return `<img src="${src}" style="width:80px;height:80px;border-radius:8px;border:2px solid #d4a017;object-fit:cover">`;
-    }).join('');
-  }
-  document.querySelector('.content').scrollTop = 0;
 }
+async function confirmSchedule(calendly) {
+  if (!calendly && !slotPick) { $('schedBody').insertAdjacentHTML('beforeend', '<p class="err">Pick a time first.</p>'); return; }
+  await api(`/api/studio/session/${session.id}/schedule`, { method: 'POST', body: JSON.stringify({ slot: slotPick, calendlyBooked: calendly, scope }) });
+  finalize();
+}
+async function skipSchedule() { finalize(); }
 
-// Generate designs via backend
-async function generateDesigns() {
-  const name = document.getElementById('userName').value.trim();
-  const email = document.getElementById('userEmail').value.trim();
-  if(!name||!email) { alert('Please enter your name and email.'); return; }
-  if(!selectedStyles.length) { alert('Please select at least one design style.'); return; }
-
-  goStep(3);
-  const loading = document.getElementById('loadingState');
-  loading.innerHTML = '<div class="spinner"></div><p>Creating your designs...</p><p style="font-size:12px;color:#aaa;margin-top:4px">This may take 30-60 seconds</p>';
-  loading.style.display = 'block';
-  document.getElementById('designResults').style.display = 'none';
-
+// ---------- stage 7: finalize ----------
+async function finalize() {
+  go(7); $('doneLead').textContent = 'Sending your selections and notes...';
   try {
-    const res = await fetch(`${API_BASE}/api/generate`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name, email,
-        business: document.getElementById('userBusiness').value.trim(),
-        text: document.getElementById('designText').value.trim(),
-        desc: document.getElementById('designDesc').value.trim(),
-        service: selectedService?.id||'',
-        decoration: selectedService?.name||'',
-        style: selectedStyles[0],
-        styles: selectedStyles,
-        locations: selectedLocations,
-        referenceImage: uploadedFileUrl
-      })
-    });
-    if(!res.ok) throw new Error('Server error ' + res.status);
-    const data = await res.json();
-    designs = Array.isArray(data.designs) ? data.designs : [];
-    if(!designs.length) throw new Error(data.error || 'No designs returned');
-    const notice = document.getElementById('demoNotice');
-    if(data.demo || data.partial) { notice.textContent = data.notice || 'Some designs are layout previews.'; notice.style.display = 'block'; }
-    else notice.style.display = 'none';
-    showDesignResults();
-  } catch(err) {
-    console.error(err);
-    document.getElementById('loadingState').innerHTML = `<p style="color:#c00;font-size:14px">Something went wrong generating designs.</p><p style="font-size:12px;color:#888;margin-top:4px">${(err && err.message) || ''}</p><button class="btn btn-primary" onclick="generateDesigns()" style="margin-top:10px">Try Again</button><button class="btn btn-back" onclick="goStep(2)" style="margin-top:6px">Go Back</button>`;
-  }
+    const d = await api(`/api/studio/session/${session.id}/finalize`, { method: 'POST', body: '{}' });
+    session = d.session;
+    const n = session.board.selections.length;
+    $('doneLead').textContent = `${n} design${n === 1 ? '' : 's'} saved to your logo library and sent to the design team with your notes.${session.schedule?.slot ? ' Your call request is in.' : ''}`;
+    $('libStrip').innerHTML = session.board.selections.map(s => `<img src="${esc(s.url)}" alt="">`).join('');
+    $('briefOut').textContent = d.brief;
+    parent.postMessage({ type: 'merchy-studio-complete', sessionId: session.id, selections: session.board.selections, libraryIds: session.library, brief: d.brief }, '*');
+  } catch (e) { $('doneLead').textContent = 'Could not send: ' + e.message; }
 }
-
-function showDesignResults() {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('designResults').style.display = 'block';
-  selectedDesignIdxs = [];
-  document.getElementById('designsGrid').innerHTML = designs.map((d,i) => {
-    if(d.error) return `<div class="design-card" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:#f8f8f8"><span style="font-size:12px;color:#888">Failed</span></div>`;
-    const src = d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : '');
-    const fallback = d.url ? `${API_BASE}${d.url}` : '';
-    return `<div class="design-card" onclick="toggleDesign(${i})" id="dcard-${i}"><div class="check-badge">&#10003;</div><img src="${src}" alt="Design ${i+1}" onerror="if(this.src!=='${fallback}')this.src='${fallback}'"><div class="watermark">PREVIEW</div></div>`;
-  }).join('');
-  updateDesignSelection();
-}
-
-function toggleDesign(idx) {
-  if(designs[idx]?.error) return;
-  const pos = selectedDesignIdxs.indexOf(idx);
-  if(pos > -1) selectedDesignIdxs.splice(pos, 1);
-  else selectedDesignIdxs.push(idx);
-  updateDesignSelection();
-}
-
-function updateDesignSelection() {
-  document.querySelectorAll('.design-card').forEach((c,i) => c.classList.toggle('selected', selectedDesignIdxs.includes(i)));
-  document.getElementById('designSelCount').textContent = selectedDesignIdxs.length > 0 ? selectedDesignIdxs.length + ' selected' : '0 selected';
-  document.getElementById('continueBtn').disabled = selectedDesignIdxs.length === 0;
-  document.getElementById('continueBtn').textContent = selectedDesignIdxs.length === 1 ? 'Continue with Selected Design' : `Continue with ${selectedDesignIdxs.length} Designs`;
-}
-
-function regenerate() { generateDesigns(); }
-
-// Sub-page navigation
-function showSubPage(page) {
-  document.getElementById('pathSelection').style.display = 'none';
-  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById('sub' + page.charAt(0).toUpperCase() + page.slice(1));
-  if(el) el.classList.add('active');
-  if(page === 'vector') {
-    if(!config?.stripeEnabled) {
-      document.getElementById('vectorBtn').textContent = 'Request Vector File';
-      document.getElementById('vectorNote').textContent = 'Our team will send a secure payment link and your file within 1 business day.';
-    }
-    document.getElementById('vectorPreviewImgs').innerHTML = selectedDesignIdxs.map(i => {
-      const d = designs[i]||{};
-      const src = d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : '');
-      return `<img src="${src}" style="width:100px;height:100px;border-radius:8px;border:2px solid #eee;object-fit:cover">`;
-    }).join('');
-  }
-}
-
-function hideSubPages() {
-  document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('pathSelection').style.display = 'block';
-}
-
-// PATH 1: Vector purchase via Stripe
-function collectSubmission(extra) {
-  return Object.assign({
-    name: document.getElementById('userName').value.trim(),
-    email: document.getElementById('userEmail').value.trim(),
-    business: document.getElementById('userBusiness').value.trim(),
-    text: document.getElementById('designText').value.trim(),
-    desc: document.getElementById('designDesc').value.trim(),
-    service: selectedService?.id||'',
-    serviceName: selectedService?.name||'',
-    styles: selectedStyles,
-    locations: selectedLocations,
-    referenceImage: uploadedFileUrl,
-    designUrls: selectedDesignIdxs.map(i => designs[i]?.url || designs[i]?.remoteUrl || ''),
-    selectedDesigns: selectedDesignIdxs
-  }, extra || {});
-}
-
-async function purchaseVector() {
-  const btn = document.getElementById('vectorBtn');
-  btn.disabled=true; btn.textContent='Processing...';
-  const d = designs[selectedDesignIdxs[0]]||{};
-  if(!config?.stripeEnabled) {
-    // Payments not connected: send the request to the team instead
-    try {
-      await fetch(`${API_BASE}/api/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(collectSubmission({ action:'vector_request' })) });
-      document.getElementById('confirmTitle').textContent = 'Vector Request Sent!';
-      document.getElementById('confirmMsg').textContent = 'Our team will prepare your production-ready vector file and send a payment link to your email within 1 business day.';
-      document.getElementById('finalSummary').innerHTML = `
-        <h3>Vector File Request</h3>
-        <div class="summary-row"><span class="label">Designs</span><span class="val">${selectedDesignIdxs.length}</span></div>
-        <div class="summary-row"><span class="label">Price</span><span class="val">$25 each</span></div>
-        <div class="summary-row"><span class="label">Email</span><span class="val">${document.getElementById('userEmail').value.trim()}</span></div>`;
-      goStep(5);
-    } catch(e) { alert('Request failed. Call 619-800-0949.'); }
-    btn.disabled=false; btn.textContent='Pay & Download Vector';
-    return;
-  }
-  try {
-    const res = await fetch(`${API_BASE}/api/create-checkout`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ tier:'detailed', designUrl: d.remoteUrl || (d.url ? `${API_BASE}${d.url}` : ''), email:document.getElementById('userEmail').value.trim() })
-    });
-    const data = await res.json();
-    if(data.url) window.open(data.url,'_blank');
-    else alert(data.error||'Checkout failed. Call 619-800-0949.');
-  } catch(e) { alert('Payment error. Call 619-800-0949.'); }
-  btn.disabled=false; btn.textContent='Pay & Download Vector';
-}
-
-// PATH 2: Save for Later (login required)
-async function handleSaveLogin() {
-  const btn = document.getElementById('saveLoginBtn');
-  const email = document.getElementById('saveEmail').value.trim();
-  const pass = document.getElementById('savePassword').value;
-  if(!email||!pass) { alert('Please enter your email and password.'); return; }
-  btn.disabled=true; btn.textContent='Saving...';
-  try {
-    const designUrls = selectedDesignIdxs.map(i => designs[i]?.remoteUrl || designs[i]?.url || '');
-    await fetch(`${API_BASE}/api/submit`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name: document.getElementById('userName').value.trim(),
-        email: document.getElementById('userEmail').value.trim(),
-        business: document.getElementById('userBusiness').value.trim(),
-        text: document.getElementById('designText').value.trim(),
-        desc: document.getElementById('designDesc').value.trim(),
-        service: selectedService?.id||'',
-        serviceName: selectedService?.name||'',
-        styles: selectedStyles,
-        locations: selectedLocations,
-        designUrls: designUrls,
-        selectedDesigns: selectedDesignIdxs,
-        action: 'save_for_later',
-        saveEmail: email
-      })
-    });
-    document.getElementById('confirmTitle').textContent = 'Designs Saved!';
-    document.getElementById('confirmMsg').textContent = 'Your designs have been saved to your account. Log in at merchysmarket.com to access them anytime.';
-    document.getElementById('finalSummary').innerHTML = `
-      <h3>Saved Designs</h3>
-      <div class="summary-row"><span class="label">Designs saved</span><span class="val">${selectedDesignIdxs.length}</span></div>
-      <div class="summary-row"><span class="label">Account</span><span class="val">${email}</span></div>
-      <div class="summary-row"><span class="label">Service</span><span class="val">${selectedService?.name||'-'}</span></div>
-    `;
-    goStep(5);
-  } catch(e) {
-    alert('Save failed. Try again or call 619-800-0949.');
-    btn.disabled=false; btn.textContent='Log In & Save';
-  }
-}
-
-// PATH 3: Add to Product
-function selectProductType(type) {
-  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  // Submit design request with product type, then redirect to product page
-  const designUrls = selectedDesignIdxs.map(i => designs[i]?.remoteUrl || designs[i]?.url || '');
-  fetch(`${API_BASE}/api/submit`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      name: document.getElementById('userName').value.trim(),
-      email: document.getElementById('userEmail').value.trim(),
-      business: document.getElementById('userBusiness').value.trim(),
-      text: document.getElementById('designText').value.trim(),
-      desc: document.getElementById('designDesc').value.trim(),
-      service: selectedService?.id||'',
-      serviceName: selectedService?.name||'',
-      styles: selectedStyles,
-      locations: selectedLocations,
-      designUrls: designUrls,
-      selectedDesigns: selectedDesignIdxs,
-      action: 'add_to_product',
-      productType: type
-    })
-  }).catch(console.error);
-
-  // Show redirect state then go to product page
-  document.getElementById('productTypeGrid').style.display = 'none';
-  document.getElementById('productRedirect').style.display = 'block';
-  const productUrls = {
-    tshirts: 'https://merchysmarket.com/collections/t-shirts',
-    hoodies: 'https://merchysmarket.com/collections/hoodies-sweatshirts',
-    polos: 'https://merchysmarket.com/collections/polos-uniforms',
-    hats: 'https://merchysmarket.com/collections/hats-caps',
-    bags: 'https://merchysmarket.com/collections/bags-totes',
-    jackets: 'https://merchysmarket.com/collections/jackets-outerwear',
-    accessories: 'https://merchysmarket.com/collections/accessories',
-    other: 'https://merchysmarket.com/collections/all'
-  };
-  setTimeout(() => {
-    window.open(productUrls[type] || productUrls.other, '_blank');
-    document.getElementById('productTypeGrid').style.display = 'grid';
-    document.getElementById('productRedirect').style.display = 'none';
-    document.getElementById('confirmTitle').textContent = 'Design Request Sent!';
-    document.getElementById('confirmMsg').textContent = 'Browse products in the new tab. Our team will match your design to your selected product.';
-    document.getElementById('finalSummary').innerHTML = `
-      <h3>Your Request</h3>
-      <div class="summary-row"><span class="label">Product type</span><span class="val">${type}</span></div>
-      <div class="summary-row"><span class="label">Designs selected</span><span class="val">${selectedDesignIdxs.length}</span></div>
-      <div class="summary-row"><span class="label">Service</span><span class="val">${selectedService?.name||'-'}</span></div>
-    `;
-    goStep(5);
-  }, 1500);
-}
-
-init();
 </script>
 </body>
 </html>
@@ -1284,14 +909,28 @@ init();
 
 <script>
 (function(){
-  var panel=document.getElementById('panel'), fab=document.getElementById('fab'), label=document.getElementById('fabLabel');
-  var frame=document.getElementById('widgetFrame'), loaded=false, open=false;
-  function load(){ if(loaded) return; loaded=true; frame.srcdoc=document.getElementById('widgetTpl').innerHTML; }
-  function setOpen(v){ open=v; panel.hidden=!v; fab.setAttribute('aria-expanded',String(v)); label.textContent=v?'Close':'Design Studio'; if(v) load(); }
-  fab.addEventListener('click',function(){ setOpen(!open); });
-  document.getElementById('openCta').addEventListener('click',function(){ setOpen(true); });
-  window.addEventListener('message',function(e){ if(e.data==='merchys-close'||(e.data&&e.data.type==='close-widget')) setOpen(false); });
-  // Open on first visit so the demo is visible without hunting for the button
-  setTimeout(function(){ setOpen(true); }, 400);
+  var overlay=null, frame=null, pending=null;
+  function open(client, context){
+    pending={client:client, context:context};
+    overlay=document.createElement('div'); overlay.className='overlay';
+    var box=document.createElement('div'); box.className='box';
+    frame=document.createElement('iframe'); frame.title="Merchy's Design Studio";
+    frame.srcdoc=document.getElementById('studioTpl').innerHTML;
+    box.appendChild(frame); overlay.appendChild(box); document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) close(); });
+    frame.onload=function(){ setTimeout(send,50); };
+  }
+  function send(){ if(frame&&pending) frame.contentWindow.postMessage({type:'merchy-studio-init', client:pending.client, context:pending.context}, '*'); }
+  function close(){ if(overlay){ overlay.remove(); overlay=null; frame=null; } }
+  document.querySelectorAll('.open').forEach(function(b){ b.addEventListener('click', function(){
+    var parse=function(v){ try{ return JSON.parse(v||'{}'); }catch(e){ return {}; } };
+    open(parse(b.getAttribute('data-client')), parse(b.getAttribute('data-context')));
+  }); });
+  window.addEventListener('message', function(e){
+    var d=e.data||{};
+    if(d.type==='merchy-studio-ready') send();
+    if(d.type==='merchy-studio-close') close();
+    if(d.type==='merchy-studio-complete'){ var r=document.getElementById('result'); r.hidden=false; document.getElementById('resultOut').textContent=JSON.stringify({sessionId:d.sessionId, selections:d.selections.map(function(s){ return {style:s.styleName, image:s.label, checks:s.checks, notes:s.notes}; })}, null, 2); }
+  });
 })();
 </script>

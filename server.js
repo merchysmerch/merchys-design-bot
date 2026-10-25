@@ -975,9 +975,13 @@ app.get('/api/vectorize-success', async (req, res) => {
 });
 
 
+// ---- Design Studio v2 (art director plugin) ----
+require('./routes/studio')(app, { asanaFetch, searchProjectByPO, getProjectTasks, postDesignNotes, ASANA_WORKSPACE, ASANA_TOKEN, emailTransporter, uploadsDir, escapeHtml });
+
 // ---- Serve frontend from /public ----
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'widget.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'studio.html')));
+app.get('/legacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'widget.html')));
 
 // ---- Start server ----
 app.listen(PORT, () => {
@@ -985,5 +989,6 @@ app.listen(PORT, () => {
   console.log(`  Asana:   ${ASANA_TOKEN ? 'Connected' : 'Not configured'}`);
   console.log(`  Recraft: ${RECRAFT_API_KEY ? 'Connected' : 'Not configured (using placeholders)'}`);
   console.log(`  Email:   ${emailTransporter ? 'Connected' : 'Not configured'}`);
-  console.log(`  Stripe:  ${stripe ? 'Connected' : 'Not configured (vector paywall disabled)'}\n`);
+  console.log(`  Stripe:  ${stripe ? 'Connected' : 'Not configured (vector paywall disabled)'}`);
+  console.log(`  Director: ${process.env.ANTHROPIC_API_KEY ? 'Anthropic model' : 'Built-in question bank (set ANTHROPIC_API_KEY)'}\n`);
 });

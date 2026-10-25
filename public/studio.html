@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merchy's Design Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Poppins',sans-serif;background:#fff;color:#111;display:flex;flex-direction:column;overflow:hidden}
+.header{background:#111;color:#d4a017;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #d4a017;flex-shrink:0}
+.header h1{font-size:16px;font-weight:700;letter-spacing:1px}
+.header .sub{font-size:12px;color:#aaa;margin-top:2px}
+.header .sub b{color:#eee;font-weight:600}
+.close-btn{background:none;border:none;color:#999;font-size:24px;cursor:pointer;padding:4px 8px;line-height:1}
+.close-btn:hover{color:#fff}
+.progress{display:flex;gap:4px;padding:10px 20px 0;flex-shrink:0}
+.progress span{flex:1;height:4px;border-radius:2px;background:#eee}
+.progress span.on{background:#d4a017}.progress span.done{background:#111}
+.content{padding:18px 20px 28px;overflow-y:auto;flex:1}
+.stage{display:none}.stage.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.lead{font-size:13px;color:#777;margin-bottom:16px;line-height:1.5}
+.btn{display:block;width:100%;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;margin-top:10px}
+.btn-primary{background:#d4a017;color:#111}.btn-primary:hover{background:#b8860b}
+.btn-primary:disabled{opacity:.45;cursor:default}
+.btn-dark{background:#111;color:#d4a017}.btn-dark:hover{background:#222}
+.btn-back{background:#fff;color:#111;border:2px solid #e5e5e5}.btn-back:hover{border-color:#d4a017}
+.btn-ghost{background:none;color:#888;font-weight:500;font-size:13px;padding:8px}
+.row{display:flex;gap:10px}.row .btn{margin-top:10px}
+/* questions */
+.q{margin-bottom:18px}
+.q label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;line-height:1.4}
+.q .why{font-size:11px;color:#999;font-weight:400;display:block;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border:2px solid #e5e5e5;border-radius:20px;font-size:13px;cursor:pointer;background:#fff;transition:all .12s;user-select:none}
+.chip:hover{border-color:#d4a017}.chip.on{background:#111;color:#d4a017;border-color:#111}
+textarea,input[type=text]{width:100%;padding:11px 13px;border:2px solid #e5e5e5;border-radius:10px;font-size:14px;font-family:inherit;transition:border .15s;background:#fff}
+textarea{resize:vertical;min-height:64px}
+textarea:focus,input:focus{outline:none;border-color:#d4a017}
+.q textarea{margin-top:8px}
+.brief-box{background:#fffdf5;border:1px solid #f0d78a;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5c00;margin-bottom:14px;line-height:1.5}
+/* style wall */
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
+.style-card{border:2px solid #eee;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .12s;position:relative}
+.style-card:hover{border-color:#d4a017}
+.style-card.on{border-color:#d4a017;background:#fffdf5}
+.style-card.on::after{content:"\2713";position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:50%;background:#d4a017;color:#111;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.style-card svg{width:38px;height:38px;stroke:#d4a017;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px}
+.style-card .n{font-size:12px;font-weight:600;line-height:1.2}
+.style-card .h{font-size:10px;color:#999;margin-top:3px;line-height:1.2}
+.counter{font-size:12px;color:#888;text-align:right;margin-bottom:6px}
+/* concepts */
+.concepts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.concept{border:2px solid #eee;border-radius:12px;overflow:hidden;cursor:pointer;transition:all .12s;position:relative;background:#fff}
+.concept:hover{border-color:#d4a017}.concept.on{border-color:#d4a017;box-shadow:0 0 0 2px #d4a017}
+.concept .img{aspect-ratio:1;background:#f6f6f6;display:flex;align-items:center;justify-content:center;position:relative}
+.concept img{width:100%;height:100%;object-fit:cover;display:block}
+.concept .t{padding:8px 10px;font-size:12px;font-weight:600;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.concept .t small{color:#aaa;font-weight:400}
+.concept .badge{position:absolute;top:8px;left:8px;background:#111;color:#d4a017;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.5px}
+.concept.on .badge{background:#d4a017;color:#111}
+.concept .num{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid #111;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.concept.on .num{background:#d4a017;border-color:#d4a017}
+.spinner{width:28px;height:28px;border:3px solid #eee;border-top-color:#d4a017;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status{font-size:11px;color:#999}
+.fail{font-size:11px;color:#c00;padding:8px;text-align:center}
+/* refine stage */
+.refine-head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.refine-head img{width:110px;height:110px;border-radius:10px;border:2px solid #d4a017;object-fit:cover;flex-shrink:0}
+.refine-head .meta{font-size:13px;color:#666}.refine-head .meta b{display:block;color:#111;font-size:16px}
+.queue{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.queue span{font-size:11px;padding:4px 10px;border-radius:12px;background:#f3f3f3;color:#777}
+.queue span.now{background:#111;color:#d4a017}.queue span.done{background:#e8f5e9;color:#2e7d32}.queue span.skip{text-decoration:line-through}
+/* board */
+.board-section{margin-bottom:22px}
+.board-section h3{font-size:15px;font-weight:700;padding:8px 12px;background:#111;color:#d4a017;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.board-section h3 small{font-size:11px;color:#aaa;font-weight:500}
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.note-card{border:2px solid #d4a017;border-radius:12px;padding:12px;margin:10px 0;background:#fffdf5}
+.note-card .nh{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.note-card .nh img{width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid #ddd}
+.note-card .nh b{font-size:13px}
+.note-card .chips{margin-bottom:8px}
+.note-card .chip{font-size:12px;padding:6px 11px}
+.dislike{margin-top:16px;padding:14px;border:2px dashed #e5e5e5;border-radius:12px}
+.dislike label{font-size:14px;font-weight:600;display:block;margin-bottom:6px}
+/* schedule */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.slot{padding:10px;border:2px solid #e5e5e5;border-radius:10px;font-size:12px;text-align:center;cursor:pointer}
+.slot:hover{border-color:#d4a017}.slot.on{background:#111;color:#d4a017;border-color:#111}
+/* done */
+.done-wrap{text-align:center;padding:16px 0}
+.done-wrap .check{width:60px;height:60px;border-radius:50%;background:#d4a017;color:#111;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.summary{background:#f8f8f8;border-radius:12px;padding:14px;text-align:left;margin-top:14px;font-size:13px}
+.summary pre{white-space:pre-wrap;font-family:inherit;font-size:12px;color:#444;line-height:1.5}
+.lib-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.lib-strip img{width:64px;height:64px;border-radius:8px;border:2px solid #d4a017;object-fit:cover}
+.err{color:#c00;font-size:13px;margin-top:8px}
+@media (max-width:480px){.content{padding:14px 14px 24px}.style-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>DESIGN STUDIO</h1><div class="sub" id="subline">Loading...</div></div>
+  <button class="close-btn" onclick="closeStudio()" title="Close">&times;</button>
+</div>
+<div class="progress" id="progress"></div>
+<div class="content" id="content">
+
+  <!-- 0: context (only shown when the host did not provide it) -->
+  <div class="stage" id="st0">
+    <h2>What are we designing?</h2>
+    <p class="lead">Normally the website passes this in. Pick one to run the studio directly.</p>
+    <div class="q"><label>Design for</label><div class="chips" id="ctxChips"></div></div>
+    <div class="q" id="ctxProductWrap" style="display:none"><label>Product (be specific: size, color, item)</label><input type="text" id="ctxProduct" placeholder="e.g. 6 ft x 3 ft outdoor banner"></div>
+    <div class="q"><label>Business name</label><input type="text" id="ctxBusiness" placeholder="Business or event name"></div>
+    <button class="btn btn-primary" onclick="startFromContext()">Start</button>
+  </div>
+
+  <!-- 1: interview -->
+  <div class="stage" id="st1">
+    <h2 id="qTitle">A few quick questions</h2>
+    <p class="lead" id="qLead">Answer what you can. Skip anything that does not apply.</p>
+    <div class="brief-box" id="briefBox" style="display:none"></div>
+    <div id="qList"></div>
+    <button class="btn btn-primary" id="qNext" onclick="submitAnswers()">Continue</button>
+    <button class="btn btn-ghost" onclick="finishBrief()">I have given enough, show me styles</button>
+  </div>
+
+  <!-- 2: style wall -->
+  <div class="stage" id="st2">
+    <h2>Pick every style you want to see</h2>
+    <p class="lead">We make one concept of your design in each style you choose. Pick as many as you like.</p>
+    <div class="counter" id="styleCounter">0 selected</div>
+    <div class="style-grid" id="styleGrid"></div>
+    <button class="btn btn-primary" id="genBtn" onclick="generateConcepts()" disabled>Generate concepts</button>
+    <button class="btn btn-back" onclick="go(1)">Back to questions</button>
+  </div>
+
+  <!-- 3: concepts -->
+  <div class="stage" id="st3">
+    <h2>Your concepts</h2>
+    <p class="lead" id="conceptLead">Concepts appear one at a time. Tap the ones you like.</p>
+    <div class="concepts" id="conceptGrid"></div>
+    <button class="btn btn-primary" id="likeBtn" onclick="continueToRefine()" disabled>Continue with 0 styles</button>
+    <button class="btn btn-back" onclick="go(2)">Add or remove styles</button>
+  </div>
+
+  <!-- 4: refine loop -->
+  <div class="stage" id="st4">
+    <div class="queue" id="refineQueue"></div>
+    <div class="refine-head"><img id="refImg" alt=""><div class="meta"><b id="refName"></b><span id="refPos"></span><br><span>Answer a few questions and we generate 5 refinements of this one while you move on.</span></div></div>
+    <div id="refQList"><div class="spinner" style="margin:20px auto"></div></div>
+    <div class="q"><label>Notes for this style</label><textarea id="refNotes" placeholder="Anything to keep, change, add, or remove"></textarea></div>
+    <button class="btn btn-primary" onclick="submitRefine(false)">Generate 5 refinements</button>
+    <button class="btn btn-back" onclick="submitRefine(true)">Skip this style</button>
+  </div>
+
+  <!-- 5: review board -->
+  <div class="stage" id="st5">
+    <h2>Review board</h2>
+    <p class="lead">Select every design you want the design team to work from. Each selection gets its own notes.</p>
+    <div id="boardWait" class="status" style="margin-bottom:10px"></div>
+    <div id="board"></div>
+    <div class="dislike"><label>What do you NOT want?</label><textarea id="dislikes" placeholder="Colors, symbols, styles, or ideas the team should stay away from"></textarea></div>
+    <button class="btn btn-primary" id="boardBtn" onclick="submitBoard()" disabled>Save selections (0)</button>
+  </div>
+
+  <!-- 6: schedule -->
+  <div class="stage" id="st6">
+    <h2>Talk to your artist</h2>
+    <p class="lead">Book a short call with the artist who will finish your designs. They will have your selections and notes in front of them.</p>
+    <div class="q"><label>This call is about</label><div class="chips" id="scopeChips"></div></div>
+    <div id="schedBody"><div class="spinner" style="margin:20px auto"></div></div>
+    <button class="btn btn-ghost" onclick="skipSchedule()">Skip for now, email me instead</button>
+  </div>
+
+  <!-- 7: done -->
+  <div class="stage" id="st7">
+    <div class="done-wrap">
+      <div class="check">&#10003;</div>
+      <h2>Sent to the design team</h2>
+      <p class="lead" id="doneLead"></p>
+      <div class="lib-strip" id="libStrip"></div>
+      <div class="summary"><pre id="briefOut"></pre></div>
+      <button class="btn btn-dark" onclick="closeStudio()">Done</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = (window.MERCHY_API_URL) || window.location.origin;
+const qs = new URLSearchParams(location.search);
+let caps = null, session = null, hostInit = null, pollTimer = null;
+let currentQuestions = [], selectedStyles = new Set(), likedStyles = new Set();
+let refineOrder = [], refineIdx = 0, boardSel = {}, scope = 'All designs', slotPick = null, schedInfo = null;
+const STAGES = ['Context', 'Brief', 'Styles', 'Concepts', 'Refine', 'Review', 'Schedule', 'Done'];
+const DEFAULT_LOCATIONS = [];
+
+const STYLE_ICONS = {
+  badge: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M14 14L24 8L34 14" fill="none"/><line x1="16" y1="28" x2="32" y2="28"/></svg>',
+  icon_logo: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="18" stroke-dasharray="6 4"/></svg>',
+  typography: '<svg viewBox="0 0 48 48"><path d="M10 12H38"/><path d="M24 12V38"/><path d="M16 38H32"/><path d="M14 12V18"/><path d="M34 12V18"/></svg>',
+  mascot: '<svg viewBox="0 0 48 48"><circle cx="24" cy="18" r="12"/><circle cx="20" cy="16" r="2" fill="#d4a017"/><circle cx="28" cy="16" r="2" fill="#d4a017"/><path d="M20 22C20 22 24 26 28 22"/><path d="M16 30C16 30 24 40 32 30"/></svg>',
+  scene: '<svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="32" rx="2"/><path d="M6 32L18 22L28 30L38 22L42 28"/><circle cx="14" cy="16" r="3"/></svg>',
+  badge_scene: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M12 30L20 22L28 28L36 22"/><circle cx="16" cy="18" r="2"/><path d="M14 12L24 8L34 12"/></svg>',
+  diagram: '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="2"/><line x1="8" y1="20" x2="40" y2="20"/><line x1="8" y1="32" x2="40" y2="32"/><line x1="24" y1="8" x2="24" y2="40"/></svg>',
+  vintage_script: '<svg viewBox="0 0 48 48"><path d="M10 28C10 28 16 16 24 24C32 32 38 20 38 20"/><line x1="8" y1="36" x2="40" y2="36"/><circle cx="24" cy="12" r="3"/></svg>',
+  streetwear: '<svg viewBox="0 0 48 48"><path d="M10 38L24 8L38 38"/><line x1="14" y1="30" x2="34" y2="30"/><rect x="18" y="18" width="12" height="8" rx="1"/></svg>',
+  trade_tools: '<svg viewBox="0 0 48 48"><path d="M14 8L34 40"/><path d="M34 8L14 40"/><circle cx="24" cy="24" r="6"/></svg>',
+  corporate_seal: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><line x1="18" y1="22" x2="30" y2="22"/><line x1="20" y1="28" x2="28" y2="28"/></svg>',
+  pattern: '<svg viewBox="0 0 48 48"><circle cx="12" cy="12" r="4"/><circle cx="24" cy="12" r="4"/><circle cx="36" cy="12" r="4"/><circle cx="12" cy="24" r="4"/><circle cx="24" cy="24" r="4"/><circle cx="36" cy="24" r="4"/><circle cx="12" cy="36" r="4"/><circle cx="24" cy="36" r="4"/><circle cx="36" cy="36" r="4"/></svg>',
+  monogram: '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="4"/><text x="24" y="32" text-anchor="middle" font-size="24" font-weight="700" fill="none" stroke="#d4a017" stroke-width="1.5">M</text></svg>',
+  collage: '<svg viewBox="0 0 48 48"><rect x="6" y="6" width="16" height="16" rx="2"/><rect x="26" y="6" width="16" height="10" rx="2"/><rect x="26" y="20" width="16" height="22" rx="2"/><rect x="6" y="26" width="16" height="16" rx="2"/></svg>',
+  product_focus: '<svg viewBox="0 0 48 48"><path d="M14 38V18L24 10L34 18V38Z"/><rect x="20" y="28" width="8" height="10"/><circle cx="24" cy="22" r="3"/></svg>',
+  humor: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="18" cy="20" r="2" fill="#d4a017"/><circle cx="30" cy="20" r="2" fill="#d4a017"/><path d="M16 30C16 30 20 36 24 36C28 36 32 30 32 30"/></svg>',
+  heritage: '<svg viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="2"/><line x1="14" y1="16" x2="34" y2="16"/><text x="24" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="none" stroke="#d4a017" stroke-width="1">1985</text><line x1="14" y1="36" x2="34" y2="36"/></svg>',
+  line_art: '<svg viewBox="0 0 48 48"><path d="M24 8C14 8 8 16 8 24C8 32 14 40 24 40C34 40 40 32 40 24" fill="none"/><path d="M32 12L36 8L40 12"/><line x1="24" y1="20" x2="24" y2="32"/><line x1="18" y1="26" x2="30" y2="26"/></svg>',
+  patch_first: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-width="3"/><circle cx="24" cy="24" r="14" stroke-dasharray="5 3"/><path d="M18 22L24 16L30 22"/><line x1="16" y1="28" x2="32" y2="28" stroke-width="2"/></svg>',
+  event_series: '<svg viewBox="0 0 48 48"><rect x="8" y="10" width="24" height="28" rx="2"/><rect x="16" y="14" width="24" height="28" rx="2"/><line x1="22" y1="22" x2="34" y2="22"/><line x1="22" y1="28" x2="32" y2="28"/><line x1="22" y1="34" x2="30" y2="34"/></svg>'
+};
+const STYLE_HINTS = { badge:'Emblem with arc text', icon_logo:'One strong symbol', typography:'Lettering is the design', mascot:'Illustrated character', scene:'Full illustration', badge_scene:'Scene inside a badge', diagram:'Labeled technical layout', vintage_script:'Retro script', streetwear:'Bold modern graphic', trade_tools:'Crossed tools', corporate_seal:'Polished emblem', pattern:'Repeating icons', monogram:'Big initials', collage:'Layered elements', product_focus:'The product as hero', humor:'Punchline visual', heritage:'Est. date, classic', line_art:'Clean single line', patch_first:'Built to stitch', event_series:'Annual template' };
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const imgSrc = im => im ? (im.remoteUrl || (im.url?.startsWith('/') ? API_BASE + im.url : im.url)) : '';
+async function api(path, opts) {
+  const r = await fetch(API_BASE + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || ('Server error ' + r.status));
+  return d;
+}
+function go(n) {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  $('st' + n).classList.add('active');
+  $('progress').innerHTML = STAGES.slice(1).map((_, i) => `<span class="${i + 1 < n ? 'done' : i + 1 === n ? 'on' : ''}"></span>`).join('');
+  $('content').scrollTop = 0;
+  const c = session?.client || {}; const ctx = session?.context || {};
+  $('subline').innerHTML = `${STAGES[n]} ${n > 0 ? '' : ''}${c.business ? '&middot; <b>' + esc(c.business) + '</b>' : ''}${ctx.product ? ' &middot; ' + esc(ctx.product) : (ctx.mode === 'logo' ? ' &middot; Logo' : '')}`;
+}
+function closeStudio() { parent.postMessage({ type: 'merchy-studio-close', sessionId: session?.id }, '*'); }
+
+// ---------- boot ----------
+window.addEventListener('message', e => { if (e.data && e.data.type === 'merchy-studio-init') { hostInit = e.data; boot(); } });
+parent.postMessage({ type: 'merchy-studio-ready' }, '*');
+(async function init() {
+  caps = await api('/api/studio/capabilities');
+  renderStyleWall();
+  $('ctxChips').innerHTML = ['Logo / artwork', ...caps.productTrees.map(t => t.label)].map(l => `<div class="chip" onclick="pickCtx(this)">${esc(l)}</div>`).join('');
+  if (qs.get('demo') || qs.get('standalone')) { setTimeout(() => { if (!hostInit) { go(0); $('subline').textContent = 'Standalone demo'; } }, 300); }
+  else setTimeout(() => { if (!hostInit && !session) { go(0); $('subline').textContent = 'No host context received'; } }, 1500);
+})();
+let ctxPick = null;
+function pickCtx(el) { document.querySelectorAll('#ctxChips .chip').forEach(c => c.classList.remove('on')); el.classList.add('on'); ctxPick = el.textContent; $('ctxProductWrap').style.display = ctxPick === 'Logo / artwork' ? 'none' : 'block'; }
+async function startFromContext() {
+  const business = $('ctxBusiness').value.trim() || 'Demo Business';
+  const product = ctxPick && ctxPick !== 'Logo / artwork' ? ($('ctxProduct').value.trim() || ctxPick) : null;
+  hostInit = { client: { id: 'demo-' + business.toLowerCase().replace(/\W+/g, '-'), name: 'Demo Client', email: '', business }, context: product ? { mode: 'product', product } : { mode: 'logo' } };
+  boot();
+}
+async function boot() {
+  if (session) return;
+  try {
+    const d = await api('/api/studio/session', { method: 'POST', body: JSON.stringify({ client: hostInit.client || {}, context: hostInit.context || {} }) });
+    session = d.session;
+    parent.postMessage({ type: 'merchy-studio-session', sessionId: session.id }, '*');
+    go(1); await loadQuestions();
+  } catch (e) { $('subline').textContent = 'Could not start: ' + e.message; }
+}
+
+// ---------- stage 1: interview ----------
+async function loadQuestions(answers) {
+  $('qList').innerHTML = '<div class="spinner" style="margin:20px auto"></div>'; $('qNext').disabled = true;
+  try {
+    const d = await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: answers || {} }) });
+    session = d.session;
+    if (d.session.brief.summary) { $('briefBox').style.display = 'block'; $('briefBox').textContent = 'Direction so far: ' + d.session.brief.summary; }
+    if (d.done || !d.questions.length) { go(2); return; }
+    renderQuestions(d.questions, 'qList');
+    $('qNext').disabled = false;
+  } catch (e) { $('qList').innerHTML = `<p class="err">${esc(e.message)}</p>`; $('qNext').disabled = false; }
+}
+function renderQuestions(list, targetId) {
+  currentQuestions = list;
+  $(targetId).innerHTML = list.map(q => {
+    const chips = (q.type === 'chips' || q.type === 'chips+text') ? `<div class="chips" data-q="${esc(q.id)}" data-multi="${q.multi ? 1 : 0}">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>` : '';
+    const text = (q.type === 'text' || q.type === 'chips+text') ? `<textarea data-q="${esc(q.id)}" placeholder="${q.type === 'chips+text' ? 'Or type your own' : 'Type here'}"></textarea>` : '';
+    return `<div class="q"><label>${esc(q.q)}${q.why ? `<span class="why">${esc(q.why)}</span>` : ''}</label>${chips}${text}</div>`;
+  }).join('');
+}
+function toggleChip(el) {
+  const grp = el.parentElement; const multi = grp.dataset.multi === '1';
+  if (!multi) grp.querySelectorAll('.chip').forEach(c => { if (c !== el) c.classList.remove('on'); });
+  el.classList.toggle('on');
+}
+function collectAnswers(targetId) {
+  const out = {};
+  document.querySelectorAll(`#${targetId} .chips[data-q]`).forEach(g => {
+    const on = [...g.querySelectorAll('.chip.on')].map(c => c.textContent);
+    if (on.length) out[g.dataset.q] = g.dataset.multi === '1' ? on : on[0];
+  });
+  document.querySelectorAll(`#${targetId} textarea[data-q]`).forEach(t => {
+    const v = t.value.trim(); if (!v) return;
+    const prev = out[t.dataset.q];
+    out[t.dataset.q] = prev ? (Array.isArray(prev) ? [...prev, v] : prev + '; ' + v) : v;
+  });
+  // unanswered questions are recorded as skipped so they are not asked again
+  currentQuestions.forEach(q => { if (!(q.id in out)) out[q.id] = ''; });
+  return out;
+}
+async function submitAnswers() { await loadQuestions(collectAnswers('qList')); }
+async function finishBrief() {
+  const a = collectAnswers('qList');
+  await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: a, finish: true }) });
+  go(2);
+}
+
+// ---------- stage 2: style wall ----------
+function renderStyleWall() {
+  $('styleGrid').innerHTML = caps.styles.map(s => `<div class="style-card ${selectedStyles.has(s.id) ? 'on' : ''}" onclick="toggleStyle('${s.id}',this)">${STYLE_ICONS[s.id] || ''}<div class="n">${esc(s.name)}</div><div class="h">${esc(STYLE_HINTS[s.id] || '')}</div></div>`).join('');
+  updateStyleCount();
+}
+function toggleStyle(id, el) { selectedStyles.has(id) ? selectedStyles.delete(id) : selectedStyles.add(id); el.classList.toggle('on'); updateStyleCount(); }
+function updateStyleCount() { const n = selectedStyles.size; $('styleCounter').textContent = `${n} of ${caps.styles.length} selected`; $('genBtn').disabled = !n; $('genBtn').textContent = n ? `Generate ${n} concept${n > 1 ? 's' : ''}` : 'Generate concepts'; }
+async function generateConcepts() {
+  $('genBtn').disabled = true;
+  const d = await api(`/api/studio/session/${session.id}/styles`, { method: 'POST', body: JSON.stringify({ styles: [...selectedStyles] }) });
+  session = d.session; go(3); renderConcepts(); startPolling(renderConcepts);
+  $('genBtn').disabled = false;
+}
+
+// ---------- polling ----------
+function startPolling(fn) {
+  stopPolling();
+  pollTimer = setInterval(async () => { try { const d = await api(`/api/studio/session/${session.id}`); session = d.session; fn(); } catch (e) {} }, 1500);
+}
+function stopPolling() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+
+// ---------- stage 3: concepts ----------
+function renderConcepts() {
+  const sts = session.styles;
+  $('conceptGrid').innerHTML = sts.map(st => {
+    const on = likedStyles.has(st.id);
+    let inner;
+    if (st.status === 'ready' && st.image) inner = `<img src="${esc(imgSrc(st.image))}" alt="${esc(st.name)}">`;
+    else if (st.status === 'failed') inner = `<div class="fail">Failed<br><button class="btn btn-ghost" onclick="event.stopPropagation();retryStyle('${st.id}')">Retry</button></div>`;
+    else inner = `<div class="spinner"></div>`;
+    return `<div class="concept ${on ? 'on' : ''}" onclick="toggleLike('${st.id}')" id="c-${st.id}"><div class="img">${inner}${st.status === 'generating' ? '<span class="badge">DRAWING</span>' : (on ? '<span class="badge">LIKED</span>' : '')}</div><div class="t"><span>${esc(st.name)}</span><small>${st.status === 'ready' ? '' : st.status}</small></div></div>`;
+  }).join('');
+  const pending = sts.filter(s => s.status === 'queued' || s.status === 'generating').length;
+  const ready = sts.filter(s => s.status === 'ready').length;
+  $('conceptLead').textContent = pending ? `${ready} of ${sts.length} ready. The rest are drawing now. Tap the ones you like as they come in.` : `All ${sts.length} ready. Tap the ones you like.`;
+  if (!pending) stopPolling();
+  updateLikeBtn();
+}
+function toggleLike(id) { const st = session.styles.find(s => s.id === id); if (!st || st.status !== 'ready') return; likedStyles.has(id) ? likedStyles.delete(id) : likedStyles.add(id); renderConcepts(); }
+function updateLikeBtn() { const n = likedStyles.size; $('likeBtn').disabled = !n; $('likeBtn').textContent = n ? `Continue with ${n} style${n > 1 ? 's' : ''}` : 'Continue with 0 styles'; }
+async function retryStyle(id) { const d = await api(`/api/studio/session/${session.id}/style/${id}/retry`, { method: 'POST', body: '{}' }); session = d.session; renderConcepts(); startPolling(renderConcepts); }
+async function continueToRefine() {
+  stopPolling();
+  const d = await api(`/api/studio/session/${session.id}/like`, { method: 'POST', body: JSON.stringify({ liked: [...likedStyles] }) });
+  session = d.session;
+  refineOrder = session.styles.filter(s => s.liked).map(s => s.id); refineIdx = 0;
+  go(4); loadRefine();
+}
+
+// ---------- stage 4: refine loop ----------
+async function loadRefine() {
+  if (refineIdx >= refineOrder.length) { go(5); renderBoard(); startPolling(renderBoard); return; }
+  const id = refineOrder[refineIdx]; const st = session.styles.find(s => s.id === id);
+  $('refineQueue').innerHTML = refineOrder.map((rid, i) => { const s = session.styles.find(x => x.id === rid); return `<span class="${i === refineIdx ? 'now' : i < refineIdx ? (s.skipped ? 'skip' : 'done') : ''}">${esc(s.name)}</span>`; }).join('');
+  $('refImg').src = imgSrc(st.image); $('refName').textContent = st.name; $('refPos').textContent = `Style ${refineIdx + 1} of ${refineOrder.length}`;
+  $('refNotes').value = '';
+  $('refQList').innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try { const d = await api(`/api/studio/session/${session.id}/style/${id}/questions`); renderQuestions(d.questions, 'refQList'); }
+  catch (e) { $('refQList').innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+}
+async function submitRefine(skip) {
+  const id = refineOrder[refineIdx];
+  const body = skip ? { skip: true } : { answers: collectAnswers('refQList'), notes: $('refNotes').value.trim() };
+  const d = await api(`/api/studio/session/${session.id}/style/${id}/refine`, { method: 'POST', body: JSON.stringify(body) });
+  session = d.session; refineIdx++; loadRefine();
+}
+
+// ---------- stage 5: review board ----------
+function renderBoard() {
+  const liked = session.styles.filter(s => s.liked && !s.skipped);
+  const waiting = liked.filter(s => s.refineStatus === 'generating');
+  $('boardWait').textContent = waiting.length ? `Still drawing refinements for: ${waiting.map(s => s.name).join(', ')}. You can start selecting.` : '';
+  if (!waiting.length) stopPolling();
+  $('board').innerHTML = liked.map(st => {
+    const imgs = [{ ...st.image, label: '#1 Original' }, ...st.refinements.map((r, i) => ({ ...r, label: `#${i + 2}` }))];
+    const pending = st.refineStatus === 'generating' ? [1, 2, 3, 4, 5].map(() => `<div class="concept"><div class="img"><div class="spinner"></div></div></div>`).join('') : '';
+    const failed = st.refineStatus === 'failed' ? `<div class="fail">Refinements failed: ${esc(st.error || '')}</div>` : '';
+    return `<div class="board-section"><h3><span>${esc(st.name)}</span><small>${imgs.length} option${imgs.length > 1 ? 's' : ''}</small></h3>
+      <div class="board-grid">${imgs.map((im, i) => { const key = st.id + ':' + i; const on = !!boardSel[key]; return `<div class="concept ${on ? 'on' : ''}" onclick="toggleBoard('${st.id}',${i})"><div class="img"><img src="${esc(imgSrc(im))}" alt=""><span class="num">${i + 1}</span></div><div class="t"><span>${esc(im.label)}</span></div></div>`; }).join('')}${pending}</div>${failed}
+      ${imgs.map((im, i) => { const key = st.id + ':' + i; const sel = boardSel[key]; if (!sel) return ''; return `<div class="note-card"><div class="nh"><img src="${esc(imgSrc(im))}" alt=""><b>${esc(st.name)} ${esc(im.label)}</b></div>
+        <div class="chips">${caps.finalChecklist.map(c => `<div class="chip ${sel.checks.includes(c) ? 'on' : ''}" onclick="toggleCheck('${key}','${esc(c)}',this)">${esc(c)}</div>`).join('')}</div>
+        <textarea placeholder="What should the artist do with this one? Colors, size, shape, spacing, font, spelling, add or remove." oninput="boardSel['${key}'].notes=this.value">${esc(sel.notes)}</textarea></div>`; }).join('')}
+    </div>`;
+  }).join('');
+  const n = Object.keys(boardSel).length;
+  $('boardBtn').disabled = !n; $('boardBtn').textContent = `Save selections (${n})`;
+}
+function toggleBoard(styleId, i) {
+  const key = styleId + ':' + i;
+  if (boardSel[key]) delete boardSel[key];
+  else { const st = session.styles.find(s => s.id === styleId); const im = i === 0 ? st.image : st.refinements[i - 1]; boardSel[key] = { styleId, idx: i, url: im.url || im.remoteUrl, label: i === 0 ? '#1 Original' : '#' + (i + 1), notes: '', checks: [] }; }
+  renderBoard();
+}
+function toggleCheck(key, c, el) { const arr = boardSel[key].checks; const i = arr.indexOf(c); i > -1 ? arr.splice(i, 1) : arr.push(c); el.classList.toggle('on'); }
+async function submitBoard() {
+  stopPolling();
+  const selections = Object.values(boardSel);
+  $('boardBtn').disabled = true;
+  await api(`/api/studio/session/${session.id}/board`, { method: 'POST', body: JSON.stringify({ selections, dislikes: $('dislikes').value.trim() }) });
+  const d = await api(`/api/studio/session/${session.id}/library`, { method: 'POST', body: JSON.stringify({ items: selections.map(s => ({ styleId: s.styleId, label: s.label, url: s.url })) }) });
+  session = d.session;
+  go(6); loadSchedule();
+}
+
+// ---------- stage 6: schedule ----------
+async function loadSchedule() {
+  const sels = Object.values(boardSel);
+  const opts = ['All designs', ...[...new Set(sels.map(s => session.styles.find(x => x.id === s.styleId)?.name))].filter(Boolean)];
+  $('scopeChips').innerHTML = opts.map((o, i) => `<div class="chip ${i === 0 ? 'on' : ''}" onclick="document.querySelectorAll('#scopeChips .chip').forEach(c=>c.classList.remove('on'));this.classList.add('on');scope=this.textContent">${esc(o)}</div>`).join('');
+  schedInfo = await api(`/api/studio/session/${session.id}/schedule-link`);
+  if (schedInfo.url) {
+    $('schedBody').innerHTML = `<a class="btn btn-primary" style="text-align:center;text-decoration:none" href="${esc(schedInfo.url)}" target="_blank" rel="noopener">Open the booking calendar</a><button class="btn btn-dark" onclick="confirmSchedule(true)">I booked my call</button>`;
+  } else {
+    $('schedBody').innerHTML = `<p class="lead">Pick a time that works (Pacific). The team confirms by email.</p><div class="slots">${schedInfo.slots.map((s, i) => `<div class="slot" onclick="document.querySelectorAll('.slot').forEach(x=>x.classList.remove('on'));this.classList.add('on');slotPick=schedInfo.slots[${i}]">${esc(s.label)}</div>`).join('')}</div><button class="btn btn-primary" onclick="confirmSchedule(false)">Request this time</button>`;
+  }
+}
+async function confirmSchedule(calendly) {
+  if (!calendly && !slotPick) { $('schedBody').insertAdjacentHTML('beforeend', '<p class="err">Pick a time first.</p>'); return; }
+  await api(`/api/studio/session/${session.id}/schedule`, { method: 'POST', body: JSON.stringify({ slot: slotPick, calendlyBooked: calendly, scope }) });
+  finalize();
+}
+async function skipSchedule() { finalize(); }
+
+// ---------- stage 7: finalize ----------
+async function finalize() {
+  go(7); $('doneLead').textContent = 'Sending your selections and notes...';
+  try {
+    const d = await api(`/api/studio/session/${session.id}/finalize`, { method: 'POST', body: '{}' });
+    session = d.session;
+    const n = session.board.selections.length;
+    $('doneLead').textContent = `${n} design${n === 1 ? '' : 's'} saved to your logo library and sent to the design team with your notes.${session.schedule?.slot ? ' Your call request is in.' : ''}`;
+    $('libStrip').innerHTML = session.board.selections.map(s => `<img src="${esc(s.url)}" alt="">`).join('');
+    $('briefOut').textContent = d.brief;
+    parent.postMessage({ type: 'merchy-studio-complete', sessionId: session.id, selections: session.board.selections, libraryIds: session.library, brief: d.brief }, '*');
+  } catch (e) { $('doneLead').textContent = 'Could not send: ' + e.message; }
+}
+</script>
+</body>
+</html>

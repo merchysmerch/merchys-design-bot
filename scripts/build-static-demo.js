@@ -1,91 +1,122 @@
 #!/usr/bin/env node
 // ================================================================
-// Build a server-free demo of the Design Studio.
-// Output: dist/index.html  (storefront page + widget, all client side)
+// Build a server-free demo of the Design Studio plugin.
+// Output: dist/index.html  (storefront + studio, everything client side)
 //
-// The widget's /api/* calls are intercepted in the browser and answered
-// locally: the service catalog is embedded, the 6 designs are the same
-// black and white layout previews server.js serves in demo mode, and
-// submissions are acknowledged without leaving the page.
+// The studio's /api/studio/* calls are answered in the browser: the
+// question bank, prompt builder and demo image generator from /lib are
+// bundled, sessions live in memory, and "generation" is simulated with
+// short delays so concepts arrive one at a time like the real thing.
 // Run: node scripts/build-static-demo.js
 // ================================================================
 const fs = require('fs');
 const path = require('path');
-
 const root = path.join(__dirname, '..');
-const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
-const widgetHtml = fs.readFileSync(path.join(root, 'public', 'widget.html'), 'utf8');
+const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 
-function slice(src, startMarker, endMarker) {
-  const a = src.indexOf(startMarker);
-  if (a < 0) throw new Error('marker not found: ' + startMarker);
-  const b = src.indexOf(endMarker, a + startMarker.length);
-  if (b < 0) throw new Error('end marker not found: ' + endMarker);
-  return src.slice(a, b);
-}
+// ---- lib/questions.js as a browser const ----
+const questionsSrc = read('lib/questions.js').replace(/module\.exports\s*=\s*\{[\s\S]*?\};?\s*$/, '');
 
-// ---- Pull catalog + config straight out of server.js ----
-const catalogSrc = slice(server, 'const SERVICE_CATEGORIES = [', '// Services catalog route');
-const configBody = slice(server, "    styles: [\n      { id: 'badge'", "    company:");
-const designFns = slice(server, '// ---- Local demo designs (no API needed) ----', '// Vectorize using Recraft');
-const promptFn = slice(server, 'function buildDesignPrompt(formData, variation) {', 'const DESIGN_COUNT');
+// ---- director: buildPrompt, finalBrief, STYLE_DESCRIPTIONS, COLOR_RULES ----
+const dirSrc = read('lib/director.js');
+const grab = (src, start, end) => { const a = src.indexOf(start); const b = src.indexOf(end, a); if (a < 0 || b < 0) throw new Error('marker: ' + start); return src.slice(a, b); };
+const directorPart = grab(dirSrc, 'const COLOR_RULES', 'module.exports').replace(/Q\./g, '');
 
-// Demo designs in the browser: return data URLs instead of writing files
-const browserDesignFns = designFns
-  .replace(/const filename = `demo-\$\{stamp\}-\$\{i\}\.svg`;\s*fs\.writeFileSync\(path\.join\(uploadsDir, filename\), svg\);\s*return \{ url: `\/uploads\/\$\{filename\}`,/,
-    "const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);\n    return { url: dataUrl, remoteUrl: dataUrl,");
-if (browserDesignFns === designFns) throw new Error('demo design return statement did not match');
+// ---- generate: demoImage as data URL ----
+const genSrc = read('lib/generate.js');
+let demoPart = grab(genSrc, '// ---- Demo SVG previews', 'module.exports');
+demoPart = demoPart.replace(/const file = `demo-[^`]*`;\s*fs\.writeFileSync\([^;]*\);\s*return \{ url: `\/uploads\/\$\{file\}`, source: 'demo', prompt \};/,
+  "const u = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); return { url: u, remoteUrl: u, source: 'demo', prompt };");
+if (!/data:image\/svg\+xml/.test(demoPart)) throw new Error('demoImage return did not match');
 
 const shim = `
-// ---- STATIC DEMO SHIM: answers /api/* locally ----
+// ---- STATIC DEMO SHIM: answers /api/studio/* in the browser ----
 (function(){
-${catalogSrc}
-const WIDGET_CONFIG = {
-  services: SERVICES_CATALOG,
-  categories: SERVICE_CATEGORIES,
-${configBody}
-  company: { name: "Merchy's Merch", phone: '619-800-0949', email: 'start@merchysmerch.com' },
-  stripeEnabled: false,
-  recraftEnabled: false,
-  demoMode: true
-};
-${promptFn.replace(/^function buildDesignPrompt/, 'function buildDesignPrompt')}
-${browserDesignFns}
-const json = (obj) => new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json' } });
+${questionsSrc}
+${directorPart}
+${demoPart}
+const PRODUCT_TREE_LIST = Object.entries(PRODUCT_TREES).map(([key, t]) => ({ key, label: t.label }));
+const sessions = {};
+const rid = () => Math.random().toString(16).slice(2, 10);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const json = obj => new Response(JSON.stringify(obj), { status: 200, headers: { 'Content-Type': 'application/json' } });
+const err = (msg, code) => new Response(JSON.stringify({ error: msg }), { status: code || 400, headers: { 'Content-Type': 'application/json' } });
+
+function styleQueue(s) {
+  if (s._q) return; s._q = true;
+  (async () => {
+    let st;
+    while ((st = s.styles.find(x => x.status === 'queued'))) {
+      st.status = 'generating'; await sleep(1400);
+      st.image = demoImage(buildPrompt(s, st.id), st.id, 0, s.id); st.status = 'ready';
+    }
+    s._q = false;
+  })();
+}
+function finalBriefText(s) { return finalBrief(s).replace(/data:image\\/svg\\+xml[^\\s]*/g, '[preview image attached]'); }
+
 const realFetch = window.fetch.bind(window);
 window.fetch = async function(url, opts) {
-  const u = String(url);
-  const i = u.indexOf('/api/');
+  const u = String(url); const i = u.indexOf('/api/');
   if (i < 0) return realFetch(url, opts);
-  const route = u.slice(i);
-  if (route.startsWith('/api/widget-config')) return json(WIDGET_CONFIG);
-  if (route.startsWith('/api/generate')) {
-    const body = opts && opts.body ? JSON.parse(opts.body) : {};
-    await new Promise(r => setTimeout(r, 1800));
-    return json({ designs: buildDemoDesigns(body), demo: true, notice: 'Demo build: these are layout previews. The live version generates 6 AI concepts from your brief.' });
+  const route = u.slice(i).split('?')[0];
+  const body = opts && opts.body ? JSON.parse(opts.body) : {};
+  const m = route.match(/^\\/api\\/studio\\/session\\/([^/]+)(?:\\/(.*))?$/);
+  if (route === '/api/studio/capabilities') return json({ director: false, generation: false, asana: false, email: false, calendly: false, styles: Object.entries(STYLE_NAMES).map(([id, name]) => ({ id, name })), productTrees: PRODUCT_TREE_LIST, finalChecklist: FINAL_CHECKLIST });
+  if (route === '/api/studio/session') {
+    const client = body.client || {}, context = body.context || {};
+    const s = { id: rid(), client, context: { mode: context.mode || (context.product ? 'product' : 'logo'), product: context.product, decoration: context.decoration, service: context.service, category: context.category }, brief: { answers: {}, done: false, summary: '' }, styles: [], board: { selections: [], dislikes: '' }, library: [], schedule: null, finalized: null };
+    s.productTree = (detectProductTree(s.context) || {}).key || null;
+    sessions[s.id] = s; return json({ session: s });
   }
-  if (route.startsWith('/api/upload')) return json({ files: [] });
-  if (route.startsWith('/api/submit')) {
-    await new Promise(r => setTimeout(r, 600));
-    return json({ success: true, results: { asana: { success: true, action: 'demo' } } });
+  if (!m) return json({});
+  const s = sessions[m[1]]; if (!s) return err('Session not found', 404);
+  const sub = m[2] || '';
+  if (!sub) return json({ session: s });
+  if (sub === 'brief') {
+    Object.assign(s.brief.answers, body.answers || {});
+    if (body.finish) { s.brief.done = true; return json({ session: s, questions: [], done: true }); }
+    const base = briefQuestions(s.context); const remaining = base.filter(q => !(q.id in s.brief.answers));
+    await sleep(350);
+    if (!remaining.length) s.brief.done = true;
+    return json({ session: s, questions: remaining.slice(0, 3), done: !remaining.length, source: 'bank' });
   }
-  if (route.startsWith('/api/create-checkout')) return json({ error: 'Payments are off in this demo. Call 619-800-0949.' });
+  if (sub === 'styles') {
+    const ids = (body.styles || []).filter(id => STYLE_NAMES[id]).slice(0, 20);
+    ids.forEach(id => { if (!s.styles.find(x => x.id === id)) s.styles.push({ id, name: STYLE_NAMES[id], status: 'queued', image: null, liked: false, skipped: false, questions: null, refinement: null, refinements: [], refineStatus: 'idle' }); });
+    s.styles = s.styles.filter(x => ids.includes(x.id)); styleQueue(s); return json({ session: s });
+  }
+  if (sub === 'like') { const liked = new Set(body.liked || []); s.styles.forEach(st => st.liked = liked.has(st.id)); return json({ session: s }); }
+  let sm = sub.match(/^style\\/([^/]+)\\/(questions|refine|retry)$/);
+  if (sm) {
+    const st = s.styles.find(x => x.id === sm[1]); if (!st) return err('Not found', 404);
+    if (sm[2] === 'questions') { await sleep(300); return json({ questions: styleQuestions(st.id) }); }
+    if (sm[2] === 'retry') { st.status = 'queued'; styleQueue(s); return json({ session: s }); }
+    if (body.skip) { st.skipped = true; st.liked = false; return json({ session: s }); }
+    st.refinement = { answers: body.answers || {}, notes: body.notes || '' }; st.refineStatus = 'generating'; st.refinements = [];
+    (async () => { await sleep(2500); st.refinements = [0,1,2,3,4].map(v => demoImage(buildPrompt(s, st.id, { ...st.refinement, variation: v }), st.id, v + 1, s.id)); st.refineStatus = 'ready'; })();
+    return json({ session: s });
+  }
+  if (sub === 'board') { s.board = { selections: (body.selections || []).map(sel => ({ styleId: sel.styleId, styleName: STYLE_NAMES[sel.styleId] || sel.styleId, label: sel.label, url: sel.url, notes: sel.notes || '', checks: sel.checks || [] })), dislikes: body.dislikes || '' }; return json({ session: s }); }
+  if (sub === 'library') { (body.items || []).forEach(it => s.library.push(rid())); return json({ session: s, library: { items: s.library } }); }
+  if (sub === 'schedule-link') {
+    const out = []; const d = new Date(); d.setHours(0,0,0,0);
+    while (out.length < 15) { d.setDate(d.getDate() + 1); if (d.getDay() === 0 || d.getDay() === 6) continue; ['10:00 AM','1:00 PM','3:30 PM'].forEach(t => out.push({ date: d.toISOString().slice(0,10), time: t, label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' ' + t })); }
+    return json({ url: null, type: 'request', slots: out });
+  }
+  if (sub === 'schedule') { s.schedule = { summary: body.slot ? 'Requested ' + body.slot.label + ' PT (' + (body.scope || 'all designs') + ')' : 'Not scheduled', slot: body.slot || null, scope: body.scope }; return json({ session: s }); }
+  if (sub === 'finalize') { await sleep(700); const brief = finalBriefText(s); s.finalized = { brief }; return json({ success: true, brief, results: { asana: { success: true, action: 'demo' } }, session: s }); }
   return json({});
 };
 })();
 `;
 
-// Inject shim as the first thing inside the widget's <script>
+const studio = read('public/studio.html');
 const marker = '<script>\nconst API_BASE';
-if (!widgetHtml.includes(marker)) throw new Error('widget script marker not found');
-let widgetDemo = widgetHtml.replace(marker, '<script>' + shim + '\nconst API_BASE');
-// Uploads do nothing here; keep the preview but say so
-widgetDemo = widgetDemo.replace("if(d.files?.length) uploadedFileUrl = d.files[0].url;", "if(d.files?.length) uploadedFileUrl = d.files[0].url; else uploadedFileUrl = null;");
+if (!studio.includes(marker)) throw new Error('studio script marker not found');
+const studioDemo = studio.replace(marker, '<script>' + shim + '\nconst API_BASE');
 
-const page = fs.readFileSync(path.join(__dirname, 'static-demo-page.html'), 'utf8')
-  .replace('<!--WIDGET_TEMPLATE-->', widgetDemo);
-
-const outDir = path.join(root, 'dist');
-fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'index.html'), page);
+const page = read('scripts/static-demo-page.html').replace('<!--WIDGET_TEMPLATE-->', studioDemo);
+fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
+fs.writeFileSync(path.join(root, 'dist', 'index.html'), page);
 console.log('Built dist/index.html (' + Math.round(page.length / 1024) + ' KB)');

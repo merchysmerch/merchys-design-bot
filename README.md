@@ -1,59 +1,90 @@
-# Merchy's Design Bot
+# Merchy's Design Studio
 
-Client-facing AI Design Studio widget. A customer picks a service, describes their design, gets 6 black and white production-style concepts, picks favorites, then either requests a vector file, saves the designs, or sends them to a product. Every submission is routed to Asana (Presale task or a comment on the matching post-sale project) and backed up locally.
+An art director pop-up that plugs into merchysmarket.com (customization step, product design pages, existing orders). The site already knows the client, so the studio starts straight on design questions and ends with approved reference designs, per-image notes, dislikes, a logo library entry, and a booked call with the artist. Only approved designs and the final brief reach the design team.
 
 ## Run it
 
 ```bash
 npm install
-cp .env.example .env     # fill in keys you have; leave the rest
+cp .env.example .env     # fill in what you have; the rest falls back to demo mode
 npm start                # http://localhost:3000
 ```
 
-- `/` or `/widget.html` is the full-screen widget.
-- `/demo.html` is a fake storefront with the widget embedded as a floating button, the way it will sit on merchysmarket.com.
-- `/api/health` shows which integrations are live.
+- `/` is the studio (add `?demo=1` to run it without a host page).
+- `/demo.html` is a storefront stand-in with four entry points showing the plug-in contract.
+- `/legacy` is the old intake widget.
+- `/api/health` and `/api/studio/capabilities` show which integrations are live.
+
+## Embed on the website
+
+```html
+<script src="https://YOUR-HOST/studio.js"></script>
+<script>
+MerchyStudio.open({
+  client:  { id: '42', name: 'Jordan Smith', email: 'jordan@example.com', business: 'Smith Family BBQ', projectGid: '', poNumber: '' },
+  context: { mode: 'product', product: '6 ft x 3 ft outdoor banner', decoration: 'Large format print' },   // or { mode: 'logo' }
+  onComplete: function (r) { /* r.sessionId, r.selections[], r.libraryIds[], r.brief */ }
+});
+</script>
+```
+
+Or a button: `<button data-merchy-studio data-client='{...}' data-context='{...}'>Design it</button>`.
+Set `window.MERCHY_API_URL` when the script is served from a different origin than the API.
+
+`context.product` picks the question tree: apparel, banner/sign, drinkware, promo, stickers/labels, patches, business printing, packaging. Anything else gets the logo brief.
+
+## The flow
+
+1. Director interview. 3 questions at a time, tuned to the product. Powered by the Anthropic API when `ANTHROPIC_API_KEY` is set; otherwise the built-in question bank in `lib/questions.js`.
+2. Style wall. Any number of the 20 styles.
+3. One concept per style, generated in the background and shown as each finishes, titled by style.
+4. Like the ones that work. For each liked style: a few questions plus notes, then 5 refinements (Recraft image-to-image) run in the background while the client moves to the next style. Skip is allowed.
+5. Review board: each liked style as a header with original plus 5, numbered. Multi-select, per-image notes with a checklist (colors, size, shape, spacing, font, spelling, remove, add), plus a "what you do not want" field.
+6. Book a call with the artist (Calendly single-use link when `CALENDLY_TOKEN` + `CALENDLY_EVENT_TYPE` are set, `CALENDLY_URL` as a plain link, or a slot request).
+7. Finalize: approved designs go to the client's library, and the brief (approved only, notes, dislikes, skipped styles, call) posts to the project's Graphic Design task (PO/project GID) or a Presale task, plus a confirmation email.
+
+Images are full color, flat, limited palette, built to vectorize (`lib/director.js` holds the rules and prompts).
+
+## Logo library
+
+Independent store at `data/library/<clientKey>.json` (clientKey = `client.id`, else email).
+
+- `GET /api/studio/library/:clientKey` one client's items
+- `GET /api/studio/library?since=<ms>` everything added since a timestamp, for the Merchy's Market sync job
+- Items: `{ id, url, styleId, styleName, label, sessionId, business, addedAt, status }`
 
 ## Demo mode
 
-The app never dead-ends. Any `.env` value left blank or as `your_..._here` is treated as not configured:
+Any `.env` value left blank or as `your_..._here` counts as not configured:
 
-| Missing | What happens |
+| Missing | Fallback |
 |---|---|
-| `RECRAFT_API_KEY` | 6 local black and white SVG layout previews are generated from the client's own text. The widget shows a "Preview mode" banner. If Recraft is configured but every call fails, the same fallback kicks in and the first error is logged. |
-| `ASANA_ACCESS_TOKEN` | Submission is saved to `submissions/*.json` only. |
-| `STRIPE_SECRET_KEY` | "Get Vector File" becomes "Request Vector File" and sends a request to the team instead of opening checkout. |
-| `SMTP_PASS` | No confirmation email. |
+| `RECRAFT_API_KEY` | Full-color SVG layout previews built from the client's answers |
+| `ANTHROPIC_API_KEY` | Built-in question bank |
+| `ASANA_ACCESS_TOKEN` | Brief saved to `submissions/` only |
+| `CALENDLY_*` | In-studio slot request |
+| `SMTP_PASS` | No email |
 
-## Embed on a site
-
-```html
-<script src="https://YOUR-HOST/widget.js"></script>
-```
-
-Optional: set `window.MERCHY_API_URL = 'https://YOUR-HOST'` before the script tag if the widget is hosted on a different domain than the API.
-
-## Integrations
-
-- Recraft: `POST /v1/images/generations` with `model: recraftv3`, `style: vector_illustration`, black and white color controls. Vectorize uses `POST /v1/images/vectorize` with `image_url`.
-- Asana: PO number match posts design notes as a comment on the project's Graphic Design task. No match creates a Presale task. Notes are plain text (no bold) per house rules.
-- Stripe: Checkout session for the $25 vector file. `/api/vectorize-paid` verifies the session before vectorizing.
-
-## Layout
-
-```
-server.js          Express API, Recraft, Asana, Stripe, email, demo fallback
-public/widget.html The widget UI (4 steps + confirmation)
-public/widget.js   Embeddable loader (floating button + iframe)
-public/demo.html   Storefront embed demo
-uploads/           Generated designs and reference uploads (gitignored)
-submissions/       JSON backup of every submission (gitignored)
-```
-
-## Shareable static demo (no server)
+## Shareable static demo
 
 ```bash
 node scripts/build-static-demo.js   # writes dist/index.html
 ```
 
-`dist/index.html` is a storefront page with the full widget running entirely in the browser: the catalog is embedded, the 6 concepts are the same layout previews as demo mode, and submissions are acknowledged on the page. Host it anywhere static (or publish as a Claude artifact) and send the link.
+The whole plug-in running in the browser with no server: host it anywhere or publish as a Claude artifact.
+
+## Layout
+
+```
+server.js              Express app, Asana/email/Stripe helpers, legacy widget API
+routes/studio.js       Studio v2 API (sessions, generation queue, refine, board, library, schedule, finalize)
+lib/questions.js       Question bank and product decision trees
+lib/director.js        Anthropic-backed art director, prompt builder, final brief
+lib/generate.js        Recraft generation + image-to-image, demo SVG fallback
+public/studio.html     Studio UI (7 stages)
+public/studio.js       Host loader (overlay + postMessage contract)
+public/demo.html       Storefront embed demo
+public/widget.html     Legacy intake widget
+scripts/               Static demo build
+data/                  Sessions and library (gitignored)
+```

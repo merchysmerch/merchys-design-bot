@@ -3,37 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Merchy's Market - Widget Embed Demo</title>
+<title>Merchy's Market - Design Studio plugin demo</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Poppins,sans-serif;background:#fafafa;color:#111}
 header{background:#111;color:#fff;padding:18px 40px;display:flex;align-items:center;justify-content:space-between}
 header b{color:#d4a017;letter-spacing:2px}
-nav a{color:#bbb;margin-left:22px;font-size:14px;text-decoration:none}
-.hero{padding:70px 40px;max-width:900px;margin:0 auto;text-align:center}
-.hero h1{font-size:38px;line-height:1.15;margin-bottom:14px}
-.hero p{color:#666;font-size:16px;margin-bottom:26px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;max-width:1000px;margin:0 auto 80px;padding:0 40px}
-.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:18px;text-align:center}
-.card .ph{height:150px;background:#f1f1f1;border-radius:8px;margin-bottom:12px}
-.card h3{font-size:15px}.card span{color:#888;font-size:13px}
-.note{position:fixed;left:24px;bottom:24px;background:#fffdf5;border:1px solid #f0d78a;border-radius:10px;padding:12px 16px;font-size:13px;max-width:320px;color:#6a5200}
+nav span{color:#bbb;margin-left:22px;font-size:14px}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:30px;margin-bottom:8px}
+p.lead{color:#666;margin-bottom:28px;max-width:60ch}
+.scenarios{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.sc{background:#fff;border:1px solid #eee;border-radius:12px;padding:18px}
+.sc h3{font-size:15px;margin-bottom:6px}
+.sc p{font-size:13px;color:#777;margin-bottom:12px;line-height:1.4}
+.sc button{background:#111;color:#d4a017;border:2px solid #d4a017;border-radius:999px;padding:10px 18px;font:600 13px Poppins,sans-serif;cursor:pointer}
+.sc button:hover{background:#d4a017;color:#111}
+.result{margin-top:30px;background:#fff;border:1px solid #eee;border-radius:12px;padding:18px;display:none}
+.result h3{font-size:14px;margin-bottom:8px}
+.result pre{font:12px/1.5 Menlo,monospace;white-space:pre-wrap;color:#444}
+code{background:#f1f1f1;padding:2px 6px;border-radius:4px;font-size:12px}
 </style>
 </head>
 <body>
-<header><b>MERCHY'S MARKET</b><nav><a href="#">Shop</a><a href="#">Services</a><a href="#">About</a></nav></header>
-<section class="hero">
-  <h1>Custom merch, done right.</h1>
-  <p>This page stands in for merchysmarket.com. The Design Studio button in the bottom right corner is the embedded widget, loaded by a single script tag.</p>
-</section>
-<div class="grid">
-  <div class="card"><div class="ph"></div><h3>Heavyweight Tee</h3><span>from $14.50</span></div>
-  <div class="card"><div class="ph"></div><h3>Pullover Hoodie</h3><span>from $32.00</span></div>
-  <div class="card"><div class="ph"></div><h3>Dad Hat</h3><span>from $18.00</span></div>
-  <div class="card"><div class="ph"></div><h3>Work Polo</h3><span>from $24.00</span></div>
-</div>
-<div class="note">Embed on any site with:<br><code>&lt;script src="https://YOUR-HOST/widget.js"&gt;&lt;/script&gt;</code></div>
-<script src="/widget.js"></script>
+<header><b>MERCHY'S MARKET</b><nav><span>Shop</span><span>Customize</span><span>Design</span><span>Account</span></nav></header>
+<main class="wrap">
+  <h1>Design Studio plugin</h1>
+  <p class="lead">Each card below stands in for a place on merchysmarket.com where the studio opens: the customization step, a product design page, or the logo library. The host already knows the client, so the studio starts straight at the art director questions.</p>
+  <div class="scenarios">
+    <div class="sc"><h3>Customize: need a logo</h3><p>Client is in the customization flow and has no artwork yet. Context: logo.</p>
+      <button data-merchy-studio data-client='{"id":"u-1001","name":"Jordan Smith","email":"jordan@example.com","business":"Smith Family BBQ"}' data-context='{"mode":"logo","decoration":"DTF"}'>Open studio</button></div>
+    <div class="sc"><h3>Design: banner order</h3><p>Client is ordering a banner. The product tree asks size, viewing distance, content, hierarchy.</p>
+      <button data-merchy-studio data-client='{"id":"u-1002","name":"Maria Lopez","email":"maria@example.com","business":"Lopez Landscaping"}' data-context='{"mode":"product","product":"6 ft x 3 ft outdoor vinyl banner","decoration":"Large format print"}'>Open studio</button></div>
+    <div class="sc"><h3>Design: travel mug</h3><p>Drinkware tree: item color, one side or wrap, engraving vs full color.</p>
+      <button data-merchy-studio data-client='{"id":"u-1003","name":"Dev Patel","email":"dev@example.com","business":"North Park Climbing"}' data-context='{"mode":"product","product":"20 oz black stainless travel mug","decoration":"Laser engraving"}'>Open studio</button></div>
+    <div class="sc"><h3>Post-sale: PO 2924 artwork</h3><p>Existing order. Results post to the project's Graphic Design task when Asana is connected.</p>
+      <button data-merchy-studio data-client='{"id":"u-2924","name":"Chris Nguyen","email":"chris@example.com","business":"Bayside Dental","poNumber":"2924"}' data-context='{"mode":"product","product":"embroidered polo, left chest","decoration":"Embroidery"}'>Open studio</button></div>
+  </div>
+  <div class="result" id="result"><h3>What the host page receives on completion</h3><pre id="resultOut"></pre></div>
+  <p class="lead" style="margin-top:30px;font-size:13px">Embed: <code>&lt;script src="https://YOUR-HOST/studio.js"&gt;&lt;/script&gt;</code> then <code>MerchyStudio.open({client, context, onComplete})</code> or a button with <code>data-merchy-studio</code>.</p>
+</main>
+<script src="/studio.js"></script>
+<script>
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'merchy-studio-complete') {
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('resultOut').textContent = JSON.stringify({ sessionId: e.data.sessionId, libraryIds: e.data.libraryIds, selections: e.data.selections }, null, 2);
+    }
+  });
+</script>
 </body>
 </html>
