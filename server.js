@@ -987,7 +987,8 @@ app.get('/legacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'wi
 app.listen(PORT, () => {
   console.log(`\n  Merchy's Design Bot running on http://localhost:${PORT}`);
   console.log(`  Asana:   ${ASANA_TOKEN ? 'Connected' : 'Not configured'}`);
-  console.log(`  Recraft: ${RECRAFT_API_KEY ? 'Connected' : 'Not configured (using placeholders)'}`);
+  console.log(`  Images:  ${require('./lib/generate').provider}`);
+  console.log(`  Recraft: ${RECRAFT_API_KEY ? 'Connected' : 'Not configured'}`);
   console.log(`  Email:   ${emailTransporter ? 'Connected' : 'Not configured'}`);
   console.log(`  Stripe:  ${stripe ? 'Connected' : 'Not configured (vector paywall disabled)'}`);
   console.log(`  Director: ${process.env.ANTHROPIC_API_KEY ? 'Anthropic model' : 'Built-in question bank (set ANTHROPIC_API_KEY)'}\n`);

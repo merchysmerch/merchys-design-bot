@@ -37,7 +37,7 @@ module.exports = function mountStudio(app, deps) {
   // ---- capabilities ----
   app.get('/api/studio/capabilities', (req, res) => {
     res.json({
-      director: director.enabled, generation: gen.enabled, asana: !!ASANA_TOKEN, email: !!emailTransporter,
+      director: director.enabled, generation: gen.enabled, imageProvider: gen.provider, asana: !!ASANA_TOKEN, email: !!emailTransporter,
       calendly: !!(process.env.CALENDLY_URL || process.env.CALENDLY_TOKEN),
       styles: Object.entries(Q.STYLE_NAMES).map(([id, name]) => ({ id, name })),
       productTrees: Object.entries(Q.PRODUCT_TREES).map(([key, t]) => ({ key, label: t.label })),
@@ -154,11 +154,11 @@ module.exports = function mountStudio(app, deps) {
     if (req.body?.skip) { st.skipped = true; st.liked = false; save(s); return res.json({ session: s }); }
     st.refinement = { answers: req.body?.answers || {}, notes: req.body?.notes || '' };
     st.refineStatus = 'generating'; st.refinements = []; save(s);
-    const baseAbs = absUrl(req, st.image?.remoteUrl || st.image?.url);
+    const baseLocal = st.image?.url; const baseAbs = absUrl(req, st.image?.remoteUrl || st.image?.url);
     (async () => {
       try {
         const prompts = [0, 1, 2, 3, 4].map(v => director.buildPrompt(s, st.id, { ...st.refinement, variation: v }));
-        const imgs = await gen.refineImage(baseAbs, prompts, st.id, s.id);
+        const imgs = await gen.refineImage(baseLocal, prompts, st.id, s.id, baseAbs);
         const c = load(s.id); const it = c.styles.find(x => x.id === st.id);
         it.refinements = imgs; it.refineStatus = 'ready'; save(c);
       } catch (e) {

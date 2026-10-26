@@ -45,6 +45,13 @@ Set `window.MERCHY_API_URL` when the script is served from a different origin th
 
 Images are full color, flat, limited palette, built to vectorize (`lib/director.js` holds the rules and prompts).
 
+## Image engine
+
+Order of preference: OpenAI, then Recraft, then demo previews. Set `IMAGE_PROVIDER` to force one.
+
+- OpenAI: `OPENAI_API_KEY` from platform.openai.com with billing enabled. Default model `gpt-image-2.5-sunburst` at `high` quality (`OPENAI_IMAGE_MODEL`, `OPENAI_IMAGE_QUALITY` to change). Concepts use `/images/generations`; refinements use `/images/edits` with the liked image as the base so each round builds on it.
+- Recraft: `RECRAFT_API_KEY`. Also provides SVG vectorizing when set, regardless of which engine generates.
+
 ## Logo library
 
 Independent store at `data/library/<clientKey>.json` (clientKey = `client.id`, else email).
@@ -59,7 +66,7 @@ Any `.env` value left blank or as `your_..._here` counts as not configured:
 
 | Missing | Fallback |
 |---|---|
-| `RECRAFT_API_KEY` | Full-color SVG layout previews built from the client's answers |
+| `OPENAI_API_KEY` and `RECRAFT_API_KEY` | Full-color SVG layout previews built from the client's answers |
 | `ANTHROPIC_API_KEY` | Built-in question bank |
 | `ASANA_ACCESS_TOKEN` | Brief saved to `submissions/` only |
 | `CALENDLY_*` | In-studio slot request |
