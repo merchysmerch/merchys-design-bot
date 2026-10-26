@@ -45,6 +45,21 @@ Set `window.MERCHY_API_URL` when the script is served from a different origin th
 
 Images are full color, flat, limited palette, built to vectorize (`lib/director.js` holds the rules and prompts).
 
+## Knowledge base (what the models are taught)
+
+`lib/knowledge.js` is the single place that teaches both the question model and the image model about Merchy's:
+
+- Company, outcome ("finished art" defined), and the eight-step process
+- Production limits per decoration method: DTF, screen print, embroidery, patches, DTG, sublimation, engraving, UV, large format, business print, stickers, drinkware, promo
+- Product knowledge per tree (placements, imprint sizes, hierarchy)
+- Style guide for all 20 styles: what it is, what it must do, what to avoid
+- Universal design rules and a never-do list
+- Stage strategy: what the interviewer must learn at the brief, style, and final stages
+
+Edit that file to change how every prompt and every question is written. `lib/director.js` assembles it into the interviewer's instructions and into each image prompt (intended use, style, main image, feel, text spelled letter by letter, colors, production limits, edit keep/change lists, universal rules, exclusions).
+
+The question model is Anthropic when `ANTHROPIC_API_KEY` is set, otherwise OpenAI chat when `OPENAI_API_KEY` is set (`OPENAI_CHAT_MODEL`, default `gpt-6-astra`), otherwise the built-in bank. `DIRECTOR_PROVIDER` forces one.
+
 ## Image engine
 
 Order of preference: OpenAI, then Recraft, then demo previews. Set `IMAGE_PROVIDER` to force one.

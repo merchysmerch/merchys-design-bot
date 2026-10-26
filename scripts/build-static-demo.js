@@ -16,11 +16,12 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 
 // ---- lib/questions.js as a browser const ----
 const questionsSrc = read('lib/questions.js').replace(/module\.exports\s*=\s*\{[\s\S]*?\};?\s*$/, '');
+const knowledgeSrc = read('lib/knowledge.js').replace(/module\.exports\s*=\s*\{[\s\S]*?\};?\s*$/, '');
 
 // ---- director: buildPrompt, finalBrief, STYLE_DESCRIPTIONS, COLOR_RULES ----
 const dirSrc = read('lib/director.js');
 const grab = (src, start, end) => { const a = src.indexOf(start); const b = src.indexOf(end, a); if (a < 0 || b < 0) throw new Error('marker: ' + start); return src.slice(a, b); };
-const directorPart = grab(dirSrc, 'const COLOR_RULES', 'module.exports').replace(/Q\./g, '');
+const directorPart = grab(dirSrc, 'const COLOR_RULES', 'module.exports').replace(/\bQ\./g, '').replace(/\bK\./g, '');
 
 // ---- generate: demoImage as data URL ----
 const genSrc = read('lib/generate.js');
@@ -33,6 +34,7 @@ const shim = `
 // ---- STATIC DEMO SHIM: answers /api/studio/* in the browser ----
 (function(){
 ${questionsSrc}
+${knowledgeSrc}
 ${directorPart}
 ${demoPart}
 const PRODUCT_TREE_LIST = Object.entries(PRODUCT_TREES).map(([key, t]) => ({ key, label: t.label }));
