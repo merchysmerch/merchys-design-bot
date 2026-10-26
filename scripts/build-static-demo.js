@@ -62,7 +62,7 @@ window.fetch = async function(url, opts) {
   const route = u.slice(i).split('?')[0];
   const body = opts && opts.body ? JSON.parse(opts.body) : {};
   const m = route.match(/^\\/api\\/studio\\/session\\/([^/]+)(?:\\/(.*))?$/);
-  if (route === '/api/studio/capabilities') return json({ director: false, generation: false, asana: false, email: false, calendly: false, styles: Object.entries(STYLE_NAMES).map(([id, name]) => ({ id, name })), productTrees: PRODUCT_TREE_LIST, finalChecklist: FINAL_CHECKLIST });
+  if (route === '/api/studio/capabilities') return json({ director: false, generation: false, asana: false, email: false, calendly: false, styles: Object.entries(STYLE_NAMES).map(([id, name]) => ({ id, name })), productTrees: PRODUCT_TREE_LIST, finalChecklist: FINAL_CHECKLIST, moods: MOOD_WORDS });
   if (route === '/api/studio/session') {
     const client = body.client || {}, context = body.context || {};
     const s = { id: rid(), client, context: { mode: context.mode || (context.product ? 'product' : 'logo'), product: context.product, decoration: context.decoration, service: context.service, category: context.category }, brief: { answers: {}, done: false, summary: '' }, styles: [], board: { selections: [], dislikes: '' }, library: [], schedule: null, finalized: null };
@@ -73,6 +73,7 @@ window.fetch = async function(url, opts) {
   const s = sessions[m[1]]; if (!s) return err('Session not found', 404);
   const sub = m[2] || '';
   if (!sub) return json({ session: s });
+  if (sub === 'client') { Object.assign(s.client, body); return json({ session: s }); }
   if (sub === 'brief') {
     Object.assign(s.brief.answers, body.answers || {});
     if (body.finish) { s.brief.done = true; return json({ session: s, questions: [], done: true }); }

@@ -42,6 +42,25 @@ textarea{resize:vertical;min-height:64px}
 textarea:focus,input:focus{outline:none;border-color:#d4a017}
 .q textarea{margin-top:8px}
 .brief-box{background:#fffdf5;border:1px solid #f0d78a;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5c00;margin-bottom:14px;line-height:1.5}
+/* details card */
+.details{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8f8f8;border-radius:12px;padding:12px;margin-bottom:16px}
+.details .f{display:flex;flex-direction:column;gap:4px}
+.details .f span{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.details input{padding:9px 11px;font-size:13px}
+.details .missing{border-color:#d4a017;background:#fffdf5}
+/* mood tiles */
+.moods{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.mood{height:54px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;border:2px solid transparent;outline:2px solid #eee;outline-offset:-2px;transition:transform .1s;padding:4px 6px;text-align:center;user-select:none;position:relative}
+.mood:hover{transform:translateY(-1px)}
+.mood.on{outline:3px solid #d4a017;outline-offset:-3px}
+.mood.on::after{content:"\2713";position:absolute;top:3px;right:5px;width:16px;height:16px;border-radius:50%;background:#d4a017;color:#111;font:700 10px Poppins,sans-serif;display:flex;align-items:center;justify-content:center}
+/* color picker */
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.swatch{width:40px;height:40px;border-radius:10px;border:2px solid #e5e5e5;position:relative;cursor:pointer}
+.swatch .x{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+.add-color{display:flex;align-items:center;gap:6px;font-size:12px;color:#666}
+.add-color input[type=color]{width:40px;height:40px;border:2px dashed #ccc;border-radius:10px;padding:0;background:none;cursor:pointer}
+.add-color input[type=text]{width:96px;padding:8px 10px;font-size:12px}
 /* style wall */
 .style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
 .style-card{border:2px solid #eee;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .12s;position:relative}
@@ -125,6 +144,7 @@ textarea:focus,input:focus{outline:none;border-color:#d4a017}
   <div class="stage" id="st1">
     <h2 id="qTitle">A few quick questions</h2>
     <p class="lead" id="qLead">Answer what you can. Skip anything that does not apply.</p>
+    <div class="details" id="details"></div>
     <div class="brief-box" id="briefBox" style="display:none"></div>
     <div id="qList"></div>
     <button class="btn btn-primary" id="qNext" onclick="submitAnswers()">Continue</button>
@@ -275,7 +295,17 @@ async function boot() {
 }
 
 // ---------- stage 1: interview ----------
+function renderDetails() {
+  const c = session.client || {};
+  const f = (k, label, ph) => `<div class="f"><span>${label}</span><input type="text" id="det_${k}" class="${c[k] ? '' : 'missing'}" value="${esc(c[k] || '')}" placeholder="${ph}"></div>`;
+  $('details').innerHTML = f('business', 'Business / event', 'Required') + f('name', 'Your name', '') + f('email', 'Email', '') + f('industry', 'Industry', 'e.g. landscaping, dental, church');
+}
+function saveDetails() {
+  const c = session.client; ['business', 'name', 'email', 'industry'].forEach(k => { const el = $('det_' + k); if (el) c[k] = el.value.trim(); });
+  return api(`/api/studio/session/${session.id}/client`, { method: 'POST', body: JSON.stringify(c) }).catch(() => {});
+}
 async function loadQuestions(answers) {
+  if (!$('details').innerHTML) renderDetails();
   $('qList').innerHTML = '<div class="spinner" style="margin:20px auto"></div>'; $('qNext').disabled = true;
   try {
     const d = await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: answers || {} }) });
@@ -286,13 +316,48 @@ async function loadQuestions(answers) {
     $('qNext').disabled = false;
   } catch (e) { $('qList').innerHTML = `<p class="err">${esc(e.message)}</p>`; $('qNext').disabled = false; }
 }
+function prefillValue(q) {
+  const c = session?.client || {}, ctx = session?.context || {};
+  if (q.prefill === 'business') return c.business || '';
+  if (q.prefill === 'industry') return c.industry || ctx.industry || '';
+  return '';
+}
+function moodStyle(sm) {
+  if (!sm) return '';
+  return `background:${sm.bg};color:${sm.fg};font-family:${sm.font};font-weight:${sm.weight};${sm.border ? 'border:' + sm.border + ';' : ''}${sm.spacing ? 'letter-spacing:' + sm.spacing + ';' : ''}${sm.transform ? 'text-transform:' + sm.transform + ';' : ''}${sm.italic ? 'font-style:italic;' : ''}`;
+}
 function renderQuestions(list, targetId) {
   currentQuestions = list;
   $(targetId).innerHTML = list.map(q => {
-    const chips = (q.type === 'chips' || q.type === 'chips+text') ? `<div class="chips" data-q="${esc(q.id)}" data-multi="${q.multi ? 1 : 0}">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>` : '';
-    const text = (q.type === 'text' || q.type === 'chips+text') ? `<textarea data-q="${esc(q.id)}" placeholder="${q.type === 'chips+text' ? 'Or type your own' : 'Type here'}"></textarea>` : '';
-    return `<div class="q"><label>${esc(q.q)}${q.why ? `<span class="why">${esc(q.why)}</span>` : ''}</label>${chips}${text}</div>`;
+    let body = '';
+    if (q.type === 'moods') {
+      const moods = caps.moods || [];
+      body = `<div class="moods chips" data-q="${esc(q.id)}" data-multi="1">${(q.options || moods.map(m => m.w)).map(w => { const m = moods.find(x => x.w === w); return `<div class="mood chip" style="${moodStyle(m && m.sample)}" onclick="toggleChip(this)" title="${esc(w)}">${esc(w)}</div>`; }).join('')}</div>`;
+    } else if (q.type === 'colors') {
+      body = `<div class="chips" data-q="${esc(q.id)}" data-multi="0">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>
+        <div class="swatches" id="swatches" data-colors="brand_colors"><div class="add-color"><input type="color" value="#d4a017" oninput="addSwatchFromPicker(this)" title="Pick a color"><input type="text" placeholder="#hex or name" onkeydown="if(event.key==='Enter'){addSwatch(this.value);this.value='';event.preventDefault()}"><span>Add your brand colors</span></div></div>`;
+    } else {
+      const chips = (q.type === 'chips' || q.type === 'chips+text') ? `<div class="chips" data-q="${esc(q.id)}" data-multi="${q.multi ? 1 : 0}">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>` : '';
+      const text = (q.type === 'text' || q.type === 'chips+text') ? `<textarea data-q="${esc(q.id)}" placeholder="${q.type === 'chips+text' ? 'Add detail or type your own' : 'Type here'}">${esc(prefillValue(q))}</textarea>` : '';
+      body = chips + text;
+    }
+    return `<div class="q"><label>${esc(q.q)}${q.why ? `<span class="why">${esc(q.why)}</span>` : ''}</label>${body}</div>`;
   }).join('');
+}
+let brandColors = [];
+function addSwatchFromPicker(inp) { clearTimeout(inp._t); inp._t = setTimeout(() => addSwatch(inp.value), 400); }
+function addSwatch(v) {
+  v = (v || '').trim(); if (!v) return;
+  if (!brandColors.includes(v)) brandColors.push(v);
+  renderSwatches();
+}
+function removeSwatch(i) { brandColors.splice(i, 1); renderSwatches(); }
+function renderSwatches() {
+  const host = $('swatches'); if (!host) return;
+  host.querySelectorAll('.swatch').forEach(e => e.remove());
+  brandColors.forEach((c, i) => host.insertAdjacentHTML('afterbegin', `<div class="swatch" style="background:${esc(c)}" title="${esc(c)}" onclick="removeSwatch(${i})"><span class="x">&times;</span></div>`));
+  // auto-select the brand colors chip when colors are added
+  const grp = host.previousElementSibling; if (grp && brandColors.length) { grp.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', /brand colors/i.test(ch.textContent))); }
 }
 function toggleChip(el) {
   const grp = el.parentElement; const multi = grp.dataset.multi === '1';
@@ -310,12 +375,18 @@ function collectAnswers(targetId) {
     const prev = out[t.dataset.q];
     out[t.dataset.q] = prev ? (Array.isArray(prev) ? [...prev, v] : prev + '; ' + v) : v;
   });
+  if (document.querySelector(`#${targetId} #swatches`) && brandColors.length) out.brand_colors = brandColors.slice();
   // unanswered questions are recorded as skipped so they are not asked again
   currentQuestions.forEach(q => { if (!(q.id in out)) out[q.id] = ''; });
   return out;
 }
-async function submitAnswers() { await loadQuestions(collectAnswers('qList')); }
+async function submitAnswers() {
+  if (!$('det_business').value.trim()) { $('det_business').focus(); $('det_business').classList.add('missing'); return; }
+  await saveDetails();
+  await loadQuestions(collectAnswers('qList'));
+}
 async function finishBrief() {
+  await saveDetails();
   const a = collectAnswers('qList');
   await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: a, finish: true }) });
   go(2);

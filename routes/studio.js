@@ -41,7 +41,8 @@ module.exports = function mountStudio(app, deps) {
       calendly: !!(process.env.CALENDLY_URL || process.env.CALENDLY_TOKEN),
       styles: Object.entries(Q.STYLE_NAMES).map(([id, name]) => ({ id, name })),
       productTrees: Object.entries(Q.PRODUCT_TREES).map(([key, t]) => ({ key, label: t.label })),
-      finalChecklist: Q.FINAL_CHECKLIST
+      finalChecklist: Q.FINAL_CHECKLIST,
+      moods: Q.MOOD_WORDS
     });
   });
 
@@ -50,7 +51,7 @@ module.exports = function mountStudio(app, deps) {
     const { client = {}, context = {} } = req.body || {};
     const s = {
       id: crypto.randomBytes(8).toString('hex'), createdAt: Date.now(),
-      client: { id: client.id, name: client.name, email: client.email, phone: client.phone, business: client.business, projectGid: client.projectGid, poNumber: client.poNumber },
+      client: { id: client.id, name: client.name, email: client.email, phone: client.phone, business: client.business, industry: client.industry, projectGid: client.projectGid, poNumber: client.poNumber },
       context: { mode: context.mode || (context.product ? 'product' : 'logo'), product: context.product, service: context.service, decoration: context.decoration, category: context.category, returnUrl: context.returnUrl },
       brief: { answers: {}, done: false, summary: '' },
       styles: [], board: { selections: [], dislikes: '' }, library: [], schedule: null, finalized: null
@@ -58,6 +59,14 @@ module.exports = function mountStudio(app, deps) {
     s.productTree = Q.detectProductTree(s.context)?.key || null;
     save(s);
     res.json({ session: publicView(s) });
+  });
+
+  app.post('/api/studio/session/:id/client', (req, res) => {
+    const s = load(req.params.id);
+    if (!s) return res.status(404).json({ error: 'Session not found' });
+    const b = req.body || {};
+    ['name', 'email', 'phone', 'business', 'industry'].forEach(k => { if (b[k] !== undefined) s.client[k] = b[k]; });
+    save(s); res.json({ session: s });
   });
 
   app.get('/api/studio/session/:id', (req, res) => {

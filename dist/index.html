@@ -122,6 +122,25 @@ textarea{resize:vertical;min-height:64px}
 textarea:focus,input:focus{outline:none;border-color:#d4a017}
 .q textarea{margin-top:8px}
 .brief-box{background:#fffdf5;border:1px solid #f0d78a;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5c00;margin-bottom:14px;line-height:1.5}
+/* details card */
+.details{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8f8f8;border-radius:12px;padding:12px;margin-bottom:16px}
+.details .f{display:flex;flex-direction:column;gap:4px}
+.details .f span{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.details input{padding:9px 11px;font-size:13px}
+.details .missing{border-color:#d4a017;background:#fffdf5}
+/* mood tiles */
+.moods{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.mood{height:54px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;border:2px solid transparent;outline:2px solid #eee;outline-offset:-2px;transition:transform .1s;padding:4px 6px;text-align:center;user-select:none;position:relative}
+.mood:hover{transform:translateY(-1px)}
+.mood.on{outline:3px solid #d4a017;outline-offset:-3px}
+.mood.on::after{content:"\2713";position:absolute;top:3px;right:5px;width:16px;height:16px;border-radius:50%;background:#d4a017;color:#111;font:700 10px Poppins,sans-serif;display:flex;align-items:center;justify-content:center}
+/* color picker */
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.swatch{width:40px;height:40px;border-radius:10px;border:2px solid #e5e5e5;position:relative;cursor:pointer}
+.swatch .x{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+.add-color{display:flex;align-items:center;gap:6px;font-size:12px;color:#666}
+.add-color input[type=color]{width:40px;height:40px;border:2px dashed #ccc;border-radius:10px;padding:0;background:none;cursor:pointer}
+.add-color input[type=text]{width:96px;padding:8px 10px;font-size:12px}
 /* style wall */
 .style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
 .style-card{border:2px solid #eee;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .12s;position:relative}
@@ -205,6 +224,7 @@ textarea:focus,input:focus{outline:none;border-color:#d4a017}
   <div class="stage" id="st1">
     <h2 id="qTitle">A few quick questions</h2>
     <p class="lead" id="qLead">Answer what you can. Skip anything that does not apply.</p>
+    <div class="details" id="details"></div>
     <div class="brief-box" id="briefBox" style="display:none"></div>
     <div id="qList"></div>
     <button class="btn btn-primary" id="qNext" onclick="submitAnswers()">Continue</button>
@@ -291,12 +311,59 @@ const STYLE_NAMES = {
   heritage: 'Heritage / Legacy', line_art: 'Minimal Line Art', patch_first: 'Patch / Embroidery', event_series: 'Event Series'
 };
 
+// ---- Mood words: each gets a typeset sample so the client sees the word in that treatment ----
+// sample: { font, weight, bg, fg, border, transform, spacing, italic }
+const MOOD_WORDS = [
+  { w: 'Bold', sample: { font: 'Impact, Arial Black, sans-serif', weight: 900, bg: '#111', fg: '#ffd400', transform: 'uppercase' } },
+  { w: 'Classic', sample: { font: 'Georgia, Times New Roman, serif', weight: 700, bg: '#f4efe4', fg: '#1b1b1b', border: '2px double #1b1b1b' } },
+  { w: 'Clean', sample: { font: 'Helvetica Neue, Arial, sans-serif', weight: 300, bg: '#fff', fg: '#222', spacing: '3px', border: '1px solid #ddd' } },
+  { w: 'Rugged', sample: { font: 'Arial Black, Impact, sans-serif', weight: 900, bg: '#4a3b2a', fg: '#e8d8b8', transform: 'uppercase', border: '3px solid #2a2117' } },
+  { w: 'Playful', sample: { font: 'Comic Sans MS, Chalkboard, cursive', weight: 700, bg: '#ff6b9d', fg: '#fff', transform: 'none' } },
+  { w: 'Premium', sample: { font: 'Didot, Bodoni MT, Georgia, serif', weight: 400, bg: '#0e0e0e', fg: '#d4a017', spacing: '4px', transform: 'uppercase' } },
+  { w: 'Vintage', sample: { font: 'Rockwell, Courier New, serif', weight: 700, bg: '#e9dcc1', fg: '#7a1f1f', transform: 'uppercase', border: '2px dashed #7a1f1f' } },
+  { w: 'Modern', sample: { font: 'Futura, Century Gothic, sans-serif', weight: 500, bg: '#e8f0fe', fg: '#0b2545', spacing: '2px' } },
+  { w: 'Friendly', sample: { font: 'Verdana, Trebuchet MS, sans-serif', weight: 700, bg: '#ffe8a3', fg: '#7a4b00', transform: 'none' } },
+  { w: 'Serious', sample: { font: 'Times New Roman, serif', weight: 700, bg: '#1f2a44', fg: '#fff', transform: 'uppercase', spacing: '1px' } },
+  { w: 'Retro', sample: { font: 'Cooper Black, Georgia, serif', weight: 900, bg: '#f7a723', fg: '#4a1d0f', transform: 'none' } },
+  { w: 'Sporty', sample: { font: 'Impact, Arial Narrow, sans-serif', weight: 900, bg: '#c8102e', fg: '#fff', transform: 'uppercase', italic: true } },
+  { w: 'Rustic', sample: { font: 'Courier New, monospace', weight: 700, bg: '#7b5e3b', fg: '#f3e9d2', transform: 'uppercase' } },
+  { w: 'Elegant', sample: { font: 'Snell Roundhand, Brush Script MT, cursive', weight: 400, bg: '#fbf7f0', fg: '#333', italic: true } },
+  { w: 'Edgy', sample: { font: 'Arial Black, sans-serif', weight: 900, bg: '#000', fg: '#39ff14', transform: 'uppercase', spacing: '-1px' } },
+  { w: 'Minimal', sample: { font: 'Helvetica Neue, Arial, sans-serif', weight: 400, bg: '#fff', fg: '#111', spacing: '6px', transform: 'lowercase' } },
+  { w: 'Luxury', sample: { font: 'Didot, Georgia, serif', weight: 400, bg: '#1a1a1a', fg: '#e5d3a1', spacing: '5px', transform: 'uppercase' } },
+  { w: 'Industrial', sample: { font: 'Arial Narrow, Impact, sans-serif', weight: 900, bg: '#3b3f44', fg: '#f0a500', transform: 'uppercase', border: '3px solid #f0a500' } },
+  { w: 'Western', sample: { font: 'Rockwell Extra Bold, Rockwell, serif', weight: 900, bg: '#c7a16b', fg: '#3b1f0f', transform: 'uppercase' } },
+  { w: 'Coastal', sample: { font: 'Trebuchet MS, sans-serif', weight: 700, bg: '#8fcbd6', fg: '#0b3954', transform: 'uppercase', spacing: '2px' } },
+  { w: 'Tactical', sample: { font: 'Arial Narrow, Impact, sans-serif', weight: 900, bg: '#2f3b2f', fg: '#c9c6a6', transform: 'uppercase', spacing: '2px' } },
+  { w: 'Handmade', sample: { font: 'Marker Felt, Chalkboard, cursive', weight: 400, bg: '#fff8e7', fg: '#2b2b2b', transform: 'none' } },
+  { w: 'Corporate', sample: { font: 'Arial, Helvetica, sans-serif', weight: 700, bg: '#fff', fg: '#0a3d91', border: '1px solid #0a3d91' } },
+  { w: 'Techy', sample: { font: 'Menlo, Consolas, monospace', weight: 700, bg: '#0a0f1e', fg: '#4fd1ff', transform: 'uppercase' } },
+  { w: 'Grunge', sample: { font: 'Impact, sans-serif', weight: 900, bg: '#2b2b2b', fg: '#d9d9d9', transform: 'uppercase', italic: true, spacing: '-1px' } },
+  { w: 'Feminine', sample: { font: 'Brush Script MT, cursive', weight: 400, bg: '#fde2ea', fg: '#8a2846', italic: true } },
+  { w: 'Masculine', sample: { font: 'Arial Black, sans-serif', weight: 900, bg: '#1b1b1b', fg: '#b0b0b0', transform: 'uppercase' } },
+  { w: 'Fun', sample: { font: 'Chalkboard, Comic Sans MS, cursive', weight: 700, bg: '#5ad2f4', fg: '#1b1b1b' } },
+  { w: 'Patriotic', sample: { font: 'Impact, sans-serif', weight: 900, bg: '#0a2a66', fg: '#fff', border: '3px solid #c8102e', transform: 'uppercase' } },
+  { w: 'Faith-based', sample: { font: 'Georgia, serif', weight: 400, bg: '#f6f1e7', fg: '#5a4632', italic: true } },
+  { w: 'Family', sample: { font: 'Verdana, sans-serif', weight: 700, bg: '#fff3d6', fg: '#b34700' } },
+  { w: 'Outdoorsy', sample: { font: 'Rockwell, serif', weight: 700, bg: '#2f5d3a', fg: '#f3e9d2', transform: 'uppercase' } },
+  { w: 'Street', sample: { font: 'Arial Black, sans-serif', weight: 900, bg: '#111', fg: '#fff', transform: 'uppercase', spacing: '-1px' } },
+  { w: 'Collegiate', sample: { font: 'Rockwell Extra Bold, Rockwell, serif', weight: 900, bg: '#7a0019', fg: '#f4c542', transform: 'uppercase' } },
+  { w: 'Nautical', sample: { font: 'Georgia, serif', weight: 700, bg: '#f7f7f7', fg: '#0a2a66', border: '2px solid #c8102e', transform: 'uppercase' } },
+  { w: 'Medical', sample: { font: 'Arial, sans-serif', weight: 500, bg: '#eaf7f2', fg: '#1a7a5a' } },
+  { w: 'Kids', sample: { font: 'Comic Sans MS, cursive', weight: 700, bg: '#ffe066', fg: '#e04e1b' } },
+  { w: 'Spooky', sample: { font: 'Chiller, Papyrus, fantasy', weight: 700, bg: '#1c0b2e', fg: '#ff7a00' } },
+  { w: 'Holiday', sample: { font: 'Georgia, serif', weight: 700, bg: '#0f5132', fg: '#f2d3a2', italic: true } },
+  { w: 'Military', sample: { font: 'Impact, sans-serif', weight: 900, bg: '#4b5320', fg: '#e6e2c3', transform: 'uppercase', spacing: '2px' } }
+];
+
 // ---- Stage 1: the brief (before any image exists) ----
+// prefill: which client/context field to seed the answer with
 const BRIEF_LOGO = [
-  { id: 'exact_text', q: 'What text has to appear in the design? Type it exactly as it should be spelled.', type: 'text', why: 'Spelling and wording go straight into the artwork.' },
-  { id: 'subject', q: 'If the design had one picture in it, what would it be?', type: 'chips+text', options: ['An object from our work', 'An animal', 'A person or character', 'A place or landmark', 'Just letters, no picture', 'Not sure, surprise me'], why: 'Anchors the focal point.' },
-  { id: 'mood', q: 'Pick the words that fit how it should feel.', type: 'chips', multi: true, options: ['Bold', 'Classic', 'Clean', 'Rugged', 'Playful', 'Premium', 'Vintage', 'Modern', 'Friendly', 'Serious'], why: 'Sets weight, type and detail level.' },
-  { id: 'palette', q: 'Colors: do you have brand colors, or should we propose a palette?', type: 'chips+text', options: ['Use my brand colors (type them)', 'Propose a palette', 'Keep it one color', 'Two colors max'], why: 'Flat, limited palettes vectorize and print cleanly.' },
+  { id: 'exact_text', q: 'What text has to appear in the design? We started with your business name. Edit it, add a tagline, year, or location, and spell everything exactly.', type: 'text', prefill: 'business', why: 'Spelling and wording go straight into the artwork.' },
+  { id: 'industry', q: 'What is your industry or trade?', type: 'text', prefill: 'industry', why: 'Lets the director pull the right symbols and avoid the wrong ones.' },
+  { id: 'subject', q: 'If the design had one picture in it, what would it be?', type: 'chips+text', options: ['An icon from my industry', 'An object from our work', 'An animal', 'A person or character', 'A place or landmark', 'Just letters, no picture', 'Not sure, surprise me'], why: 'Anchors the focal point. Add detail in the box if you have it.' },
+  { id: 'mood', q: 'Pick every word that fits how it should feel.', type: 'moods', multi: true, options: MOOD_WORDS.map(m => m.w), why: 'Sets weight, type, and detail level.' },
+  { id: 'palette', q: 'Colors', type: 'colors', options: ['Use my brand colors', 'Propose a palette', 'One color', 'Two colors'], why: 'Flat, limited palettes vectorize and print cleanly. Pick your brand colors below if you have them.' },
   { id: 'avoid', q: 'Anything you do NOT want to see? Colors, symbols, styles, cliches.', type: 'text', why: 'Keeps the design team away from dead ends.' },
   { id: 'references', q: 'Any brands or logos you admire for this? Names are enough.', type: 'text', why: 'Reference points sharpen the direction.' }
 ];
@@ -453,6 +520,56 @@ const STYLE_DESCRIPTIONS = {
   event_series: 'Reusable annual layout with a consistent frame and designated zones for year, date, or event text.'
 };
 
+// Five distinct directions per refinement round. Each is a different concept, never a recolor.
+const GENERIC_VARIATIONS = [
+  'Variation 1 of 5: new composition. Rebuild the layout from scratch (stacked, horizontal, or asymmetric), keep the same central subject.',
+  'Variation 2 of 5: new central image. Replace the main icon with a different symbol from the same world, keep the layout structure.',
+  'Variation 3 of 5: new lettering. Different type style for the main words (condensed, slab, script, or hand lettered) and text arrangement.',
+  'Variation 4 of 5: simplified. Half the elements, one dominant shape, maximum readability at 3 inches.',
+  'Variation 5 of 5: richer. Add one supporting illustrated element and a frame or banner that ties the text to the picture.'
+];
+const VARIATION_PLANS = {
+  mascot: [
+    'Variation 1 of 5: a completely different character: a person who does this work, head and shoulders, with a prop from the trade.',
+    'Variation 2 of 5: a completely different character: an animal that fits the brand, full body, in action.',
+    'Variation 3 of 5: a completely different character: an everyday object from this industry given a face, arms, and attitude.',
+    'Variation 4 of 5: a completely different character: a retro 1950s-style cartoon figure with exaggerated features and a big smile.',
+    'Variation 5 of 5: a completely different character: a tough, heroic figure or creature in a dramatic pose with a strong silhouette.'
+  ],
+  icon_logo: [
+    'Variation 1 of 5: a geometric abstract mark built from the initials.',
+    'Variation 2 of 5: a pictorial mark: one literal object from the industry, simplified to its silhouette.',
+    'Variation 3 of 5: a negative-space mark that hides a second shape inside the first.',
+    'Variation 4 of 5: a monoline mark drawn with one continuous stroke.',
+    'Variation 5 of 5: a mark inside a simple container shape (circle, hexagon, or shield) with the name beside it.'
+  ],
+  typography: [
+    'Variation 1 of 5: stacked block lettering, three tiers, first word largest.',
+    'Variation 2 of 5: arched top line with a straight bottom line and a small ornament between.',
+    'Variation 3 of 5: hand-lettered script for the main word, small caps for the rest.',
+    'Variation 4 of 5: condensed sans-serif in a tall vertical lockup with rules above and below.',
+    'Variation 5 of 5: letters with dimensional drop shadow and an inline detail, 1970s poster feel.'
+  ],
+  scene: [
+    'Variation 1 of 5: dawn landscape, wide horizon, subject small in the foreground.',
+    'Variation 2 of 5: close-up action scene, subject fills the frame.',
+    'Variation 3 of 5: night scene with a single light source and strong silhouettes.',
+    'Variation 4 of 5: scene framed inside a circle with the text wrapping the frame.',
+    'Variation 5 of 5: scene with layered depth: foreground object, mid-ground action, background shape.'
+  ],
+  badge: [
+    'Variation 1 of 5: shield-shaped badge with a chevron split and a ribbon banner.',
+    'Variation 2 of 5: rectangular plaque badge with corner ornaments and a small icon.',
+    'Variation 3 of 5: round seal with a rope or rivet border and a different central icon.',
+    'Variation 4 of 5: hexagon badge with text on straight lines, modern feel.',
+    'Variation 5 of 5: two-layer badge: a circle behind a horizontal banner that carries the name.'
+  ]
+};
+VARIATION_PLANS.humor = VARIATION_PLANS.mascot;
+VARIATION_PLANS.badge_scene = VARIATION_PLANS.scene;
+VARIATION_PLANS.corporate_seal = VARIATION_PLANS.badge;
+VARIATION_PLANS.patch_first = VARIATION_PLANS.badge;
+
 function buildPrompt(session, styleId, refinement) {
   const a = session.brief?.answers || {};
   const client = session.client || {};
@@ -461,21 +578,23 @@ function buildPrompt(session, styleId, refinement) {
     `Design a ${ctx.mode === 'logo' || !ctx.product ? 'logo / merchandise graphic' : 'graphic for a ' + ctx.product} for ${client.business || 'the client'}.`,
     `STYLE: ${STYLE_DESCRIPTIONS[styleId] || styleId}.`,
     a.exact_text ? `TEXT (spell exactly): ${a.exact_text}.` : `TEXT (spell exactly): ${client.business || ''}.`,
-    a.subject ? `MAIN IMAGE: ${a.subject}.` : '',
+    a.industry ? `INDUSTRY: ${a.industry}.` : '',
+    a.subject ? `MAIN IMAGE: ${[].concat(a.subject).join('; ')}${/icon from my industry/i.test([].concat(a.subject).join(' ')) ? ' (choose the most recognizable symbol of this industry)' : ''}.` : '',
     a.mood ? `FEEL: ${[].concat(a.mood).join(', ')}.` : '',
-    a.palette ? `COLORS: ${a.palette}.` : '',
+    a.palette ? `COLORS: ${[].concat(a.palette).join(', ')}${a.brand_colors ? ' using these brand colors: ' + [].concat(a.brand_colors).join(', ') : ''}.` : (a.brand_colors ? `COLORS: use these brand colors: ${[].concat(a.brand_colors).join(', ')}.` : ''),
     a.references ? `REFERENCE POINTS: ${a.references}.` : '',
     a.avoid ? `DO NOT INCLUDE: ${a.avoid}.` : ''
   ];
   // product tree answers
   Object.entries(a).forEach(([k, v]) => {
-    if (!['exact_text', 'subject', 'mood', 'palette', 'references', 'avoid'].includes(k) && v) parts.push(`${k.replace(/_/g, ' ').toUpperCase()}: ${[].concat(v).join(', ')}.`);
+    if (!['exact_text', 'industry', 'subject', 'mood', 'palette', 'brand_colors', 'references', 'avoid'].includes(k) && v) parts.push(`${k.replace(/_/g, ' ').toUpperCase()}: ${[].concat(v).join(', ')}.`);
   });
   if (refinement) {
-    parts.push('REFINEMENT ROUND. Keep what the client liked, change what they asked for:');
+    parts.push('REFINEMENT ROUND. Keep the overall style direction and what the client liked. Apply every change they asked for:');
     Object.entries(refinement.answers || {}).forEach(([k, v]) => v && parts.push(`${k.replace(/_/g, ' ')}: ${[].concat(v).join(', ')}.`));
     if (refinement.notes) parts.push(`CLIENT NOTES: ${refinement.notes}.`);
-    if (refinement.variation !== undefined) parts.push(`Variation ${refinement.variation + 1} of 5: make this one noticeably different from the others in ${['layout', 'icon treatment', 'lettering', 'color balance', 'level of detail'][refinement.variation % 5]}.`);
+    if (refinement.variation !== undefined) parts.push(VARIATION_PLANS[styleId] ? VARIATION_PLANS[styleId][refinement.variation % 5] : GENERIC_VARIATIONS[refinement.variation % 5]);
+    parts.push('This must be a visibly different concept from the other refinements, not a recolor: change the composition, the central image, and the lettering treatment. Same palette family is fine; same picture is not.');
   }
   parts.push(`PRODUCTION RULES: ${COLOR_RULES}`);
   return parts.filter(Boolean).join('\n');
@@ -513,50 +632,69 @@ const PALETTES = [
 const esc = s => String(s || '').replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]));
 const fit = (text, maxW, base, cw = 0.68) => Math.max(26, Math.min(base, Math.floor(maxW / (Math.max(1, String(text || '').length) * cw))));
 
+// Marks: simple one-color symbols, rotated through so refinements never share a picture
+const MARKS = {
+  star: (c) => `<path d="M512 330 L556 440 L674 448 L582 522 L616 638 L512 572 L408 638 L442 522 L350 448 L468 440 Z" fill="${c}"/>`,
+  bolt: (c) => `<path d="M560 300 L420 540 L510 540 L470 740 L620 470 L530 470 Z" fill="${c}"/>`,
+  mountains: (c) => `<path d="M300 660 L440 420 L520 540 L580 450 L724 660 Z" fill="${c}"/><circle cx="660" cy="380" r="40" fill="${c}"/>`,
+  tools: (c) => `<g stroke="${c}" stroke-width="40" stroke-linecap="round"><line x1="380" y1="360" x2="644" y2="624"/><line x1="644" y1="360" x2="380" y2="624"/></g><circle cx="512" cy="492" r="60" fill="${c}"/>`,
+  shield: (c) => `<path d="M512 300 L660 350 L640 560 Q600 660 512 720 Q424 660 384 560 L364 350 Z" fill="none" stroke="${c}" stroke-width="28"/><path d="M460 520 L500 560 L580 460" fill="none" stroke="${c}" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>`,
+  gear: (c) => `<circle cx="512" cy="500" r="120" fill="none" stroke="${c}" stroke-width="40" stroke-dasharray="40 24"/><circle cx="512" cy="500" r="50" fill="${c}"/>`,
+  wave: (c) => `<path d="M320 560 Q400 460 480 560 T640 560 T800 560" fill="none" stroke="${c}" stroke-width="36" stroke-linecap="round"/><circle cx="700" cy="400" r="46" fill="${c}"/>`,
+  leaf: (c) => `<path d="M512 320 Q700 400 620 620 Q512 700 404 620 Q324 400 512 320 Z" fill="${c}"/><line x1="512" y1="360" x2="512" y2="660" stroke="#fff" stroke-width="16"/>`,
+  house: (c) => `<path d="M352 520 L512 380 L672 520 V700 H352 Z" fill="${c}"/><rect x="480" y="600" width="64" height="100" fill="#fff"/>`,
+  cup: (c) => `<path d="M400 380 H620 L600 680 H420 Z" fill="${c}"/><path d="M620 430 H690 V530 H610" fill="none" stroke="${c}" stroke-width="28"/>`
+};
+const MARK_KEYS = Object.keys(MARKS);
+
+// Characters: five different mascots, not one face in five colors
+const CHARACTERS = [
+  (ink, acc, paper) => `<circle cx="512" cy="400" r="200" fill="${acc}" stroke="${ink}" stroke-width="18"/><circle cx="450" cy="370" r="28" fill="${ink}"/><circle cx="574" cy="370" r="28" fill="${ink}"/><path d="M420 470 Q512 560 604 470" stroke="${ink}" stroke-width="20" fill="none" stroke-linecap="round"/><path d="M340 300 L512 180 L684 300 Z" fill="${ink}"/>`,
+  (ink, acc, paper) => `<ellipse cx="512" cy="430" rx="190" ry="160" fill="${ink}"/><circle cx="380" cy="300" r="60" fill="${ink}"/><circle cx="644" cy="300" r="60" fill="${ink}"/><ellipse cx="512" cy="480" rx="90" ry="70" fill="${paper}"/><circle cx="470" cy="400" r="18" fill="${paper}"/><circle cx="554" cy="400" r="18" fill="${paper}"/><ellipse cx="512" cy="460" rx="26" ry="18" fill="${acc}"/>`,
+  (ink, acc, paper) => `<rect x="352" y="280" width="320" height="280" rx="30" fill="${acc}" stroke="${ink}" stroke-width="18"/><rect x="410" y="350" width="70" height="60" rx="8" fill="${ink}"/><rect x="544" y="350" width="70" height="60" rx="8" fill="${ink}"/><rect x="430" y="460" width="164" height="30" rx="8" fill="${ink}"/><line x1="512" y1="200" x2="512" y2="280" stroke="${ink}" stroke-width="18"/><circle cx="512" cy="190" r="22" fill="${ink}"/>`,
+  (ink, acc, paper) => `<ellipse cx="512" cy="440" rx="170" ry="190" fill="${acc}" stroke="${ink}" stroke-width="18"/><circle cx="560" cy="380" r="30" fill="${paper}" stroke="${ink}" stroke-width="10"/><circle cx="566" cy="384" r="10" fill="${ink}"/><path d="M640 420 L740 450 L640 480 Z" fill="${ink}"/><path d="M360 520 Q300 600 380 640" stroke="${ink}" stroke-width="18" fill="none"/>`,
+  (ink, acc, paper) => `<path d="M512 240 L700 330 L700 520 Q700 640 512 700 Q324 640 324 520 L324 330 Z" fill="${acc}" stroke="${ink}" stroke-width="18"/><rect x="420" y="400" width="184" height="48" rx="10" fill="${ink}"/><path d="M440 530 Q512 600 584 530" stroke="${ink}" stroke-width="18" fill="none" stroke-linecap="round"/><path d="M400 300 L512 220 L624 300" fill="none" stroke="${ink}" stroke-width="18"/>`
+];
+
 function demoImage(prompt, styleId, variant, tag) {
-  const textMatch = prompt.match(/TEXT \(spell exactly\): ([^\n.]*)/);
-  const text = (textMatch ? textMatch[1] : 'MERCHYS').trim().toUpperCase() || "MERCHY'S";
+  const textMatch = prompt.match(/TEXT \(spell exactly\): ([^\n]*)/);
+  const text = (textMatch ? textMatch[1] : 'MERCHYS').replace(/\.$/, '').split('|')[0].trim().toUpperCase() || "MERCHY'S";
   const words = text.split(/\s+/);
   const first = words[0], rest = words.slice(1).join(' ');
-  const [ink, accent, paper] = PALETTES[(Object.keys(STYLE_NAMES).indexOf(styleId) + variant) % PALETTES.length];
+  const styleIdx = Object.keys(STYLE_NAMES).indexOf(styleId);
+  const [ink, accent, paper] = PALETTES[(styleIdx + variant) % PALETTES.length];
   const F = 'font-family="Arial Black, Impact, Helvetica, sans-serif" font-weight="900"';
+  const S = 'font-family="Georgia, Times New Roman, serif" font-weight="700"';
   const name = STYLE_NAMES[styleId] || styleId;
   const sub = variant ? `REFINEMENT ${variant}` : 'CONCEPT';
   const label = `<text x="992" y="1004" text-anchor="end" font-family="Arial, sans-serif" font-size="22" fill="#999">${esc(name)} ${sub} PREVIEW</text>`;
   const bg = `<rect width="1024" height="1024" fill="#fff"/>`;
-  const rot = (variant * 7) % 21 - 10;
+  const mark = MARKS[MARK_KEYS[(styleIdx * 3 + variant * 2) % MARK_KEYS.length]];
+  const typeFace = variant % 2 ? S : F;
   let body;
-  switch (styleId) {
-    case 'typography': case 'monogram': case 'streetwear':
-      body = `<rect x="92" y="92" width="840" height="840" rx="${variant * 20}" fill="${paper}" stroke="${ink}" stroke-width="22"/>
-        <text x="512" y="430" text-anchor="middle" ${F} font-size="${fit(first, 760, 170)}" fill="${ink}" transform="rotate(${rot} 512 430)">${esc(first)}</text>
-        <rect x="160" y="470" width="704" height="100" fill="${accent}"/>
-        <text x="512" y="542" text-anchor="middle" ${F} font-size="${fit(rest || 'EST 2026', 640, 60)}" fill="${ink}">${esc(rest || 'EST. 2026')}</text>`;
-      break;
-    case 'mascot': case 'humor':
-      body = `<circle cx="512" cy="400" r="${230 + variant * 10}" fill="${accent}" stroke="${ink}" stroke-width="20"/>
-        <circle cx="440" cy="370" r="34" fill="${ink}"/><circle cx="584" cy="370" r="34" fill="${ink}"/>
-        <path d="M400 480 Q512 ${560 + variant * 15} 624 480" stroke="${ink}" stroke-width="22" fill="none" stroke-linecap="round"/>
-        <text x="512" y="780" text-anchor="middle" ${F} font-size="${fit(text, 880, 90)}" fill="${ink}">${esc(text)}</text>`;
-      break;
-    case 'scene': case 'badge_scene': case 'line_art':
-      body = `<rect x="112" y="160" width="800" height="520" rx="${styleId === 'badge_scene' ? 400 : 16}" fill="${paper}" stroke="${ink}" stroke-width="20"/>
-        <circle cx="${700 - variant * 30}" cy="300" r="60" fill="${accent}"/>
-        <path d="M160 620 L360 ${380 + variant * 20} L470 520 L560 440 L860 620 Z" fill="${ink}"/>
-        <text x="512" y="800" text-anchor="middle" ${F} font-size="${fit(text, 860, 84)}" fill="${ink}">${esc(text)}</text>`;
-      break;
-    case 'trade_tools': case 'diagram': case 'corporate_seal':
-      body = `<g stroke="${ink}" stroke-width="44" stroke-linecap="round" transform="rotate(${rot} 512 430)"><line x1="360" y1="280" x2="664" y2="584"/><line x1="664" y1="280" x2="360" y2="584"/></g>
-        <circle cx="512" cy="432" r="90" fill="${accent}" stroke="${ink}" stroke-width="24"/>
-        <text x="512" y="760" text-anchor="middle" ${F} font-size="${fit(text, 880, 90)}" fill="${ink}">${esc(text)}</text>
-        <text x="512" y="840" text-anchor="middle" font-family="Arial" font-weight="700" font-size="40" fill="${ink}" letter-spacing="10">SAN DIEGO, CA</text>`;
-      break;
-    default: // badge and the rest
-      body = `<defs><path id="a${variant}" d="M 132 512 A 380 380 0 0 1 892 512"/><path id="b${variant}" d="M 152 512 A 360 360 0 0 0 872 512"/></defs>
-        <circle cx="512" cy="512" r="440" fill="${paper}" stroke="${ink}" stroke-width="30"/><circle cx="512" cy="512" r="300" fill="${accent}"/>
-        <path d="M512 380 L548 470 L644 476 L570 536 L596 630 L512 578 L428 630 L454 536 L380 476 L476 470 Z" fill="${ink}" transform="rotate(${rot} 512 512)"/>
-        <text ${F} font-size="${fit(text, 1100, 74)}" fill="${ink}" letter-spacing="4"><textPath href="#a${variant}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text>
-        <text ${F} font-size="52" fill="${ink}" letter-spacing="4"><textPath href="#b${variant}" startOffset="50%" text-anchor="middle">EST. 2026</textPath></text>`;
+
+  if (styleId === 'mascot' || styleId === 'humor') {
+    const ch = CHARACTERS[variant % CHARACTERS.length](ink, accent, paper);
+    body = `${ch}<rect x="212" y="720" width="600" height="110" rx="12" fill="${ink}"/><text x="512" y="795" text-anchor="middle" ${typeFace} font-size="${fit(text, 560, 64)}" fill="${paper}">${esc(text)}</text>`;
+  } else {
+    // layouts rotate per variant so refinements differ in structure, not just hue
+    const layout = variant === 0 ? ['badge', 'typography', 'scene', 'plaque', 'stacked'][styleIdx % 5] : ['plaque', 'stacked', 'banner', 'badge', 'split'][(variant - 1) % 5];
+    const forceType = ['typography', 'monogram', 'streetwear'].includes(styleId) && variant === 0;
+    if (forceType) {
+      body = `<rect x="92" y="92" width="840" height="840" fill="${paper}" stroke="${ink}" stroke-width="22"/><text x="512" y="430" text-anchor="middle" ${F} font-size="${fit(first, 760, 170)}" fill="${ink}">${esc(first)}</text><rect x="160" y="470" width="704" height="100" fill="${accent}"/><text x="512" y="542" text-anchor="middle" ${F} font-size="${fit(rest || 'EST 2026', 640, 60)}" fill="${ink}">${esc(rest || 'EST. 2026')}</text>`;
+    } else if (layout === 'badge') {
+      body = `<defs><path id="a${tag}${variant}" d="M 132 512 A 380 380 0 0 1 892 512"/><path id="b${tag}${variant}" d="M 152 512 A 360 360 0 0 0 872 512"/></defs><circle cx="512" cy="512" r="440" fill="${paper}" stroke="${ink}" stroke-width="30"/><circle cx="512" cy="512" r="290" fill="${accent}"/>${mark(ink)}<text ${typeFace} font-size="${fit(text, 1100, 74)}" fill="${ink}" letter-spacing="4"><textPath href="#a${tag}${variant}" startOffset="50%" text-anchor="middle">${esc(text)}</textPath></text><text ${F} font-size="46" fill="${ink}" letter-spacing="4"><textPath href="#b${tag}${variant}" startOffset="50%" text-anchor="middle">EST. 2026</textPath></text>`;
+    } else if (layout === 'plaque') {
+      body = `<rect x="112" y="200" width="800" height="624" rx="24" fill="${paper}" stroke="${ink}" stroke-width="24"/><rect x="140" y="228" width="744" height="568" rx="14" fill="none" stroke="${ink}" stroke-width="6"/><g transform="translate(0,-110) scale(0.8) translate(128,120)">${mark(accent)}</g><text x="512" y="700" text-anchor="middle" ${typeFace} font-size="${fit(text, 700, 80)}" fill="${ink}">${esc(text)}</text><text x="512" y="760" text-anchor="middle" font-family="Arial" font-weight="700" font-size="30" fill="${ink}" letter-spacing="8">SAN DIEGO, CA</text>`;
+    } else if (layout === 'stacked') {
+      body = `<g transform="translate(0,-170)">${mark(ink)}</g><text x="512" y="640" text-anchor="middle" ${typeFace} font-size="${fit(first, 860, 130)}" fill="${ink}">${esc(first)}</text><text x="512" y="740" text-anchor="middle" ${F} font-size="${fit(rest || 'EST. 2026', 860, 64)}" fill="${accent}" letter-spacing="4">${esc(rest || 'EST. 2026')}</text><line x1="300" y1="790" x2="724" y2="790" stroke="${ink}" stroke-width="10"/>`;
+    } else if (layout === 'banner') {
+      body = `<rect x="60" y="380" width="904" height="264" fill="${ink}"/><g transform="translate(-300,-330) scale(0.55) translate(300,300)">${mark(accent)}</g><text x="560" y="490" text-anchor="middle" ${typeFace} font-size="${fit(text, 620, 90)}" fill="${paper}">${esc(text)}</text><text x="560" y="580" text-anchor="middle" font-family="Arial" font-weight="700" font-size="40" fill="${accent}" letter-spacing="8">CUSTOM DONE RIGHT</text>`;
+    } else if (layout === 'scene') {
+      body = `<rect x="112" y="160" width="800" height="520" rx="16" fill="${paper}" stroke="${ink}" stroke-width="20"/><circle cx="700" cy="300" r="60" fill="${accent}"/><path d="M160 620 L360 400 L470 520 L560 440 L860 620 Z" fill="${ink}"/><text x="512" y="800" text-anchor="middle" ${typeFace} font-size="${fit(text, 860, 84)}" fill="${ink}">${esc(text)}</text>`;
+    } else { // split
+      body = `<rect x="80" y="160" width="430" height="704" fill="${ink}"/><g transform="translate(-220,0) scale(0.9) translate(60,60)">${mark(paper)}</g><text x="540" y="470" ${typeFace} font-size="${fit(first, 400, 110)}" fill="${ink}">${esc(first)}</text><text x="540" y="570" ${F} font-size="${fit(rest || 'EST 2026', 400, 70)}" fill="${accent}">${esc(rest || 'EST. 2026')}</text><rect x="540" y="600" width="300" height="12" fill="${ink}"/>`;
+    }
   }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${bg}${body}${label}</svg>`;
   const u = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); return { url: u, remoteUrl: u, source: 'demo', prompt };
@@ -590,7 +728,7 @@ window.fetch = async function(url, opts) {
   const route = u.slice(i).split('?')[0];
   const body = opts && opts.body ? JSON.parse(opts.body) : {};
   const m = route.match(/^\/api\/studio\/session\/([^/]+)(?:\/(.*))?$/);
-  if (route === '/api/studio/capabilities') return json({ director: false, generation: false, asana: false, email: false, calendly: false, styles: Object.entries(STYLE_NAMES).map(([id, name]) => ({ id, name })), productTrees: PRODUCT_TREE_LIST, finalChecklist: FINAL_CHECKLIST });
+  if (route === '/api/studio/capabilities') return json({ director: false, generation: false, asana: false, email: false, calendly: false, styles: Object.entries(STYLE_NAMES).map(([id, name]) => ({ id, name })), productTrees: PRODUCT_TREE_LIST, finalChecklist: FINAL_CHECKLIST, moods: MOOD_WORDS });
   if (route === '/api/studio/session') {
     const client = body.client || {}, context = body.context || {};
     const s = { id: rid(), client, context: { mode: context.mode || (context.product ? 'product' : 'logo'), product: context.product, decoration: context.decoration, service: context.service, category: context.category }, brief: { answers: {}, done: false, summary: '' }, styles: [], board: { selections: [], dislikes: '' }, library: [], schedule: null, finalized: null };
@@ -601,6 +739,7 @@ window.fetch = async function(url, opts) {
   const s = sessions[m[1]]; if (!s) return err('Session not found', 404);
   const sub = m[2] || '';
   if (!sub) return json({ session: s });
+  if (sub === 'client') { Object.assign(s.client, body); return json({ session: s }); }
   if (sub === 'brief') {
     Object.assign(s.brief.answers, body.answers || {});
     if (body.finish) { s.brief.done = true; return json({ session: s, questions: [], done: true }); }
@@ -719,7 +858,17 @@ async function boot() {
 }
 
 // ---------- stage 1: interview ----------
+function renderDetails() {
+  const c = session.client || {};
+  const f = (k, label, ph) => `<div class="f"><span>${label}</span><input type="text" id="det_${k}" class="${c[k] ? '' : 'missing'}" value="${esc(c[k] || '')}" placeholder="${ph}"></div>`;
+  $('details').innerHTML = f('business', 'Business / event', 'Required') + f('name', 'Your name', '') + f('email', 'Email', '') + f('industry', 'Industry', 'e.g. landscaping, dental, church');
+}
+function saveDetails() {
+  const c = session.client; ['business', 'name', 'email', 'industry'].forEach(k => { const el = $('det_' + k); if (el) c[k] = el.value.trim(); });
+  return api(`/api/studio/session/${session.id}/client`, { method: 'POST', body: JSON.stringify(c) }).catch(() => {});
+}
 async function loadQuestions(answers) {
+  if (!$('details').innerHTML) renderDetails();
   $('qList').innerHTML = '<div class="spinner" style="margin:20px auto"></div>'; $('qNext').disabled = true;
   try {
     const d = await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: answers || {} }) });
@@ -730,13 +879,48 @@ async function loadQuestions(answers) {
     $('qNext').disabled = false;
   } catch (e) { $('qList').innerHTML = `<p class="err">${esc(e.message)}</p>`; $('qNext').disabled = false; }
 }
+function prefillValue(q) {
+  const c = session?.client || {}, ctx = session?.context || {};
+  if (q.prefill === 'business') return c.business || '';
+  if (q.prefill === 'industry') return c.industry || ctx.industry || '';
+  return '';
+}
+function moodStyle(sm) {
+  if (!sm) return '';
+  return `background:${sm.bg};color:${sm.fg};font-family:${sm.font};font-weight:${sm.weight};${sm.border ? 'border:' + sm.border + ';' : ''}${sm.spacing ? 'letter-spacing:' + sm.spacing + ';' : ''}${sm.transform ? 'text-transform:' + sm.transform + ';' : ''}${sm.italic ? 'font-style:italic;' : ''}`;
+}
 function renderQuestions(list, targetId) {
   currentQuestions = list;
   $(targetId).innerHTML = list.map(q => {
-    const chips = (q.type === 'chips' || q.type === 'chips+text') ? `<div class="chips" data-q="${esc(q.id)}" data-multi="${q.multi ? 1 : 0}">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>` : '';
-    const text = (q.type === 'text' || q.type === 'chips+text') ? `<textarea data-q="${esc(q.id)}" placeholder="${q.type === 'chips+text' ? 'Or type your own' : 'Type here'}"></textarea>` : '';
-    return `<div class="q"><label>${esc(q.q)}${q.why ? `<span class="why">${esc(q.why)}</span>` : ''}</label>${chips}${text}</div>`;
+    let body = '';
+    if (q.type === 'moods') {
+      const moods = caps.moods || [];
+      body = `<div class="moods chips" data-q="${esc(q.id)}" data-multi="1">${(q.options || moods.map(m => m.w)).map(w => { const m = moods.find(x => x.w === w); return `<div class="mood chip" style="${moodStyle(m && m.sample)}" onclick="toggleChip(this)" title="${esc(w)}">${esc(w)}</div>`; }).join('')}</div>`;
+    } else if (q.type === 'colors') {
+      body = `<div class="chips" data-q="${esc(q.id)}" data-multi="0">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>
+        <div class="swatches" id="swatches" data-colors="brand_colors"><div class="add-color"><input type="color" value="#d4a017" oninput="addSwatchFromPicker(this)" title="Pick a color"><input type="text" placeholder="#hex or name" onkeydown="if(event.key==='Enter'){addSwatch(this.value);this.value='';event.preventDefault()}"><span>Add your brand colors</span></div></div>`;
+    } else {
+      const chips = (q.type === 'chips' || q.type === 'chips+text') ? `<div class="chips" data-q="${esc(q.id)}" data-multi="${q.multi ? 1 : 0}">${(q.options || []).map(o => `<div class="chip" onclick="toggleChip(this)">${esc(o)}</div>`).join('')}</div>` : '';
+      const text = (q.type === 'text' || q.type === 'chips+text') ? `<textarea data-q="${esc(q.id)}" placeholder="${q.type === 'chips+text' ? 'Add detail or type your own' : 'Type here'}">${esc(prefillValue(q))}</textarea>` : '';
+      body = chips + text;
+    }
+    return `<div class="q"><label>${esc(q.q)}${q.why ? `<span class="why">${esc(q.why)}</span>` : ''}</label>${body}</div>`;
   }).join('');
+}
+let brandColors = [];
+function addSwatchFromPicker(inp) { clearTimeout(inp._t); inp._t = setTimeout(() => addSwatch(inp.value), 400); }
+function addSwatch(v) {
+  v = (v || '').trim(); if (!v) return;
+  if (!brandColors.includes(v)) brandColors.push(v);
+  renderSwatches();
+}
+function removeSwatch(i) { brandColors.splice(i, 1); renderSwatches(); }
+function renderSwatches() {
+  const host = $('swatches'); if (!host) return;
+  host.querySelectorAll('.swatch').forEach(e => e.remove());
+  brandColors.forEach((c, i) => host.insertAdjacentHTML('afterbegin', `<div class="swatch" style="background:${esc(c)}" title="${esc(c)}" onclick="removeSwatch(${i})"><span class="x">&times;</span></div>`));
+  // auto-select the brand colors chip when colors are added
+  const grp = host.previousElementSibling; if (grp && brandColors.length) { grp.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', /brand colors/i.test(ch.textContent))); }
 }
 function toggleChip(el) {
   const grp = el.parentElement; const multi = grp.dataset.multi === '1';
@@ -754,12 +938,18 @@ function collectAnswers(targetId) {
     const prev = out[t.dataset.q];
     out[t.dataset.q] = prev ? (Array.isArray(prev) ? [...prev, v] : prev + '; ' + v) : v;
   });
+  if (document.querySelector(`#${targetId} #swatches`) && brandColors.length) out.brand_colors = brandColors.slice();
   // unanswered questions are recorded as skipped so they are not asked again
   currentQuestions.forEach(q => { if (!(q.id in out)) out[q.id] = ''; });
   return out;
 }
-async function submitAnswers() { await loadQuestions(collectAnswers('qList')); }
+async function submitAnswers() {
+  if (!$('det_business').value.trim()) { $('det_business').focus(); $('det_business').classList.add('missing'); return; }
+  await saveDetails();
+  await loadQuestions(collectAnswers('qList'));
+}
 async function finishBrief() {
+  await saveDetails();
   const a = collectAnswers('qList');
   await api(`/api/studio/session/${session.id}/brief`, { method: 'POST', body: JSON.stringify({ answers: a, finish: true }) });
   go(2);
